@@ -2849,14 +2849,15 @@ public class SemanticAnalyzer extends BLangNodeVisitor {
             return;
         }
         for (BLangAnnotationAttachment attachment : attachments) {
-            if (!attachment.annotationSymbol.pkgID.equals(PackageID.ANNOTATIONS)) {
+            if (attachment.annotationSymbol == null || // annotation symbol can be null on invalid attachment.
+                    !attachment.annotationSymbol.pkgID.equals(PackageID.ANNOTATIONS)) {
                 continue;
             }
             String annotationName = attachment.annotationName.value;
             if (annotationName.equals(Names.ANNOTATION_TYPE_PARAM.value)) {
                 dlog.error(attachment.pos, DiagnosticCode.TYPE_PARAM_OUTSIDE_LANG_MODULE);
             } else if (annotationName.equals(Names.ANNOTATION_BUILTIN_SUBTYPE.value)) {
-                dlog.error(attachment.pos, DiagnosticCode.TYPE_PARAM_OUTSIDE_LANG_MODULE);
+                dlog.error(attachment.pos, DiagnosticCode.BUILTIN_SUBTYPE_OUTSIDE_LANG_MODULE);
             }
         }
     }
