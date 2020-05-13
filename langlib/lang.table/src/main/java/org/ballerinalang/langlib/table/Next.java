@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -20,11 +20,10 @@ package org.ballerinalang.langlib.table;
 
 import org.ballerinalang.jvm.BallerinaValues;
 import org.ballerinalang.jvm.scheduling.Strand;
-import org.ballerinalang.jvm.values.ArrayValue;
 import org.ballerinalang.jvm.values.IteratorValue;
 import org.ballerinalang.jvm.values.MapValueImpl;
 import org.ballerinalang.jvm.values.ObjectValue;
-import org.ballerinalang.jvm.values.TableValueImpl;
+import org.ballerinalang.jvm.values.TableValue;
 import org.ballerinalang.model.types.TypeKind;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.Receiver;
@@ -33,7 +32,7 @@ import org.ballerinalang.natives.annotations.ReturnType;
 /**
  * Native implementation of lang.table.TableIterator:next().
  *
- * @since 1.3.0
+ * @since 1.0
  */
 @BallerinaFunction(
         orgName = "ballerina", packageName = "lang.table", functionName = "next",
@@ -44,18 +43,17 @@ import org.ballerinalang.natives.annotations.ReturnType;
 )
 public class Next {
     //TODO: refactor hard coded values
-    public static Object next(Strand strand, ObjectValue t) {
-        IteratorValue tableIterator = (IteratorValue) t.getNativeData("&iterator&");
-        TableValueImpl tableValueImpl = (TableValueImpl) t.get("t");
+    public static Object next(Strand strand, ObjectValue m) {
+        IteratorValue tableIterator = (IteratorValue) m.getNativeData("&iterator&");
+        TableValue tableValue = (TableValue) m.get("m");
         if (tableIterator == null) {
-            tableIterator = tableValueImpl.getIterator();
-            t.addNativeData("&iterator&", tableIterator);
+            tableIterator = tableValue.getIterator();
+            m.addNativeData("&iterator&", tableIterator);
         }
 
         if (tableIterator.hasNext()) {
-            ArrayValue keyValueTuple = (ArrayValue) tableIterator.next();
-            return BallerinaValues.createRecord(new MapValueImpl<>(tableValueImpl.getIteratorNextReturnType()),
-                    keyValueTuple.get(1));
+            Object tableRow =  tableIterator.next();
+            return BallerinaValues.createRecord(new MapValueImpl<>(tableValue.getIteratorNextReturnType()), tableRow);
         }
 
         return null;

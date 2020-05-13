@@ -52,8 +52,4 @@ public class Strip {
         }
         return null;
     }
-
-    public static XMLValue strip_bstring(Strand strand, XMLValue xml) {
-        return strip(strand, xml);
-    }
 }

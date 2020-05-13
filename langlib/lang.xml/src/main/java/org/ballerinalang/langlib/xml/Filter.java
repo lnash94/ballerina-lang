@@ -18,9 +18,9 @@
 
 package org.ballerinalang.langlib.xml;
 
-import org.ballerinalang.jvm.BRuntime;
 import org.ballerinalang.jvm.scheduling.Strand;
 import org.ballerinalang.jvm.values.FPValue;
+import org.ballerinalang.jvm.values.IteratorValue;
 import org.ballerinalang.jvm.values.XMLSequence;
 import org.ballerinalang.jvm.values.XMLValue;
 import org.ballerinalang.jvm.values.api.BXML;
@@ -31,7 +31,6 @@ import org.ballerinalang.natives.annotations.ReturnType;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Native implementation of lang.xml:filter(map&lt;Type&gt;, function).
@@ -50,29 +49,20 @@ public class Filter {
 
     public static XMLValue filter(Strand strand, XMLValue x, FPValue<Object, Boolean> func) {
         if (x.isSingleton()) {
-            Object[] args = new Object[]{strand, x, true};
-            func.asyncCall(args,
-                      result -> {
-                          if ((Boolean) result) {
-                              return new XMLSequence(x);
-                          }
-                          return new XMLSequence();
-                      });
+            if (func.apply(new Object[]{strand, x, true})) {
+                return x;
+            }
             return new XMLSequence();
         }
 
+        IteratorValue iterator = ((XMLSequence) x).getIterator();
         List<BXML> elements = new ArrayList<>();
-        int size = x.size();
-        AtomicInteger index = new AtomicInteger(-1);
-        BRuntime.getCurrentRuntime()
-                .invokeFunctionPointerAsyncIteratively(func, size,
-                                                       () -> new Object[]{strand,
-                                                               x.getItem(index.incrementAndGet()), true},
-                                                       result -> {
-                                                           if ((Boolean) result) {
-                                                               elements.add(x.getItem(index.get()));
-                                                           }
-                                                       }, () -> new XMLSequence(elements));
+        while (iterator.hasNext()) {
+            XMLValue next = (XMLValue) iterator.next();
+            if (func.apply(new Object[]{strand, next, true})) {
+                elements.add(next);
+            }
+        }
 
         return new XMLSequence(elements);
     }

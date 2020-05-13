@@ -48,12 +48,12 @@ public interface IteratorValue extends RefValue, BIterator {
     }
 
     @Override
-    default Object copy(Map<Object, Object> refs) {
+    public default Object copy(Map<Object, Object> refs) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    default Object frozenCopy(Map<Object, Object> refs) {
+    public default Object frozenCopy(Map<Object, Object> refs) {
         throw new UnsupportedOperationException();
     }
 }

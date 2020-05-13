@@ -34,7 +34,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -42,6 +41,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.TimeZone;
+
+import static org.ballerinalang.test.util.BAssertUtil.validateError;
 
 /**
  * This test class handles the complex sql types to ballerina type conversion for query operation.
@@ -51,14 +52,17 @@ import java.util.TimeZone;
 public class ComplexTypesQueryTest {
 
     private CompileResult result;
+    private CompileResult negativeResult;
     private static final String DB_NAME = "TEST_SQL_COMPLEX_QUERY";
     private static final String JDBC_URL = "jdbc:h2:file:" + SQLDBUtils.DB_DIR + DB_NAME;
     private BValue[] args = {new BString(JDBC_URL), new BString(SQLDBUtils.DB_USER),
             new BString(SQLDBUtils.DB_PASSWORD)};
 
     @BeforeClass
-    public void setup() throws SQLException {
+    public void setup() {
         result = BCompileUtil.compileOffline(SQLDBUtils.getBalFilesDir("query", "complex-query-test.bal"));
+        negativeResult = BCompileUtil.compileOffline(SQLDBUtils.getBalFilesDir("query",
+                "complex-query-negative-test.bal"));
         SQLDBUtils.deleteFiles(new File(SQLDBUtils.DB_DIR), DB_NAME);
         SQLDBUtils.initH2Database(SQLDBUtils.DB_DIR, DB_NAME,
                 SQLDBUtils.getSQLResourceDir("query", "complex-test-data.sql"));
@@ -82,7 +86,6 @@ public class ComplexTypesQueryTest {
     public void testToJson() {
         BValue[] returns = BRunUtil.invokeFunction(result, "testToJson", args);
         Assert.assertEquals(returns.length, 1);
-        SQLDBUtils.assertNotError(returns[0]);
         Assert.assertTrue(returns[0] instanceof BMap);
         String expected = "{\"INT_TYPE\":1, \"LONG_TYPE\":9223372036854774807, \"FLOAT_TYPE\":123.34, "
                 + "\"DOUBLE_TYPE\":2.139095039E9, \"BOOLEAN_TYPE\":true, \"STRING_TYPE\":\"Hello\"}";
@@ -93,7 +96,6 @@ public class ComplexTypesQueryTest {
     public void testToJsonComplexTypes() {
         BValue[] returns = BRunUtil.invokeFunction(result, "testToJsonComplexTypes", args);
         Assert.assertEquals(returns.length, 1);
-        SQLDBUtils.assertNotError(returns[0]);
         Assert.assertTrue(returns[0] instanceof BMap);
         LinkedHashMap result = ((BMap) returns[0]).getMap();
         String blobString = new String(((BValueArray) result.get("BLOB_TYPE")).getBytes());
@@ -108,19 +110,17 @@ public class ComplexTypesQueryTest {
     public void testComplexTypesNil() {
         BValue[] returns = BRunUtil.invokeFunction(result, "testComplexTypesNil", args);
         Assert.assertEquals(returns.length, 1);
-        SQLDBUtils.assertNotError(returns[0]);
         LinkedHashMap result = ((BMap) returns[0]).getMap();
         Assert.assertEquals(result.size(), 3);
-        Assert.assertNull(result.get("BLOB_TYPE"));
-        Assert.assertNull(result.get("CLOB_TYPE"));
-        Assert.assertNull(result.get("BINARY_TYPE"));
+        Assert.assertEquals(result.get("BLOB_TYPE"), null);
+        Assert.assertEquals(result.get("CLOB_TYPE"), null);
+        Assert.assertEquals(result.get("BINARY_TYPE"), null);
     }
 
     @Test(description = "Check array retrieval.")
     public void testArrayRetrieval() {
         BValue[] returns = BRunUtil.invokeFunction(result, "testArrayRetrieval", args);
         Assert.assertEquals(returns.length, 1);
-        SQLDBUtils.assertNotError(returns[0]);
         LinkedHashMap result = ((BMap) returns[0]).getMap();
         Assert.assertEquals(result.size(), 13);
         Assert.assertEquals(((BInteger) result.get("INT_TYPE")).intValue(), 1);
@@ -145,30 +145,29 @@ public class ComplexTypesQueryTest {
         Assert.assertEquals(((BDecimal) floatArray.getBValue(2)).floatValue(), 8796.123);
 
         Assert.assertEquals(((BFloat) result.get("DOUBLE_TYPE")).floatValue(), 2.139095039E9);
-        Assert.assertTrue(((BBoolean) result.get("BOOLEAN_TYPE")).booleanValue());
+        Assert.assertEquals(((BBoolean) result.get("BOOLEAN_TYPE")).booleanValue(), true);
         Assert.assertEquals(((BString) result.get("STRING_TYPE")).stringValue(), "Hello");
         Assert.assertEquals(((BDecimal) result.get("DECIMAL_TYPE")).stringValue(), "342452151425.4556");
 
         BValueArray doubleArray = (BValueArray) result.get("DOUBLE_ARRAY");
-        Assert.assertEquals(doubleArray.getBValue(0).stringValue(), "245.23");
-        Assert.assertEquals(doubleArray.getBValue(1).stringValue(), "5559.49");
-        Assert.assertEquals(doubleArray.getBValue(2).stringValue(), "8796.123");
+        Assert.assertEquals(((BDecimal) doubleArray.getBValue(0)).stringValue(), "245.23");
+        Assert.assertEquals(((BDecimal) doubleArray.getBValue(1)).stringValue(), "5559.49");
+        Assert.assertEquals(((BDecimal) doubleArray.getBValue(2)).stringValue(), "8796.123");
 
         BValueArray booleanArray = (BValueArray) result.get("BOOLEAN_ARRAY");
-        Assert.assertTrue(((BBoolean) booleanArray.getBValue(0)).booleanValue());
-        Assert.assertFalse(((BBoolean) booleanArray.getBValue(1)).booleanValue());
-        Assert.assertTrue(((BBoolean) booleanArray.getBValue(2)).booleanValue());
+        Assert.assertEquals(((BBoolean) booleanArray.getBValue(0)).booleanValue(), true);
+        Assert.assertEquals(((BBoolean) booleanArray.getBValue(1)).booleanValue(), false);
+        Assert.assertEquals(((BBoolean) booleanArray.getBValue(2)).booleanValue(), true);
 
         BValueArray stringArray = (BValueArray) result.get("STRING_ARRAY");
-        Assert.assertEquals(stringArray.getBValue(0).stringValue(), "Hello");
-        Assert.assertEquals(stringArray.getBValue(1).stringValue(), "Ballerina");
+        Assert.assertEquals(((BString) stringArray.getBValue(0)).stringValue(), "Hello");
+        Assert.assertEquals(((BString) stringArray.getBValue(1)).stringValue(), "Ballerina");
     }
 
     @Test(description = "Check complex data retrieval as a record.")
     public void testComplexWithStructDef() {
         BValue[] returns = BRunUtil.invokeFunction(result, "testComplexWithStructDef", args);
         Assert.assertEquals(returns.length, 1);
-        SQLDBUtils.assertNotError(returns[0]);
         LinkedHashMap result = ((BMap) returns[0]).getMap();
         Assert.assertEquals(result.size(), 12);
         Assert.assertEquals(((BInteger) result.get("int_type")).intValue(), 1);
@@ -193,29 +192,28 @@ public class ComplexTypesQueryTest {
         Assert.assertEquals(((BDecimal) floatArray.getBValue(2)).floatValue(), 8796.123);
 
         Assert.assertEquals(((BFloat) result.get("double_type")).floatValue(), 2.139095039E9);
-        Assert.assertTrue(((BBoolean) result.get("boolean_type")).booleanValue());
+        Assert.assertEquals(((BBoolean) result.get("boolean_type")).booleanValue(), true);
         Assert.assertEquals(((BString) result.get("string_type")).stringValue(), "Hello");
 
         BValueArray doubleArray = (BValueArray) result.get("double_array");
-        Assert.assertEquals(doubleArray.getBValue(0).stringValue(), "245.23");
-        Assert.assertEquals(doubleArray.getBValue(1).stringValue(), "5559.49");
-        Assert.assertEquals(doubleArray.getBValue(2).stringValue(), "8796.123");
+        Assert.assertEquals(((BDecimal) doubleArray.getBValue(0)).stringValue(), "245.23");
+        Assert.assertEquals(((BDecimal) doubleArray.getBValue(1)).stringValue(), "5559.49");
+        Assert.assertEquals(((BDecimal) doubleArray.getBValue(2)).stringValue(), "8796.123");
 
         BValueArray booleanArray = (BValueArray) result.get("boolean_array");
-        Assert.assertTrue(((BBoolean) booleanArray.getBValue(0)).booleanValue());
-        Assert.assertFalse(((BBoolean) booleanArray.getBValue(1)).booleanValue());
-        Assert.assertTrue(((BBoolean) booleanArray.getBValue(2)).booleanValue());
+        Assert.assertEquals(((BBoolean) booleanArray.getBValue(0)).booleanValue(), true);
+        Assert.assertEquals(((BBoolean) booleanArray.getBValue(1)).booleanValue(), false);
+        Assert.assertEquals(((BBoolean) booleanArray.getBValue(2)).booleanValue(), true);
 
         BValueArray stringArray = (BValueArray) result.get("string_array");
-        Assert.assertEquals(stringArray.getBValue(0).stringValue(), "Hello");
-        Assert.assertEquals(stringArray.getBValue(1).stringValue(), "Ballerina");
+        Assert.assertEquals(((BString) stringArray.getBValue(0)).stringValue(), "Hello");
+        Assert.assertEquals(((BString) stringArray.getBValue(1)).stringValue(), "Ballerina");
     }
 
     @Test(description = "Check complex data retrieval as a record.")
     public void testMultipleRecoredRetrieval() {
         BValue[] returns = BRunUtil.invokeFunction(result, "testMultipleRecoredRetrieval", args);
         Assert.assertEquals(returns.length, 1);
-        SQLDBUtils.assertNotError(returns[0]);
         BValueArray rowSet = ((BValueArray) returns[0]);
         Assert.assertEquals(rowSet.size(), 4);
         LinkedHashMap resultRow1 = ((BMap) rowSet.getBValue(0)).getMap();
@@ -229,17 +227,17 @@ public class ComplexTypesQueryTest {
         Assert.assertEquals(((BInteger) row1IntArray.getBValue(2)).intValue(), 3);
 
         BValueArray row2IntArray = (BValueArray) resultRow2.get("INT_ARRAY");
-        Assert.assertNull(row2IntArray.getBValue(0));
+        Assert.assertEquals(row2IntArray.getBValue(0), null);
         Assert.assertEquals((row2IntArray.getBValue(1)).stringValue(), "2");
         Assert.assertEquals((row2IntArray.getBValue(2)).stringValue(), "3");
 
         BValueArray row3IntArray = (BValueArray) resultRow3.get("INT_ARRAY");
-        Assert.assertNull(row3IntArray);
+        Assert.assertEquals(row3IntArray, null);
 
         BValueArray row4IntArray = (BValueArray) resultRow4.get("INT_ARRAY");
-        Assert.assertNull(row4IntArray.getBValue(0));
-        Assert.assertNull(row4IntArray.getBValue(1));
-        Assert.assertNull(row4IntArray.getBValue(2));
+        Assert.assertEquals(row4IntArray.getBValue(0), null);
+        Assert.assertEquals(row4IntArray.getBValue(1), null);
+        Assert.assertEquals(row4IntArray.getBValue(2), null);
     }
 
     @Test(description = "Check date time operation")
@@ -263,7 +261,6 @@ public class ComplexTypesQueryTest {
 
         BValue[] returns = BRunUtil.invoke(result, "testDateTime", args);
         Assert.assertEquals(returns.length, 1);
-        SQLDBUtils.assertNotError(returns[0]);
         LinkedHashMap result = ((BMap) returns[0]).getMap();
         Assert.assertEquals(result.size(), 4);
         assertDateStringValues(result, dateInserted, timeInserted, timestampInserted);
@@ -273,7 +270,6 @@ public class ComplexTypesQueryTest {
     public void testColumnAlias() {
         BValue[] returns = BRunUtil.invoke(result, "testColumnAlias", args);
         Assert.assertEquals(returns.length, 1);
-        SQLDBUtils.assertNotError(returns[0]);
         LinkedHashMap result = ((BMap) returns[0]).getMap();
         Assert.assertEquals(result.size(), 7);
         Assert.assertEquals(((BInteger) result.get("INT_TYPE")).intValue(), 1);
@@ -287,23 +283,31 @@ public class ComplexTypesQueryTest {
             DateFormat dfDate = new SimpleDateFormat("yyyy-MM-dd");
             String dateReturnedStr = returns.get("DATE_TYPE").toString();
             Date dateReturned = dfDate.parse(dateReturnedStr);
-            Assert.assertEquals(dateInserted.compareTo(dateReturned), 0);
+            Assert.assertTrue(dateInserted.compareTo(dateReturned) == 0);
 
             DateFormat dfTime = new SimpleDateFormat("HH:mm:ss");
             String timeReturnedStr = returns.get("TIME_TYPE").toString();
             Date timeReturned = dfTime.parse(timeReturnedStr);
-            Assert.assertEquals(timeInserted.compareTo(timeReturned), 0);
+            Assert.assertTrue(timeInserted.compareTo(timeReturned) == 0);
 
             DateFormat dfTimestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             String timestampReturnedStr = returns.get("TIMESTAMP_TYPE").toString();
             Date timestampReturned = dfTimestamp.parse(timestampReturnedStr);
-            Assert.assertEquals(timestampInserted.compareTo(timestampReturned), 0);
+            Assert.assertTrue(timestampInserted.compareTo(timestampReturned) == 0);
 
             String datetimeReturnedStr = returns.get("DATETIME_TYPE").toString();
             Date datetimeReturned = dfTimestamp.parse(datetimeReturnedStr);
-            Assert.assertEquals(timestampInserted.compareTo(datetimeReturned), 0);
+            Assert.assertTrue(timestampInserted.compareTo(datetimeReturned) == 0);
         } catch (ParseException e) {
             Assert.fail("Parsing the returned date/time/timestamp value has failed", e);
         }
+    }
+    @Test(description = "Test string representation of stream type")
+    public void testErrorInStringRepresentation() {
+        validateError(negativeResult, 0,
+                "incompatible types: expected 'stream<Student," +
+                        "(ballerina/sql:DatabaseError|ballerina/sql:ApplicationError)>', " +
+                        "found 'stream<record {| anydata...; |}," +
+                        "(ballerina/sql:DatabaseError|ballerina/sql:ApplicationError)>'", 25, 41);
     }
 }

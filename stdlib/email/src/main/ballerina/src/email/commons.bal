@@ -14,6 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
+
 import ballerina/mime;
 
 # Email message properties.
@@ -23,7 +24,6 @@ import ballerina/mime;
 # + bcc - BCC address list
 # + subject - Subject of email
 # + body - Body of the email message
-# + contentType - Content Type of the Body
 # + from - From address
 # + sender - Sender's address
 # + replyTo - Reply To addresses
@@ -33,8 +33,7 @@ public type Email record {|
     string[] cc?;
     string[] bcc?;
     string subject;
-    string|xml|json body;
-    string contentType?;
+    string body;
     string 'from;
     string sender?;
     string[] replyTo?;

@@ -24,6 +24,7 @@ import org.ballerinalang.model.Whitespace;
 import org.ballerinalang.model.elements.AttachPoint;
 import org.ballerinalang.model.elements.Flag;
 import org.ballerinalang.model.elements.PackageID;
+import org.ballerinalang.model.elements.TableColumnFlag;
 import org.ballerinalang.model.tree.AnnotatableNode;
 import org.ballerinalang.model.tree.AnnotationAttachmentNode;
 import org.ballerinalang.model.tree.AnnotationNode;
@@ -42,12 +43,9 @@ import org.ballerinalang.model.tree.NodeKind;
 import org.ballerinalang.model.tree.OperatorKind;
 import org.ballerinalang.model.tree.ServiceNode;
 import org.ballerinalang.model.tree.SimpleVariableNode;
-import org.ballerinalang.model.tree.TableKeySpecifierNode;
-import org.ballerinalang.model.tree.TableKeyTypeConstraintNode;
 import org.ballerinalang.model.tree.TopLevelNode;
 import org.ballerinalang.model.tree.VariableNode;
 import org.ballerinalang.model.tree.expressions.ExpressionNode;
-import org.ballerinalang.model.tree.expressions.TableMultiKeyExpressionNode;
 import org.ballerinalang.model.tree.expressions.XMLAttributeNode;
 import org.ballerinalang.model.tree.expressions.XMLElementFilter;
 import org.ballerinalang.model.tree.expressions.XMLLiteralNode;
@@ -78,8 +76,6 @@ import org.wso2.ballerinalang.compiler.tree.BLangRecordVariable;
 import org.wso2.ballerinalang.compiler.tree.BLangRecordVariable.BLangRecordVariableKeyValue;
 import org.wso2.ballerinalang.compiler.tree.BLangService;
 import org.wso2.ballerinalang.compiler.tree.BLangSimpleVariable;
-import org.wso2.ballerinalang.compiler.tree.BLangTableKeySpecifier;
-import org.wso2.ballerinalang.compiler.tree.BLangTableKeyTypeConstraint;
 import org.wso2.ballerinalang.compiler.tree.BLangTupleVariable;
 import org.wso2.ballerinalang.compiler.tree.BLangTypeDefinition;
 import org.wso2.ballerinalang.compiler.tree.BLangVariable;
@@ -126,8 +122,7 @@ import org.wso2.ballerinalang.compiler.tree.expressions.BLangRestArgsExpression;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangServiceConstructorExpr;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangSimpleVarRef;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangStringTemplateLiteral;
-import org.wso2.ballerinalang.compiler.tree.expressions.BLangTableConstructorExpr;
-import org.wso2.ballerinalang.compiler.tree.expressions.BLangTableMultiKeyExpr;
+import org.wso2.ballerinalang.compiler.tree.expressions.BLangTableLiteral;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangTernaryExpr;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangTrapExpr;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangTupleVarRef;
@@ -195,7 +190,6 @@ import org.wso2.ballerinalang.compiler.tree.types.BLangObjectTypeNode;
 import org.wso2.ballerinalang.compiler.tree.types.BLangRecordTypeNode;
 import org.wso2.ballerinalang.compiler.tree.types.BLangStreamType;
 import org.wso2.ballerinalang.compiler.tree.types.BLangStructureTypeNode;
-import org.wso2.ballerinalang.compiler.tree.types.BLangTableTypeNode;
 import org.wso2.ballerinalang.compiler.tree.types.BLangTupleTypeNode;
 import org.wso2.ballerinalang.compiler.tree.types.BLangType;
 import org.wso2.ballerinalang.compiler.tree.types.BLangUnionTypeNode;
@@ -265,6 +259,8 @@ public class BLangPackageBuilder {
 
     private Stack<BLangRecordLiteral> recordLiteralNodes = new Stack<>();
 
+    private Stack<BLangTableLiteral> tableLiteralNodes = new Stack<>();
+
     private Stack<BLangWaitForAllExpr> waitCollectionStack = new Stack<>();
 
     private Stack<BLangTryCatchFinally> tryCatchFinallyNodesStack = new Stack<>();
@@ -324,10 +320,6 @@ public class BLangPackageBuilder {
     private Stack<Set<Whitespace>> invocationRuleWS = new Stack<>();
     private Stack<Set<Whitespace>> errorRestBindingPatternWS = new Stack<>();
     private Stack<Set<Whitespace>> restMatchPatternWS = new Stack<>();
-
-    private Stack<TableKeySpecifierNode> tableKeySpecifierNodeStack = new Stack<>();
-    private Stack<TableKeyTypeConstraintNode>  tableKeyTypeConstraintNodeStack = new Stack<>();
-    private Stack<TableMultiKeyExpressionNode> tableMultiKeyExpressionNodeStack = new Stack<>();
 
     private long isInErrorType = 0;
 
@@ -401,8 +393,8 @@ public class BLangPackageBuilder {
         this.typeNodeStack.push(tupleTypeNode);
     }
 
-    void addRecordType(DiagnosticPos pos, Set<Whitespace> ws, boolean isAnonymous, boolean hasRestField,
-                       boolean isExclusiveTypeDesc) {
+    void addRecordType(DiagnosticPos pos, Set<Whitespace> ws, boolean isFieldAnalyseRequired, boolean isAnonymous,
+                       boolean hasRestField, boolean isExclusiveTypeDesc) {
         // If there is an explicitly defined rest field, take it.
         BLangType restFieldType = null;
         if (hasRestField) {
@@ -410,6 +402,7 @@ public class BLangPackageBuilder {
         }
         // Create an anonymous record and add it to the list of records in the current package.
         BLangRecordTypeNode recordTypeNode = populateRecordTypeNode(pos, ws, isAnonymous);
+        recordTypeNode.isFieldAnalyseRequired = isFieldAnalyseRequired;
         recordTypeNode.sealed = isExclusiveTypeDesc && !hasRestField;
         recordTypeNode.restFieldType = restFieldType;
 
@@ -444,31 +437,6 @@ public class BLangPackageBuilder {
         return recordTypeNode;
     }
 
-    void addTableType(DiagnosticPos pos, Set<Whitespace> ws) {
-        String tableTypeName = "table";
-        Set<Whitespace> refTypeWS = removeNthFromLast(ws, 2);
-
-        BLangBuiltInRefTypeNode refType = (BLangBuiltInRefTypeNode) TreeBuilder.createBuiltInReferenceTypeNode();
-        refType.typeKind = TreeUtils.stringToTypeKind(tableTypeName);
-        refType.pos = pos;
-        refType.addWS(refTypeWS);
-
-        BLangTableTypeNode tableTypeNode = (BLangTableTypeNode) TreeBuilder.createTableTypeNode();
-        tableTypeNode.pos = pos;
-        tableTypeNode.addWS(ws);
-
-        tableTypeNode.type = refType;
-        tableTypeNode.constraint = (BLangType) typeNodeStack.pop();
-        if (tableKeySpecifierNodeStack.size() > 0) {
-            tableTypeNode.tableKeySpecifier =
-                    (BLangTableKeySpecifier) tableKeySpecifierNodeStack.pop();
-        } else if (tableKeyTypeConstraintNodeStack.size() > 0) {
-            tableTypeNode.tableKeyTypeConstraint = (BLangTableKeyTypeConstraint) tableKeyTypeConstraintNodeStack.pop();
-        }
-
-        addType(tableTypeNode);
-    }
-
     private boolean isInLocalDefinition() {
         // TODO: When supporting local defs for errors, need to get rid of the second condition
         return !this.blockNodeStack.isEmpty() && this.isInErrorType <= 0;
@@ -476,7 +444,7 @@ public class BLangPackageBuilder {
 
     void addFieldVariable(DiagnosticPos pos, Set<Whitespace> ws, String identifier, DiagnosticPos identifierPos,
                           boolean exprAvailable, int annotCount, boolean isPrivate, boolean isOptional,
-                          boolean markdownExists, boolean isReadonly) {
+                          boolean markdownExists) {
         BLangSimpleVariable field = addSimpleVar(pos, ws, identifier, identifierPos, exprAvailable, annotCount);
 
         if (!isPrivate) {
@@ -487,10 +455,6 @@ public class BLangPackageBuilder {
             field.flagSet.add(Flag.OPTIONAL);
         } else if (!exprAvailable) {
             field.flagSet.add(Flag.REQUIRED);
-        }
-
-        if (isReadonly) {
-            field.flagSet.add(Flag.READONLY);
         }
 
         if (markdownExists) {
@@ -731,7 +695,7 @@ public class BLangPackageBuilder {
         this.funcBodyNodeStack.push(TreeBuilder.createExternFunctionBodyNode());
     }
 
-    public BLangIdentifier createIdentifier(DiagnosticPos pos, String value) {
+    private BLangIdentifier createIdentifier(DiagnosticPos pos, String value) {
         return createIdentifier(pos, value, null);
     }
 
@@ -1224,8 +1188,7 @@ public class BLangPackageBuilder {
     void markLastInvocationAsAsync(DiagnosticPos pos, int numAnnotations) {
         final ExpressionNode expressionNode = this.exprNodeStack.peek();
         if (expressionNode.getKind() == NodeKind.INVOCATION) {
-            BLangInvocation.BLangActionInvocation invocation =
-                    (BLangInvocation.BLangActionInvocation) this.exprNodeStack.peek();
+            BLangInvocation invocation = (BLangInvocation) this.exprNodeStack.peek();
             invocation.async = true;
             attachAnnotations(invocation, numAnnotations, false);
         } else {
@@ -1597,7 +1560,7 @@ public class BLangPackageBuilder {
         recordLiteralNodes.peek().fields.add((BLangRecordLiteral.BLangRecordVarNameField) exprNodeStack.pop());
     }
 
-    void addKeyValueRecordField(Set<Whitespace> ws, boolean computedKey, boolean isReadonly) {
+    void addKeyValueRecordField(Set<Whitespace> ws, boolean computedKey) {
         BLangRecordKeyValueField keyValue = (BLangRecordKeyValueField) TreeBuilder.createRecordKeyValue();
         keyValue.addWS(ws);
         keyValue.valueExpr = (BLangExpression) exprNodeStack.pop();
@@ -1606,7 +1569,6 @@ public class BLangPackageBuilder {
             keyValue.addWS(this.recordKeyWS.pop());
         }
         keyValue.key.computedKey = computedKey;
-        keyValue.isReadonly = isReadonly;
         recordLiteralNodes.peek().fields.add(keyValue);
     }
 
@@ -1646,6 +1608,82 @@ public class BLangPackageBuilder {
         addExpressionNode(recordTypeLiteralNode);
     }
 
+    void startTableLiteral() {
+        final BLangTableLiteral tableLiteral = (BLangTableLiteral) TreeBuilder.createTableLiteralNode();
+        tableLiteralNodes.push(tableLiteral);
+    }
+
+    void endTableColumnDefinition(Set<Whitespace> ws) {
+        BLangTableLiteral tableLiteral = this.tableLiteralNodes.peek();
+        tableLiteral.addWS(ws);
+    }
+
+    void addTableColumn(String columnName, DiagnosticPos pos, Set<Whitespace> ws) {
+        BLangTableLiteral.BLangTableColumn tableColumn = new BLangTableLiteral.BLangTableColumn(columnName);
+        tableColumn.pos = pos;
+        tableColumn.addWS(ws);
+        this.tableLiteralNodes.peek().columns.add(tableColumn);
+    }
+
+    void markPrimaryKeyColumn(String columnName) {
+        BLangTableLiteral tableLiteral = this.tableLiteralNodes.peek();
+        BLangTableLiteral.BLangTableColumn column = tableLiteral.getColumn(columnName);
+        if (column != null) {
+            column.flagSet.add(TableColumnFlag.PRIMARYKEY);
+        }
+    }
+
+    void endTableDataList(DiagnosticPos pos, Set<Whitespace> ws) {
+        BLangRecordLiteral recordLiteral = (BLangRecordLiteral) TreeBuilder.createRecordLiteralNode();
+        List<BLangTableLiteral.BLangTableColumn> keyNames = tableLiteralNodes.peek().columns;
+        List<ExpressionNode> recordValues = exprNodeListStack.pop();
+        int index = 0;
+        for (ExpressionNode expr : recordValues) {
+            BLangRecordKeyValueField keyValue = (BLangRecordKeyValueField) TreeBuilder.createRecordKeyValue();
+            //Value
+            keyValue.valueExpr = (BLangExpression) expr;
+            //key
+            BLangSimpleVarRef keyExpr = (BLangSimpleVarRef) TreeBuilder.createSimpleVariableReferenceNode();
+            keyExpr.pos = pos;
+            BLangTableLiteral.BLangTableColumn key = keyNames.get(index);
+            BLangIdentifier identifierNode = createIdentifier(key.pos, key.columnName);
+            keyExpr.variableName = identifierNode;
+            keyValue.key = new BLangRecordKey(keyExpr);
+            //Key-Value pair
+            recordLiteral.fields.add(keyValue);
+            ++index;
+        }
+        recordLiteral.addWS(ws);
+        recordLiteral.pos = pos;
+        if (commaWsStack.size() > 0) {
+            recordLiteral.addWS(commaWsStack.pop());
+        }
+        this.tableLiteralNodes.peek().tableDataRows.add(recordLiteral);
+    }
+
+    void endTableDataArray(Set<Whitespace> ws) {
+        BLangTableLiteral tableLiteral = this.tableLiteralNodes.peek();
+        tableLiteral.addWS(ws);
+    }
+
+    void endTableDataRow(Set<Whitespace> ws) {
+        List<ExpressionNode> argExprList = exprNodeListStack.pop();
+        BLangTableLiteral tableLiteral = this.tableLiteralNodes.peek();
+        tableLiteral.addWS(ws);
+        if (commaWsStack.size() > 0) {
+            tableLiteral.addWS(commaWsStack.pop());
+        }
+        tableLiteral.tableDataRows = argExprList.stream().map(expr -> (BLangExpression) expr)
+                .collect(Collectors.toList());
+    }
+
+    void addTableLiteral(DiagnosticPos pos, Set<Whitespace> ws) {
+        final BLangTableLiteral tableLiteral = tableLiteralNodes.pop();
+        tableLiteral.addWS(ws);
+        tableLiteral.pos = pos;
+        addExpressionNode(tableLiteral);
+    }
+
     void startMapStructLiteral() {
         BLangRecordLiteral literalNode = (BLangRecordLiteral) TreeBuilder.createRecordLiteralNode();
         recordLiteralNodes.push(literalNode);
@@ -1675,11 +1713,8 @@ public class BLangPackageBuilder {
         createSimpleVariableReference(pos, ws, (BLangSimpleVarRef) TreeBuilder.createSimpleVariableReferenceNode());
     }
 
-    void createBLangRecordVarRefNameField(DiagnosticPos pos, Set<Whitespace> ws, boolean isReadonly) {
-        BLangRecordLiteral.BLangRecordVarNameField varNameField =
-                (BLangRecordLiteral.BLangRecordVarNameField) TreeBuilder.createRecordVarRefNameFieldNode();
-        varNameField.isReadonly = isReadonly;
-        createSimpleVariableReference(pos, ws, varNameField);
+    void createBLangRecordVarRefNameField(DiagnosticPos pos, Set<Whitespace> ws) {
+        createSimpleVariableReference(pos, ws, (BLangSimpleVarRef) TreeBuilder.createRecordVarRefNameFieldNode());
     }
 
     private void createSimpleVariableReference(DiagnosticPos pos, Set<Whitespace> ws, BLangSimpleVarRef varRef) {
@@ -1692,16 +1727,8 @@ public class BLangPackageBuilder {
         this.exprNodeStack.push(varRef);
     }
 
-    void createFunctionInvocation(DiagnosticPos pos, Set<Whitespace> ws, boolean argsAvailable,
-                                  boolean actionInvocation) {
-        BLangInvocation invocationNode;
-
-        if (actionInvocation) {
-            invocationNode = (BLangInvocation) TreeBuilder.createActionInvocation();
-        } else {
-            invocationNode = (BLangInvocation) TreeBuilder.createInvocationNode();
-        }
-
+    void createFunctionInvocation(DiagnosticPos pos, Set<Whitespace> ws, boolean argsAvailable) {
+        BLangInvocation invocationNode = (BLangInvocation) TreeBuilder.createInvocationNode();
         invocationNode.pos = pos;
         invocationNode.addWS(ws);
         if (argsAvailable) {
@@ -1722,19 +1749,9 @@ public class BLangPackageBuilder {
         invocationWsStack.push(ws);
     }
 
-    // Note: This method is for creating invocation nodes for the invocation types defined in the grammar rule
-    // `variableReference`. The assumption here is that those invocations can only become an action invocation if
-    // it's an async op (i.e., preceded by `start`).
     void createInvocationNode(DiagnosticPos pos, Set<Whitespace> ws, String invocation, boolean argsAvailable,
-                              DiagnosticPos identifierPos, boolean async, int annots) {
-        BLangInvocation invocationNode;
-        if (async) {
-            invocationNode = (BLangInvocation.BLangActionInvocation) TreeBuilder.createActionInvocation();
-            invocationNode.async = async;
-            attachAnnotations(invocationNode, annots, false);
-        } else {
-            invocationNode = (BLangInvocation) TreeBuilder.createInvocationNode();
-        }
+                              DiagnosticPos identifierPos) {
+        BLangInvocation invocationNode = (BLangInvocation) TreeBuilder.createInvocationNode();
         invocationNode.pos = pos;
         invocationNode.addWS(ws);
         invocationNode.addWS(invocationWsStack.pop());
@@ -1759,7 +1776,7 @@ public class BLangPackageBuilder {
     }
 
     void createWorkerLambdaInvocationNode(DiagnosticPos pos, Set<Whitespace> ws, String invocation) {
-        BLangInvocation invocationNode = (BLangInvocation) TreeBuilder.createActionInvocation();
+        BLangInvocation invocationNode = (BLangInvocation) TreeBuilder.createInvocationNode();
         invocationNode.pos = pos;
         invocationNode.addWS(ws);
         invocationNode.addWS(invocationWsStack.pop());
@@ -1769,18 +1786,16 @@ public class BLangPackageBuilder {
         addExpressionNode(invocationNode);
     }
 
-    void createActionInvocationNode(DiagnosticPos pos, Set<Whitespace> ws, boolean async, boolean remoteMethodCall,
-                                    int numAnnotations) {
-        BLangInvocation.BLangActionInvocation actionInvocation =
-                (BLangInvocation.BLangActionInvocation) exprNodeStack.pop();
-        actionInvocation.pos = pos;
-        actionInvocation.addWS(ws);
-        actionInvocation.async = async;
-        actionInvocation.remoteMethodCall = remoteMethodCall;
+    void createActionInvocationNode(DiagnosticPos pos, Set<Whitespace> ws, boolean async, int numAnnotations) {
+        BLangInvocation invocationExpr = (BLangInvocation) exprNodeStack.pop();
+        invocationExpr.actionInvocation = true;
+        invocationExpr.pos = pos;
+        invocationExpr.addWS(ws);
+        invocationExpr.async = async;
 
-        actionInvocation.expr = (BLangExpression) exprNodeStack.pop();
-        attachAnnotations(actionInvocation, numAnnotations, false);
-        exprNodeStack.push(actionInvocation);
+        invocationExpr.expr = (BLangExpression) exprNodeStack.pop();
+        attachAnnotations(invocationExpr, numAnnotations, false);
+        exprNodeStack.push(invocationExpr);
     }
 
     void createFieldBasedAccessNode(DiagnosticPos pos, Set<Whitespace> ws, String fieldName, DiagnosticPos fieldNamePos,
@@ -1806,26 +1821,11 @@ public class BLangPackageBuilder {
         addExpressionNode(fieldBasedAccess);
     }
 
-    void createMultiKeyExpressionNode(DiagnosticPos pos, Set<Whitespace> ws) {
-        BLangTableMultiKeyExpr tableMultiKeyExpr = (BLangTableMultiKeyExpr) TreeBuilder.
-                createTableMultiKeyExpressionNode();
-        tableMultiKeyExpr.pos = pos;
-        tableMultiKeyExpr.addWS(ws);
-        this.exprNodeListStack.pop().forEach(expr -> tableMultiKeyExpr.multiKeyIndexExprs.
-                add((BLangExpression) expr));
-        tableMultiKeyExpressionNodeStack.push(tableMultiKeyExpr);
-    }
-
     void createIndexBasedAccessNode(DiagnosticPos pos, Set<Whitespace> ws) {
         BLangIndexBasedAccess indexBasedAccess = (BLangIndexBasedAccess) TreeBuilder.createIndexBasedAccessNode();
         indexBasedAccess.pos = pos;
         indexBasedAccess.addWS(ws);
-        if (tableMultiKeyExpressionNodeStack.size() == 1) {
-            indexBasedAccess.indexExpr = (BLangTableMultiKeyExpr) tableMultiKeyExpressionNodeStack.pop();
-        } else {
-            indexBasedAccess.indexExpr = (BLangExpression) exprNodeStack.pop();
-        }
-
+        indexBasedAccess.indexExpr = (BLangExpression) exprNodeStack.pop();
         indexBasedAccess.expr = (BLangVariableReference) exprNodeStack.pop();
         addExpressionNode(indexBasedAccess);
     }
@@ -2109,24 +2109,6 @@ public class BLangPackageBuilder {
         }
 
         this.compUnit.addTopLevelNode(function);
-    }
-
-    void createTableConstructor(DiagnosticPos pos, Set<Whitespace> ws) {
-        BLangTableConstructorExpr tableConstructorExpr =
-                (BLangTableConstructorExpr) TreeBuilder.createTableConstructorExpressionNode();
-        tableConstructorExpr.pos = pos;
-        tableConstructorExpr.addWS(ws);
-        if (tableKeySpecifierNodeStack.size() > 0) {
-            tableConstructorExpr.tableKeySpecifier = (BLangTableKeySpecifier) tableKeySpecifierNodeStack.pop();
-        }
-
-        Collections.reverse(exprNodeStack);
-        while (exprNodeStack.size() > 0) {
-            ExpressionNode expression = exprNodeStack.pop();
-            BLangRecordLiteral recordLiteral = (BLangRecordLiteral) expression;
-            tableConstructorExpr.addRecordLiteral(recordLiteral);
-        }
-        addExpressionNode(tableConstructorExpr);
     }
 
     void startWorker(PackageID pkgID) {
@@ -2430,26 +2412,6 @@ public class BLangPackageBuilder {
         this.compUnit.addTopLevelNode(var);
     }
 
-    void addTableKeyTypeConstraint(DiagnosticPos pos, Set<Whitespace> ws) {
-        BLangTableKeyTypeConstraint tableKeyTypeConstraint = new BLangTableKeyTypeConstraint();
-        tableKeyTypeConstraint.pos = pos;
-        tableKeyTypeConstraint.addWS(ws);
-        tableKeyTypeConstraint.keyType = (BLangType) typeNodeStack.pop();
-        tableKeyTypeConstraintNodeStack.push(tableKeyTypeConstraint);
-    }
-
-    void addTableKeySpecifier(DiagnosticPos pos, Set<Whitespace> ws, List<BLangIdentifier> keyFieldNameIdentifierList) {
-        BLangTableKeySpecifier tableKeySpecifierNode =
-                (BLangTableKeySpecifier) TreeBuilder.createTableKeySpecifierNode();
-        tableKeySpecifierNode.pos = pos;
-        tableKeySpecifierNode.addWS(ws);
-
-        for (BLangIdentifier identifier : keyFieldNameIdentifierList) {
-            tableKeySpecifierNode.addFieldNameIdentifier(identifier);
-        }
-        tableKeySpecifierNodeStack.push(tableKeySpecifierNode);
-    }
-
     void startRecordType() {
         BLangRecordTypeNode recordTypeNode = (BLangRecordTypeNode) TreeBuilder.createRecordTypeNode();
         typeNodeStack.push(recordTypeNode);
@@ -2463,10 +2425,11 @@ public class BLangPackageBuilder {
         startFieldBlockList();
     }
 
-    void addObjectType(DiagnosticPos pos, Set<Whitespace> ws, boolean isAnonymous, boolean isAbstract,
-                       boolean isClient, boolean isService) {
+    void addObjectType(DiagnosticPos pos, Set<Whitespace> ws, boolean isFieldAnalyseRequired, boolean isAnonymous,
+                       boolean isAbstract, boolean isClient, boolean isService) {
         BLangObjectTypeNode objectTypeNode = populateObjectTypeNode(pos, ws, isAnonymous);
         objectTypeNode.addWS(this.objectFieldBlockWs.pop());
+        objectTypeNode.isFieldAnalyseRequired = isFieldAnalyseRequired;
 
         if (isAbstract) {
             objectTypeNode.flagSet.add(Flag.ABSTRACT);
@@ -3305,7 +3268,6 @@ public class BLangPackageBuilder {
         workerReceiveExpr.pos = pos;
         workerReceiveExpr.addWS(ws);
         //if there are two expressions, this is a channel receive and the top expression is the key
-        // TODO: Not needed?
         if (hasKey) {
             workerReceiveExpr.keyExpr = (BLangExpression) exprNodeStack.pop();
             workerReceiveExpr.isChannel = true;

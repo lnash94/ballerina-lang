@@ -158,7 +158,7 @@ public class CookieNativeFunctionNegativeTest {
     }
 
     @Test(description = "Test to remove a specific cookie which is not in the cookie store, when there is a " +
-            "persistent cookie store", enabled = false)
+            "persistent cookie store")
     public void testRemovePersistentCookieFromCookieStore_1() {
         BValue[] returnVals = BRunUtil.invoke(result, "testRemovePersistentCookieFromCookieStore_1");
         Assert.assertFalse(returnVals == null || returnVals.length == 0 || returnVals[0] == null,
@@ -169,14 +169,14 @@ public class CookieNativeFunctionNegativeTest {
     }
 
     @Test(description = "Test to remove a specific cookie which is not in the cookie store, when there is no " +
-            "persistent cookie store", enabled = false)
+            "persistent cookie store")
     public void testRemovePersistentCookieFromCookieStore_2() {
         BValue[] returnVals = BRunUtil.invoke(result, "testRemovePersistentCookieFromCookieStore_2");
         Assert.assertTrue(returnVals == null || returnVals.length == 0 || returnVals[0] == null,
                           "Cookie objects are in the Return Values");
     }
 
-    @Test(description = "Test to remove all cookies when there is no persistent cookie store", enabled = false)
+    @Test(description = "Test to remove all cookies when there is no persistent cookie store")
     public void testRemoveAllCookiesFromCookieStore() {
         BValue[] returnVals = BRunUtil.invoke(result, "testRemoveAllCookiesFromCookieStore");
         Assert.assertTrue(returnVals == null || returnVals.length == 0 || returnVals[0] == null,

@@ -30,7 +30,6 @@ import org.testng.annotations.Test;
  *
  * @since 0.985.0
  */
-
 public class ForeachTableTypedBindingPatternsTests {
 
     private CompileResult program;

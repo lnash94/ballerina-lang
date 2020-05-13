@@ -15,6 +15,7 @@
  */
 package org.ballerinalang.docgen.generator.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,10 +25,10 @@ import java.util.stream.Collectors;
  */
 public class Object extends Construct {
 
-    public List<DefaultableVariable> fields;
-    public List<Function> methods;
+    public List<DefaultableVariable> fields = new ArrayList<>();
+    public List<Function> methods = new ArrayList<>();
     public Function initMethod;
-    public List<Function> otherMethods;
+    public List<Function> otherMethods = new ArrayList<>();
 
     public Object(String name, String description, boolean isDeprecated, List<DefaultableVariable> fields,
             List<Function> methods) {

@@ -24,7 +24,7 @@ import org.ballerinalang.jvm.scheduling.Scheduler;
 import org.ballerinalang.jvm.values.ObjectValue;
 import org.ballerinalang.nats.Constants;
 import org.ballerinalang.nats.Utils;
-import org.ballerinalang.nats.observability.NatsMetricsReporter;
+import org.ballerinalang.nats.observability.NatsMetricsUtil;
 import org.ballerinalang.nats.observability.NatsObservabilityConstants;
 import org.ballerinalang.nats.observability.NatsTracingUtil;
 import org.slf4j.Logger;
@@ -53,12 +53,11 @@ public class GracefulStop {
     public static void basicGracefulStop(ObjectValue listenerObject) {
         NatsTracingUtil.traceResourceInvocation(Scheduler.getStrand(), listenerObject);
         ObjectValue connectionObject = (ObjectValue) listenerObject.get(Constants.CONNECTION_OBJ);
-        NatsMetricsReporter natsMetricsReporter =
-                (NatsMetricsReporter) connectionObject.getNativeData(Constants.NATS_METRIC_UTIL);
+        NatsMetricsUtil natsMetricsUtil = (NatsMetricsUtil) connectionObject.getNativeData(Constants.NATS_METRIC_UTIL);
         Connection natsConnection =
                 (Connection) connectionObject.getNativeData(Constants.NATS_CONNECTION);
         if (natsConnection == null) {
-            NatsMetricsReporter.reportConsumerError(NatsObservabilityConstants.ERROR_TYPE_CLOSE);
+            NatsMetricsUtil.reportConsumerError(NatsObservabilityConstants.ERROR_TYPE_CLOSE);
             LOG.debug("NATS connection does not exist. Possibly the connection is already closed.");
             return;
         }
@@ -75,7 +74,7 @@ public class GracefulStop {
         ArrayList<String> subscriptionsList =
                 (ArrayList<String>) listenerObject
                         .getNativeData(BASIC_SUBSCRIPTION_LIST);
-        natsMetricsReporter.reportBulkUnsubscription(subscriptionsList);
+        natsMetricsUtil.reportBulkUnsubscription(subscriptionsList);
 
         int clientsCount =
                 ((AtomicInteger) connectionObject.getNativeData(Constants.CONNECTED_CLIENTS)).decrementAndGet();
@@ -86,16 +85,16 @@ public class GracefulStop {
                 natsConnection.drain(Duration.ZERO);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                natsMetricsReporter.reportConsumerError(NatsObservabilityConstants.UNKNOWN,
-                                                        NatsObservabilityConstants.ERROR_TYPE_CLOSE);
+                natsMetricsUtil.reportConsumerError(NatsObservabilityConstants.UNKNOWN,
+                                                    NatsObservabilityConstants.ERROR_TYPE_CLOSE);
                 throw Utils.createNatsError("Listener interrupted on graceful stop.");
             } catch (TimeoutException e) {
-                natsMetricsReporter.reportConsumerError(NatsObservabilityConstants.UNKNOWN,
-                                                        NatsObservabilityConstants.ERROR_TYPE_CLOSE);
+                natsMetricsUtil.reportConsumerError(NatsObservabilityConstants.UNKNOWN,
+                                                    NatsObservabilityConstants.ERROR_TYPE_CLOSE);
                 throw Utils.createNatsError("Timeout error occurred, on graceful stop.");
             } catch (IllegalStateException e) {
-                natsMetricsReporter.reportConsumerError(NatsObservabilityConstants.UNKNOWN,
-                                                        NatsObservabilityConstants.ERROR_TYPE_CLOSE);
+                natsMetricsUtil.reportConsumerError(NatsObservabilityConstants.UNKNOWN,
+                                                    NatsObservabilityConstants.ERROR_TYPE_CLOSE);
                 throw Utils.createNatsError("Connection is already closed.");
             }
         }

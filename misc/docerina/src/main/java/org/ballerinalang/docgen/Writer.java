@@ -104,18 +104,15 @@ public class Writer {
                 //remove anything with <pre> tag
                 String newDescription = description.replaceAll("<pre>(.|\\n)*?<\\/pre>", "");
                 // select only the first sentence
-                String[] splits = newDescription.split("\\.", 2);
-                if (splits.length < 2) {
-                    return splits[0];
-                } else {
-                    return splits[0] + ".";
-                }
+                newDescription = newDescription.replaceAll("\\.(.|\\n)*", ".");
+                return newDescription;
             });
 
             handlebars.registerHelper("removePTags", (Helper<String>) (string, options) -> {
                 //remove paragraph tags
                 if (string != null) {
-                    return string.replaceAll("<\\/?p>", "");
+                    String newString = string.replaceAll("<\\/?p>", "");
+                    return newString;
                 } else {
                     return "";
                 }

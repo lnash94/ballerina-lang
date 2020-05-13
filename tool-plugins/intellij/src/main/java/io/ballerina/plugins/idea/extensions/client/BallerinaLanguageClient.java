@@ -16,8 +16,8 @@
 package io.ballerina.plugins.idea.extensions.client;
 
 import com.intellij.openapi.diagnostic.Logger;
-import io.ballerina.plugins.idea.configuration.BallerinaProjectSettings;
 import io.ballerina.plugins.idea.notifiers.BallerinaLSLogNotifier;
+import io.ballerina.plugins.idea.settings.langserverlogs.LangServerLogsSettings;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.MessageType;
 import org.wso2.lsp4intellij.client.ClientContext;
@@ -43,14 +43,14 @@ public class BallerinaLanguageClient extends DefaultLanguageClient {
         MessageType msgType = messageParams.getType();
 
         // Todo - Revisit after the language server logger implementation is fixed with proper message types.
-        BallerinaProjectSettings settings = BallerinaProjectSettings.getStoredSettings(context.getProject());
-        if (msgType == MessageType.Error && settings.isLsDebugLogs()) {
+        LangServerLogsSettings logSettings = LangServerLogsSettings.getInstance(context.getProject());
+        if (msgType == MessageType.Error && logSettings.isLangServerDebugLogsEnabled()) {
             logNotifier.showMessage(context.getProject(), message, com.intellij.openapi.ui.MessageType.ERROR);
-        } else if (msgType == MessageType.Warning && settings.isLsDebugLogs()) {
+        } else if (msgType == MessageType.Warning && logSettings.isLangServerDebugLogsEnabled()) {
             logNotifier.showMessage(context.getProject(), message, com.intellij.openapi.ui.MessageType.WARNING);
-        } else if (msgType == MessageType.Info && settings.isLsTraceLogs()) {
+        } else if (msgType == MessageType.Info && logSettings.isLangServerTraceLogsEnabled()) {
             logNotifier.showMessage(context.getProject(), message, com.intellij.openapi.ui.MessageType.INFO);
-        } else if (msgType == MessageType.Log && settings.isLsDebugLogs()) {
+        } else if (msgType == MessageType.Log && logSettings.isLangServerDebugLogsEnabled()) {
             logNotifier.showMessage(context.getProject(), message, com.intellij.openapi.ui.MessageType.INFO);
         } else if (msgType == null) {
             LOGGER.warn("unknown message type for " + message);

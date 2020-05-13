@@ -24,6 +24,10 @@ function name3() {
     });
 }
 
+function tableReturnFunction() returns (table<any>) {
+    return;
+}
+
 public function main() {
     string text = "Sample String";
     int number = 34;

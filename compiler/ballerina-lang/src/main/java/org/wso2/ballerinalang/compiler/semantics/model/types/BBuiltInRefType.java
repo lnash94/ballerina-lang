@@ -52,10 +52,10 @@ public class BBuiltInRefType extends BType implements ReferenceType {
                 return TypeKind.JSON;
             case XML:
                 return TypeKind.XML;
-            case STREAM:
-                return TypeKind.STREAM;
             case TABLE:
                 return TypeKind.TABLE;
+            case STREAM:
+                return TypeKind.STREAM;
             case ANY:
                 return TypeKind.ANY;
             case ANYDATA:

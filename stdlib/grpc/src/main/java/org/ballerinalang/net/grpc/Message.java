@@ -44,11 +44,6 @@ import java.util.Map;
  * @since 1.0.0
  */
 public class Message {
-
-    private static final String GOOGLE_PROTOBUF_ANY = "google.protobuf.Any";
-    private static final String GOOGLE_PROTOBUF_ANY_VALUE = "google.protobuf.Any.value";
-    private static final String GOOGLE_PROTOBUF_ANY_TYPE_URL = "google.protobuf.Any.type_url";
-
     private String messageName;
     private int memoizedSize = -1;
     private HttpHeaders headers;
@@ -368,7 +363,7 @@ public class Message {
                             } else {
                                 bMapValue.put(name, input.readStringRequireUtf8());
                             }
-                        } else if (!fieldDescriptor.getFullName().equals(GOOGLE_PROTOBUF_ANY_TYPE_URL)) {
+                        } else {
                             bMessage = input.readStringRequireUtf8();
                         }
                         break;
@@ -629,8 +624,7 @@ public class Message {
                         } else {
                             output.writeString(fieldDescriptor.getNumber(), (String) bValue);
                         }
-                    } else if (bMessage instanceof String &&
-                            !fieldDescriptor.getFullName().equals(GOOGLE_PROTOBUF_ANY_TYPE_URL)) {
+                    } else if (bMessage instanceof String) {
                         output.writeString(fieldDescriptor.getNumber(), (String) bMessage);
                     }
                     break;
@@ -638,8 +632,7 @@ public class Message {
                 case DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE_VALUE: {
                     if (bMapValue != null && bMapValue.containsKey(fieldDescriptor.getName())) {
                         Object bValue = bMapValue.get(fieldDescriptor.getName());
-                        if (bValue instanceof ArrayValue
-                                && !fieldDescriptor.getMessageType().getFullName().equals(GOOGLE_PROTOBUF_ANY_VALUE)) {
+                        if (bValue instanceof ArrayValue) {
                             ArrayValue valueArray = (ArrayValue) bValue;
                             for (int i = 0; i < valueArray.size(); i++) {
                                 Message message = new Message(fieldDescriptor.getMessageType(),
@@ -883,8 +876,7 @@ public class Message {
                 case DescriptorProtos.FieldDescriptorProto.Type.TYPE_MESSAGE_VALUE: {
                     if (bMapValue != null && bMapValue.containsKey(fieldDescriptor.getName())) {
                         Object bValue = bMapValue.get(fieldDescriptor.getName());
-                        if (bValue instanceof ArrayValue
-                                && !fieldDescriptor.getMessageType().getFullName().equals(GOOGLE_PROTOBUF_ANY)) {
+                        if (bValue instanceof ArrayValue) {
                             ArrayValue valueArray = (ArrayValue) bValue;
                             for (int i = 0; i < valueArray.size(); i++) {
                                 MapValue<String, Object> value = (MapValue) valueArray.getRefValue(i);

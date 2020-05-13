@@ -173,8 +173,8 @@ public class MapValueImpl<K, V> extends LinkedHashMap<K, V> implements RefValue,
         if (this.type.getTag() == TypeTags.RECORD_TYPE_TAG) {
             BRecordType recordType = (BRecordType) this.type;
             Map fields = recordType.getFields();
-            if (fields.containsKey(key.toString())) {
-                expectedType = ((BField) fields.get(key.toString())).type;
+            if (fields.containsKey(key)) {
+                expectedType = ((BField) fields.get(key)).type;
             } else {
                 if (recordType.sealed) {
                     // Panic if this record type does not contain a key by the specified name.
@@ -269,39 +269,16 @@ public class MapValueImpl<K, V> extends LinkedHashMap<K, V> implements RefValue,
         return super.containsKey(key);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-
-        if (o == null || getClass() != o.getClass()) {
-           return false;
-        }
-
-        MapValueImpl<?, ?> mapValue = (MapValueImpl<?, ?>) o;
-
-        if (mapValue.type.getTag() != this.type.getTag()) {
-            return false;
-        }
-
-        if (this.entrySet().size() != mapValue.entrySet().size()) {
-            return false;
-        }
-
-        return entrySet().equals(mapValue.entrySet());
-    }
-
     /**
-     * Returns the hash code value.
+     * Returns the hash code value for map value object.
      *
-     * @return returns hashcode value
+     * @return returns hashcode value.
      */
     @Override
     public int hashCode() {
         return System.identityHashCode(this);
     }
-
+    
     /**
      * Remove an item from the map.
      *
@@ -322,10 +299,7 @@ public class MapValueImpl<K, V> extends LinkedHashMap<K, V> implements RefValue,
     @SuppressWarnings("unchecked")
     public K[] getKeys() {
         Set<K> keys = super.keySet();
-        String bStringProp = System.getProperty("ballerina.bstring");
-        boolean isBString = (bStringProp != null && !"".equals(bStringProp));
-        int size = keys.size();
-        return (K[]) (isBString ? keys.toArray(new BString[size]) : keys.toArray(new String[size]));
+        return (K[]) keys.toArray(new String[keys.size()]);
     }
 
     /**
@@ -401,6 +375,11 @@ public class MapValueImpl<K, V> extends LinkedHashMap<K, V> implements RefValue,
             sj.add(key + "=" + StringUtils.getStringValue(value));
         }
         return sj.toString();
+    }
+
+    @Override
+    public StringValue bStringValue() {
+        return null;
     }
 
     @Override
@@ -501,6 +480,11 @@ public class MapValueImpl<K, V> extends LinkedHashMap<K, V> implements RefValue,
         @Override
         public boolean hasNext() {
             return iterator.hasNext();
+        }
+
+        @Override
+        public BString bStringValue() {
+            return null;
         }
     }
 

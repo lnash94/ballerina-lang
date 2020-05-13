@@ -19,7 +19,6 @@ package org.ballerinalang.langserver.command.testgen.template;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.ballerinalang.langserver.commons.LSContext;
 import org.ballerinalang.net.http.HttpConstants;
 import org.wso2.ballerinalang.compiler.tree.BLangImportPackage;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
@@ -53,12 +52,9 @@ public abstract class AbstractTestTemplate implements TestTemplate {
     protected static final String WSS = "wss://";
     protected final BiConsumer<Integer, Integer> focusLineAcceptor;
     protected final BLangPackage builtTestFile;
-    protected final LSContext context;
     protected final List<Pair<String, String>> imports;
 
-    public AbstractTestTemplate(BLangPackage builtTestFile, BiConsumer<Integer, Integer> focusLineAcceptor,
-                                LSContext context) {
-        this.context = context;
+    public AbstractTestTemplate(BLangPackage builtTestFile, BiConsumer<Integer, Integer> focusLineAcceptor) {
         this.focusLineAcceptor = focusLineAcceptor;
         this.builtTestFile = builtTestFile;
         this.imports = new ArrayList<>();

@@ -133,7 +133,6 @@
             <class name="org.ballerinalang.test.auth.AuthzConfigPatternTest"/>
             <class name="org.ballerinalang.test.auth.AuthnConfigPatternTest"/>
             <class name="org.ballerinalang.test.auth.AuthnWithOAuth2Test"/>
-            <class name="org.ballerinalang.test.auth.JwkSignatureValidationTest"/>
         </classes>
     </test>
 
@@ -147,11 +146,6 @@
     </test>
 
     <test name="ballerina-transaction-tests" parallel="false">
-        <groups>
-            <run>
-                <exclude name="brokenOnTableRemove"/>
-            </run>
-        </groups>
         <classes>
             <class name="org.ballerinalang.test.transaction.MicroTransactionTestCase"/>
             <class name="org.ballerinalang.test.transaction.RemoteParticipantTransactionTest"/>
@@ -282,7 +276,6 @@
         <groups>
             <run>
                 <exclude name="brokenOnXMLChange"/>
-                <exclude name="brokenOnTableRemove"/>
             </run>
         </groups>
         <classes>
@@ -299,11 +292,6 @@
 
     <test name="ballerina-observability-tests" parallel="false">
         <parameter name="enableJBallerinaTests" value="true"/>
-        <groups>
-            <run>
-                <exclude name="brokenOnTableRemove"/>
-            </run>
-        </groups>
         <classes>
             <class name="org.ballerinalang.test.observability.tracing.TracingTestCase"/>
             <class name="org.ballerinalang.test.observability.metrics.MetricsTestCase"/>
@@ -312,25 +300,25 @@
         </classes>
     </test>
 
-<!--    <test name="ballerina-packerina-tests" parallel="false">-->
-<!--        <parameter name="enableJBallerinaTests" value="true"/>-->
-<!--        <groups>-->
-<!--            <run>-->
-<!--                <exclude name="brokenOnJBallerina"/>-->
-<!--            </run>-->
-<!--        </groups>-->
-<!--        <classes>-->
-<!--&lt;!&ndash;            <class name="org.ballerinalang.test.packaging.ModulePushTestCase"/>&ndash;&gt;-->
-<!--&lt;!&ndash;            <class name="org.ballerinalang.test.packaging.PackagingNegativeTestCase"/>&ndash;&gt;-->
-<!--&lt;!&ndash;            <class name="org.ballerinalang.test.packaging.PackagingTestCase"/>&ndash;&gt;-->
-<!--            <class name="org.ballerinalang.test.packaging.LockFileTestCase"/>-->
-<!--            &lt;!&ndash;            <class name="org.ballerinalang.test.packaging.NativePackagingTestCase"/>&ndash;&gt;-->
-<!--            <class name="org.ballerinalang.test.packaging.PathDependencyTestCase"/>-->
-<!--            <class name="org.ballerinalang.test.packaging.DirectoryTestCase"/>-->
-<!--            <class name="org.ballerinalang.test.packaging.SpiServicesTestCase"/>-->
-<!--            <class name="org.ballerinalang.test.packaging.SingleBalFileTestCase"/>-->
-<!--        </classes>-->
-<!--    </test>-->
+    <test name="ballerina-packerina-tests" parallel="false">
+        <parameter name="enableJBallerinaTests" value="true"/>
+        <groups>
+            <run>
+                <exclude name="brokenOnJBallerina"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="org.ballerinalang.test.packaging.ModulePushTestCase"/>
+            <class name="org.ballerinalang.test.packaging.PackagingNegativeTestCase"/>
+            <class name="org.ballerinalang.test.packaging.PackagingTestCase"/>
+            <class name="org.ballerinalang.test.packaging.LockFileTestCase"/>
+            <!--            <class name="org.ballerinalang.test.packaging.NativePackagingTestCase"/>-->
+            <class name="org.ballerinalang.test.packaging.PathDependencyTestCase"/>
+            <class name="org.ballerinalang.test.packaging.DirectoryTestCase"/>
+            <class name="org.ballerinalang.test.packaging.SpiServicesTestCase"/>
+            <class name="org.ballerinalang.test.packaging.SingleBalFileTestCase"/>
+        </classes>
+    </test>
 
     <test name="ballerina-task-tests" parallel="false">
         <parameter name="enableJBallerinaTests" value="true"/>
@@ -356,13 +344,6 @@
         <parameter name="enableJBallerinaTests" value="true" />
         <classes>
             <class name="org.ballerinalang.test.logging.LogAPITestCase" />
-        </classes>
-    </test>
-
-    <test name="ballerina-launch-listener-tests" parallel="false">
-        <parameter name="enableJBallerinaTests" value="true" />
-        <classes>
-            <class name="org.ballerinalang.test.listener.LaunchListenerTestCase"/>
         </classes>
     </test>
 <!--    <test name="ballerina-kafka-tests" parallel="false">-->

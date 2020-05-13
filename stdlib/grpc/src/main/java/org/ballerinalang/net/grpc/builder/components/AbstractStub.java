@@ -19,9 +19,7 @@
 package org.ballerinalang.net.grpc.builder.components;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -29,7 +27,7 @@ import java.util.TreeSet;
  * Holds the abstract features of the stubs which are common to service and client stubs.
  */
 public abstract class AbstractStub {
-    private Map<String, Message> messageMap = new HashMap<>();
+    private List<Message> messageList = new ArrayList<>();
     private List<EnumMessage> enumList = new ArrayList<>();
     private String rootDescriptor;
     private Set<Descriptor> descriptors = new TreeSet<>((descriptor1, descriptor2) -> {
@@ -40,18 +38,23 @@ public abstract class AbstractStub {
     });
 
     public void addMessage(Message message) {
-        messageMap.put(message.getMessageName(), message);
+        messageList.add(message);
     }
 
     public boolean isMessageExists(String messageName) {
         if (messageName == null) {
             return false;
         }
-        return messageMap.containsKey(messageName);
+        for (Message message : messageList) {
+            if (messageName.equals(message.getMessageName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    public Map<String, Message> getMessageMap() {
-        return messageMap;
+    public List<Message> getMessageList() {
+        return messageList;
     }
 
     public void addEnumMessage(EnumMessage message) {
@@ -82,8 +85,8 @@ public abstract class AbstractStub {
         return descriptors;
     }
 
-    public void setMessageMap(Map<String, Message>  messageMap) {
-        this.messageMap = messageMap;
+    public void setMessageList(List<Message> messageList) {
+        this.messageList = messageList;
     }
 
     public void setEnumList(List<EnumMessage> enumList) {

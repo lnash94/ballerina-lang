@@ -42,8 +42,6 @@ import static org.ballerinalang.jvm.values.utils.ArrayUtils.createOpNotSupported
 )
 public class Push {
 
-    private static final String FUNCTION_SIGNATURE = "push()";
-
     public static void push(Strand strand, ArrayValue arr, ArrayValue vals) {
         BType arrType = arr.getType();
         int nVals = vals.size();
@@ -55,11 +53,7 @@ public class Push {
                 }
                 break;
             default:
-                throw createOpNotSupportedError(arrType, FUNCTION_SIGNATURE);
+                throw createOpNotSupportedError(arrType, "push()");
         }
-    }
-
-    public static void push_bstring(Strand strand, ArrayValue arr, ArrayValue vals) {
-        push(strand, arr, vals);
     }
 }

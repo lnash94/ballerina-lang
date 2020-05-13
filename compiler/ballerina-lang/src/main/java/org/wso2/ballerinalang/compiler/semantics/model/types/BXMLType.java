@@ -18,8 +18,6 @@ package org.wso2.ballerinalang.compiler.semantics.model.types;
 
 import org.wso2.ballerinalang.compiler.semantics.model.TypeVisitor;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BTypeSymbol;
-import org.wso2.ballerinalang.compiler.util.Names;
-import org.wso2.ballerinalang.compiler.util.TypeTags;
 
 /**
  * Represents XML Type.
@@ -28,21 +26,8 @@ import org.wso2.ballerinalang.compiler.util.TypeTags;
  */
 public class BXMLType extends BBuiltInRefType {
 
-    public BType constraint;
-
-    public BXMLType(BType constraint, BTypeSymbol tsymbol) {
-        super(TypeTags.XML, tsymbol);
-        this.constraint = constraint;
-    }
-
-    @Override
-    public String toString() {
-        if (constraint != null && !(constraint.tag == TypeTags.UNION &&
-                constraint instanceof BUnionType &&
-                ((BUnionType) constraint).getMemberTypes().size() == 4)) {
-            return Names.XML.value + "<" + constraint + ">";
-        }
-        return Names.XML.value;
+    public BXMLType(int tag, BTypeSymbol tsymbol) {
+        super(tag, tsymbol);
     }
 
     @Override

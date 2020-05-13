@@ -66,7 +66,7 @@ public class TokensUtil {
     /**
      * Search the token at a given cursor position.
      *
-     * @param context  {@link LSContext}
+     * @param context
      * @param tokenList List of tokens in the current compilation unit's source
      * @param cLine     Cursor line
      * @param cCol      cursor column

@@ -19,7 +19,6 @@
 package org.ballerinalang.langlib.string;
 
 import org.ballerinalang.jvm.scheduling.Strand;
-import org.ballerinalang.jvm.values.api.BString;
 import org.ballerinalang.model.types.TypeKind;
 import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
@@ -40,9 +39,5 @@ public class StartsWith {
 
     public static boolean startsWith(Strand strand, String str, String substr) {
         return str.startsWith(substr);
-    }
-
-    public static boolean startsWith_bstring(Strand strand, BString str, BString substr) {
-        return str.getValue().startsWith(substr.getValue());
     }
 }

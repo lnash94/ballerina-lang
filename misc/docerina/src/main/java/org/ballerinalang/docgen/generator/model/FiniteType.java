@@ -15,6 +15,7 @@
  */
 package org.ballerinalang.docgen.generator.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,7 +23,7 @@ import java.util.List;
  */
 public class FiniteType extends Type {
 
-    public List<String> valueSpace;
+    public List<String> valueSpace = new ArrayList<>();
 
     public FiniteType(String name, String description, boolean isDeprecated,  List<String> valueSpace) {
         super(name, description, isDeprecated);

@@ -159,6 +159,8 @@ class JMethodRequest {
                     return BTypes.typeTypedesc;
                 case TypeConstants.MAP_TNAME:
                     return BTypes.typeMap;
+                case TypeConstants.TABLE_TNAME:
+                    return BTypes.typeTable;
                 case TypeConstants.STREAM_TNAME:
                     return BTypes.typeStream;
                 case TypeConstants.ERROR:

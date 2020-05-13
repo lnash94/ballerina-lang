@@ -90,8 +90,6 @@ public class BCompileUtil {
     //TODO find a way to remove below line.
     private static Path resourceDir = Paths.get("src/test/resources").toAbsolutePath();
 
-    public static final String IS_STRING_VALUE_PROP = "ballerina.bstring";
-    public static final boolean USE_BSTRING = System.getProperty(IS_STRING_VALUE_PROP) != null;
     /**
      * Compile and return the semantic errors.
      *
@@ -272,20 +270,6 @@ public class BCompileUtil {
         Path rootPath = Paths.get(filePath);
         Path packagePath = Paths.get(packageName);
         return getCompileResult(packageName, rootPath, packagePath, init, withTests);
-    }
-
-    /**
-     * Compile and return the semantic errors.
-     *
-     * @param sourceRoot  root path of the modules as a path object
-     * @param packageName name of the module to compile
-     * @param init init the module or not
-     * @param withTests compile with tests or not
-     * @return Semantic errors
-     */
-    public static CompileResult compile(Path sourceRoot, String packageName, boolean init, boolean withTests) {
-        Path packagePath = Paths.get(packageName);
-        return getCompileResult(packageName, sourceRoot, packagePath, init, withTests);
     }
 
     /**
@@ -638,28 +622,18 @@ public class BCompileUtil {
     public static ExitDetails run(CompileResult compileResult, String[] args) {
         BLangPackage compiledPkg = ((BLangPackage) compileResult.getAST());
         String initClassName = BFileUtil.getQualifiedClassName(compiledPkg.packageID.orgName.value,
-                                                               compiledPkg.packageID.name.value,
-                                                               MODULE_INIT_CLASS_NAME);
+                compiledPkg.packageID.name.value, MODULE_INIT_CLASS_NAME);
         URLClassLoader classLoader = compileResult.classLoader;
 
 
         try {
             Class<?> initClazz = classLoader.loadClass(initClassName);
             final List<String> actualArgs = new ArrayList<>();
-            if (USE_BSTRING) {
-                actualArgs.add(0, "java");
-                actualArgs.add(1, "-Dballerina.bstring=true");
-                actualArgs.add(2, "-cp");
-                String classPath = System.getProperty("java.class.path") + ":" + getClassPath(classLoader);
-                actualArgs.add(3, classPath);
-                actualArgs.add(4, initClazz.getCanonicalName());
-            } else {
-                actualArgs.add(0, "java");
-                actualArgs.add(1, "-cp");
-                String classPath = System.getProperty("java.class.path") + ":" + getClassPath(classLoader);
-                actualArgs.add(2, classPath);
-                actualArgs.add(3, initClazz.getCanonicalName());
-            }
+            actualArgs.add(0, "java");
+            actualArgs.add(1, "-cp");
+            String classPath = System.getProperty("java.class.path") + ":" + getClassPath(classLoader);
+            actualArgs.add(2, classPath);
+            actualArgs.add(3, initClazz.getCanonicalName());
             actualArgs.addAll(Arrays.asList(args));
 
             final Runtime runtime = Runtime.getRuntime();

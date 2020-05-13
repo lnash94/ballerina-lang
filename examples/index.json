@@ -184,6 +184,10 @@
                 "url": "maps"
             },
             {
+                "name": "Table",
+                "url": "table"
+            },
+            {
                 "name": "Union Types",
                 "url": "union-type"
             },
@@ -680,7 +684,7 @@
             {
                 "name": "Group Tests",
                 "url": "testerina-group-tests"
-            }
+            }        
         ]
     },
     {
@@ -923,6 +927,29 @@
         }]
     },
     {
+        "title": "Database",
+        "column": 2,
+        "category": "Working over the network",
+        "samples": [
+            {
+                "name": "JDBC Client CRUD Operations",
+                "url": "jdbc-client-crud-operations"
+            },
+            {
+                "name": "JDBC Client Batch Update",
+                "url": "jdbc-client-batch-update"
+            },
+            {
+                "name": "JDBC Client Call Procedures",
+                "url": "jdbc-client-call-procedures"
+            },
+            {
+                "name": "Streaming a Big Dataset",
+                "url": "jdbc-streaming-big-dataset"
+            }
+        ]
+    },
+    {
         "title": "gRPC",
         "column": 2,
         "category": "Working over the network",
@@ -1030,31 +1057,31 @@
         "samples": [
             {
                 "name": "Producer",
-                "url": "kafka-producer"
+                "url": "kafka_message_producer"
             },
             {
                 "name": "Consumer Service",
-                "url": "kafka-consumer-service"
+                "url": "kafka_message_consumer_service"
             },
             {
                 "name": "Consumer Client",
-                "url": "kafka-consumer-client"
+                "url": "kafka_message_consumer_simple"
             },
             {
                 "name": "Transactional Producer",
-                "url": "kafka-producer-transactional"
+                "url": "kafka_message_producer_transactional"
             },
             {
                 "name": "Consumer Groups",
-                "url": "kafka-consumer-group-service"
+                "url": "kafka_message_consumer_group_service"
             },
             {
                 "name": "SASL Authentication - Consumer",
-                "url": "kafka-authentication-sasl-plain-consumer"
+                "url": "kafka_authentication_sasl_plain_consumer"
             },
             {
                 "name": "SASL Authentication - Producer",
-                "url": "kafka-authentication-sasl-plain-producer"
+                "url": "kafka_authentication_sasl_plain_producer"
             }
         ]
     },

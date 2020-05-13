@@ -22,7 +22,6 @@ import org.ballerinalang.jvm.scheduling.Strand;
 import org.ballerinalang.jvm.values.ArrayValue;
 import org.ballerinalang.jvm.values.ArrayValueImpl;
 import org.ballerinalang.jvm.values.MapValue;
-import org.ballerinalang.jvm.values.api.BString;
 import org.ballerinalang.model.types.TypeKind;
 import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
@@ -43,9 +42,5 @@ public class GetKeys {
 
     public static ArrayValue keys(Strand strand, MapValue<?, ?> m) {
         return new ArrayValueImpl((String[]) m.getKeys());
-    }
-
-    public static ArrayValue keys_bstring(Strand strand, MapValue<?, ?> m) {
-        return new ArrayValueImpl((BString[]) m.getKeys());
     }
 }

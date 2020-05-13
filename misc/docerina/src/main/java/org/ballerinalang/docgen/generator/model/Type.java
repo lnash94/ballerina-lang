@@ -119,13 +119,6 @@ public class Type {
         this.isDeprecated = isDeprecated;
     }
 
-    public static Type fromTypeNode(BLangType type, BType bType, String currentModule) {
-        if (type == null) {
-            return new Type(bType);
-        }
-        return fromTypeNode(type, currentModule);
-    }
-
     public static Type fromTypeNode(BLangType type, String currentModule) {
         Type typeModel = null;
         if (type instanceof BLangFunctionTypeNode) {
@@ -142,8 +135,7 @@ public class Type {
             }
         } else if (type instanceof BLangArrayType) {
             BLangType elemtype = ((BLangArrayType) type).elemtype;
-            String moduleName = elemtype.type.tsymbol == null ? type.type.tsymbol.pkgID.name.toString() :
-                    elemtype.type.tsymbol.pkgID.name.toString();
+            String moduleName = elemtype.type.tsymbol.pkgID.name.toString();
             Type elementType = fromTypeNode(elemtype, moduleName);
             typeModel = new Type(type, currentModule);
             typeModel.elementType = elementType;
@@ -230,6 +222,7 @@ public class Type {
                 case TypeTags.ANYDATA:
                 case TypeTags.XMLNS:
                 case TypeTags.MAP: // TODO generate type for constraint type
+                case TypeTags.TABLE:
                 case TypeTags.FUTURE:
                 case TypeTags.HANDLE:
                     this.category = "builtin"; break;

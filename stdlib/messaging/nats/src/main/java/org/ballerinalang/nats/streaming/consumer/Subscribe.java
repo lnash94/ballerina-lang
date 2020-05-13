@@ -28,7 +28,7 @@ import org.ballerinalang.jvm.values.ObjectValue;
 import org.ballerinalang.nats.Constants;
 import org.ballerinalang.nats.Utils;
 import org.ballerinalang.nats.connection.NatsStreamingConnection;
-import org.ballerinalang.nats.observability.NatsMetricsReporter;
+import org.ballerinalang.nats.observability.NatsMetricsUtil;
 import org.ballerinalang.nats.observability.NatsObservabilityConstants;
 
 import java.io.IOException;
@@ -62,8 +62,7 @@ public class Subscribe {
                                           String clusterId, Object clientIdNillable, Object streamingConfig) {
         NatsStreamingConnection.createConnection(streamingListener, connectionObject, clusterId, clientIdNillable,
                                                  streamingConfig);
-        NatsMetricsReporter natsMetricsReporter =
-                (NatsMetricsReporter) connectionObject.getNativeData(Constants.NATS_METRIC_UTIL);
+        NatsMetricsUtil natsMetricsUtil = (NatsMetricsUtil) connectionObject.getNativeData(Constants.NATS_METRIC_UTIL);
         io.nats.streaming.StreamingConnection streamingConnection =
                 (io.nats.streaming.StreamingConnection) streamingListener
                         .getNativeData(Constants.NATS_STREAMING_CONNECTION);
@@ -78,7 +77,7 @@ public class Subscribe {
             Map.Entry pair = (Map.Entry) serviceListeners.next();
             Subscription sub =
                     createSubscription((ObjectValue) pair.getKey(),
-                                       (StreamingListener) pair.getValue(), streamingConnection, natsMetricsReporter);
+                                       (StreamingListener) pair.getValue(), streamingConnection, natsMetricsUtil);
             subscriptionsMap.put((ObjectValue) pair.getKey(), sub);
             serviceListeners.remove(); // avoids a ConcurrentModificationException
         }
@@ -86,7 +85,7 @@ public class Subscribe {
 
     private static Subscription createSubscription(ObjectValue service, StreamingListener messageHandler,
                                                    io.nats.streaming.StreamingConnection streamingConnection,
-                                                   NatsMetricsReporter natsMetricsReporter) {
+                                                   NatsMetricsUtil natsMetricsUtil) {
         MapValue<String, Object> annotation = (MapValue<String, Object>) service.getType()
                 .getAnnotation(Constants.NATS_PACKAGE, STREAMING_SUBSCRIPTION_CONFIG);
         assertNull(annotation, "Streaming configuration annotation not present.");
@@ -99,13 +98,13 @@ public class Subscribe {
             Subscription subscription =
                     streamingConnection.subscribe(subject, queueName, messageHandler, subscriptionOptions);
             console.println(NATS_CLIENT_SUBSCRIBED + consoleOutput);
-            NatsMetricsReporter.reportSubscription(streamingConnection.getNatsConnection().getConnectedUrl(), subject);
+            NatsMetricsUtil.reportSubscription(streamingConnection.getNatsConnection().getConnectedUrl(), subject);
             return subscription;
         } catch (IOException | InterruptedException e) {
-            natsMetricsReporter.reportConsumerError(subject, NatsObservabilityConstants.ERROR_TYPE_SUBSCRIPTION);
+            natsMetricsUtil.reportConsumerError(subject, NatsObservabilityConstants.ERROR_TYPE_SUBSCRIPTION);
             throw Utils.createNatsError(e.getMessage());
         } catch (TimeoutException e) {
-            natsMetricsReporter.reportConsumerError(subject, NatsObservabilityConstants.ERROR_TYPE_SUBSCRIPTION);
+            natsMetricsUtil.reportConsumerError(subject, NatsObservabilityConstants.ERROR_TYPE_SUBSCRIPTION);
             throw Utils.createNatsError("Error while creating the subscription");
         }
     }

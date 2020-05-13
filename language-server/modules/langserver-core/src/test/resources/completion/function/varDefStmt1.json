@@ -15,7 +15,7 @@
           "value": "Specifies the time error, which occurs in the module."
         }
       },
-      "sortText": "130",
+      "sortText": "221",
       "insertText": "TIME_ERROR_REASON",
       "insertTextFormat": "Snippet"
     },
@@ -29,7 +29,7 @@
           "value": "Specifies the time format defined by the RFC-1123."
         }
       },
-      "sortText": "130",
+      "sortText": "221",
       "insertText": "TIME_FORMAT_RFC_1123",
       "insertTextFormat": "Snippet"
     },
@@ -40,7 +40,7 @@
       "documentation": {
         "left": "Details of an error.\n"
       },
-      "sortText": "180",
+      "sortText": "221",
       "insertText": "Detail",
       "insertTextFormat": "Snippet"
     },
@@ -51,7 +51,7 @@
       "documentation": {
         "left": "Represents the Time module related error."
       },
-      "sortText": "200",
+      "sortText": "221",
       "insertText": "Error",
       "insertTextFormat": "Snippet"
     },
@@ -62,7 +62,7 @@
       "documentation": {
         "left": "The time format defined by the RFC-1123."
       },
-      "sortText": "170",
+      "sortText": "221",
       "insertText": "TimeFormat",
       "insertTextFormat": "Snippet"
     },
@@ -73,7 +73,7 @@
       "documentation": {
         "left": "Represents the time-zone information associated with a particular time.\n"
       },
-      "sortText": "180",
+      "sortText": "221",
       "insertText": "TimeZone",
       "insertTextFormat": "Snippet"
     },
@@ -84,7 +84,7 @@
       "documentation": {
         "left": "Represents a particular time with its associated time-zone.\n"
       },
-      "sortText": "180",
+      "sortText": "221",
       "insertText": "Time",
       "insertTextFormat": "Snippet"
     },

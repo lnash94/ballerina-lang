@@ -23,7 +23,7 @@ type ClosedFoo record {|
 |};
 
 type Employee record {|
-    readonly int id;
+    int id;
     string name;
     float salary;
 |};
@@ -107,16 +107,17 @@ function testJSONAssignment() returns anydata {
     return adj;
 }
 
-function testTableAssignment() {
-    table<Employee> t = table key(id) [
-          { id: 1, name: "Mary", salary: 300.5 },
-          { id: 2, name: "John", salary: 200.5 },
-          { id: 3, name: "Jim", salary: 330.5 }
-        ];
-
+function testTableAssignment() returns anydata {
+    table<Employee> t = table {
+        { key id, name, salary },
+        [
+          { 1, "Mary", 300.5 },
+          { 2, "John", 200.5 },
+          { 3, "Jim", 330.5 }
+        ]
+    };
     anydata adt = t;
-    string employeeListAsString = "id=1 name=Mary salary=300.5\nid=2 name=John salary=200.5\nid=3 name=Jim salary=330.5";
-    assertEquality(employeeListAsString, adt.toString());
+    return adt;
 }
 
 function testMapAssignment() {
@@ -149,7 +150,7 @@ function testMapAssignment() {
     map<ClosedFoo> mcr = {};
     ad = mcr;
 
-    map<table<map<any>>> mt = {};
+    map<table<any>> mt = {};
     ad = mt;
 
     map<map<anydata>> mmad = {};
@@ -168,11 +169,18 @@ function testMapAssignment() {
     ad = mnil;
 }
 
-function testConstrainedMaps(){
+function testConstrainedMaps() returns map<anydata> {
     byte b = 10;
     Foo foo = {a: 15};
     json j = {name: "apple", color: "red", price: 40};
     xml x = xml `<book>The Lost World</book>`;
+    table<Employee> t = table {
+            { key id, name, salary },
+            [ { 1, "Mary",  300.5 },
+              { 2, "John",  200.5 },
+              { 3, "Jim", 330.5 }
+            ]
+        };
     map<string> smap = {};
 
     smap["foo"] = "foo";
@@ -188,26 +196,10 @@ function testConstrainedMaps(){
     adm["float"] = 23.45;
     adm["boolean"] = true;
     adm["map"] = smap;
+    adm["table"] = t;
     adm["nil"] = ();
 
-    table<Employee> t = table key(id) [
-        { id: 1, name: "Mary", salary: 300.5 },
-        { id: 2, name: "John", salary: 200.5 },
-        { id: 3, name: "Jim", salary: 330.5 }
-    ];
-    adm["table"] = t;
-
-    assertEquality(1234, adm["int"]);
-    assertEquality(23.45, adm["float"]);
-    assertEquality(true, adm["boolean"]);
-    assertEquality("Hello World", adm["string"]);
-    assertEquality("10", adm["byte"].toString());
-    assertEquality("<book>The Lost World</book>", adm["xml"].toString());
-    assertEquality(foo, adm["record"]);
-    assertEquality(smap, adm["map"]);
-    assertEquality(j, adm["json"]);
-    string employeeListAsString = "id=1 name=Mary salary=300.5\nid=2 name=John salary=200.5\nid=3 name=Jim salary=330.5";
-    assertEquality(employeeListAsString, adm["table"].toString());
+    return adm;
 }
 
 function testArrayAssignment() {
@@ -240,11 +232,13 @@ function testArrayAssignment() {
     ClosedFoo[] acr = [{ca:10}, {ca:20}];
     ad = acr;
 
-    table<Employee> t = table key(id) [
-            { id: 1, name: "Mary", salary: 300.5 },
-            { id: 2, name: "John", salary: 200.5 },
-            { id: 3, name: "Jim", salary: 330.5 }
-        ];
+    table<Employee> t = table {
+                { key id, name, salary },
+                [ { 1, "Mary",  300.5 },
+                  { 2, "John",  200.5 },
+                  { 3, "Jim", 330.5 }
+                ]
+            };
     table<Employee>[] at = [t];
     ad = at;
 
@@ -272,7 +266,7 @@ function testAnydataArray() returns anydata[] {
 }
 
 type ValueType int|float|string|boolean|byte;
-type DataType ValueType|table<map<any>>|json|xml|ClosedFoo|Foo|map<anydata>|anydata[]|();
+type DataType ValueType|table<any>|json|xml|ClosedFoo|Foo|map<anydata>|anydata[]|();
 
 function testUnionAssignment() returns anydata[] {
     anydata[] rets = [];
@@ -302,7 +296,7 @@ function testUnionAssignment() returns anydata[] {
     return rets;
 }
 
-function testUnionAssignment2(){
+function testUnionAssignment2() returns anydata[] {
     anydata[] rets = [];
     int i = 0;
 
@@ -310,11 +304,13 @@ function testUnionAssignment2(){
     rets[i] = dt;
     i += 1;
 
-    table<Employee> t = table key(id) [
-            { id: 1, name: "Mary", salary: 300.5 },
-            { id: 2, name: "John", salary: 200.5 },
-            { id: 3, name: "Jim", salary: 330.5 }
-        ];
+    table<Employee> t = table {
+                { key id, name, salary },
+                [ { 1, "Mary",  300.5 },
+                  { 2, "John",  200.5 },
+                  { 3, "Jim", 330.5 }
+                ]
+            };
     dt = t;
     rets[i] = dt;
     i += 1;
@@ -350,17 +346,10 @@ function testUnionAssignment2(){
     rets[i] = dt;
     i += 1;
 
-    assertEquality("hello world!", rets[0].toString());
-    string employeeListAsString = "id=1 name=Mary salary=300.5\nid=2 name=John salary=200.5\nid=3 name=Jim salary=330.5";
-    assertEquality(employeeListAsString, rets[1].toString());
-    assertEquality("name=apple color=red price=40", rets[2].toString());
-    assertEquality("<book>The Lost World</book>", rets[3].toString());
-    assertEquality(foo, rets[4]);
-    assertEquality(cfoo, rets[5]);
-    assertEquality(m, rets[6]);
+    return rets;
 }
 
-function testTupleAssignment(){
+function testTupleAssignment() returns anydata[] {
     anydata[] rets = [];
     int i = 0;
 
@@ -383,10 +372,7 @@ function testTupleAssignment(){
     [[DataType[], string], int, float] nt = [ct, 123, 23.45];
     rets[i] = nt;
 
-    assertEquality("123 23.45 true hello world! 255", rets[0].toString());
-    assertEquality(jxt, rets[1]);
-    assertEquality(ct, rets[2]);
-    assertEquality(nt, rets[3]);
+    return rets;
 }
 
 function testNilAssignment() returns anydata {
@@ -554,10 +540,10 @@ function testAnydataToMap() {
         convertedMCfoo = ad;
     }
 
-    map<table<map<any>>> mt = {};
+    map<table<any>> mt = {};
     ad = mt;
-    map<table<map<any>>> convertedMt;
-    if (ad is map<table<map<any>>>) {
+    map<table<any>> convertedMt;
+    if (ad is map<table<any>>) {
         convertedMt = ad;
     }
 
@@ -597,19 +583,20 @@ function testAnydataToMap() {
     }
 }
 
-function testAnydataToTable(){
-    table<Employee> t = table key(id)[
-                    { id: 1, name: "Mary", salary: 300.5 },
-                    { id: 2, name: "John", salary: 200.5 },
-                    { id: 3, name: "Jim", salary: 330.5 }
-        ];
-
+function testAnydataToTable() returns table<Employee>? {
+    table<Employee> t = table {
+                { key id, name, salary },
+                [ { 1, "Mary",  300.5 },
+                  { 2, "John",  200.5 },
+                  { 3, "Jim", 330.5 }
+                ]
+            };
     anydata ad = t;
     table<Employee>|() convertedT = ();
     if (ad is table<Employee>) {
         convertedT = ad;
-        assertEquality(t, convertedT);
     }
+    return convertedT;
 }
 
 function testAnydataToUnion() returns ValueType?[] {
@@ -650,7 +637,7 @@ function testAnydataToUnion() returns ValueType?[] {
     return vt;
 }
 
-function testAnydataToUnion2(){
+function testAnydataToUnion2() returns DataType[] {
     anydata ad;
     DataType[] dt = [];
     int i = 0;
@@ -669,12 +656,13 @@ function testAnydataToUnion2(){
         i += 1;
     }
 
-    table<Employee> t = table key(id) [
-        { id: 1, name: "Mary", salary: 300.5 },
-        { id: 2, name: "John", salary: 200.5 },
-        { id: 3, name: "Jim", salary: 330.5 }
-    ];
-
+    table<Employee> t = table {
+                    { key id, name, salary },
+                    [ { 1, "Mary",  300.5 },
+                      { 2, "John",  200.5 },
+                      { 3, "Jim", 330.5 }
+                    ]
+                };
     ad = t;
     if (ad is DataType) {
         dt[i] = ad;
@@ -711,13 +699,7 @@ function testAnydataToUnion2(){
         i += 1;
     }
 
-    assertEquality(j, dt[0]);
-    assertEquality(x, dt[1]);
-    assertEquality(t, dt[2]);
-    assertEquality(foo, dt[3]);
-    assertEquality(cfoo, dt[4]);
-    assertEquality(m, dt[5]);
-    assertEquality(adr, dt[6]);
+    return dt;
 }
 
 function testAnydataToTuple() returns [int, float, boolean, string, byte]? {
@@ -748,7 +730,7 @@ function testAnydataToTuple2() returns [json, xml]? {
     return ();
 }
 
-function testAnydataToTuple3() {
+function testAnydataToTuple3() returns [[DataType[], string], int, float]? {
     anydata ad;
 
     json j = { name: "apple", color: "red", price: 40 };
@@ -759,8 +741,10 @@ function testAnydataToTuple3() {
     ad = nt;
 
     if (ad is [[DataType[], string], int, float]) {
-        assertEquality("name=apple color=red price=40 <book>The Lost World</book> hello world!", ad[0].toString());
+        return ad;
     }
+
+    return ();
 }
 
 function testAnydataToNil() returns int? {
@@ -948,20 +932,4 @@ function testRecordsWithErrorsAsAnydata() returns boolean {
     MyRecordTwo m4 = <MyRecordTwo> a2;
 
     return m3["err"] === e1 && m4["err"] === e3 && m3 === a1 && m2 === m4;
-}
-
-type AssertionError error<ASSERTION_ERROR_REASON>;
-
-const ASSERTION_ERROR_REASON = "AssertionError";
-
-function assertEquality(any|error expected, any|error actual) {
-    if expected is anydata && actual is anydata && expected == actual {
-        return;
-    }
-
-    if expected === actual {
-        return;
-    }
-
-    panic AssertionError(message = "expected '" + expected.toString() + "', found '" + actual.toString () + "'");
 }

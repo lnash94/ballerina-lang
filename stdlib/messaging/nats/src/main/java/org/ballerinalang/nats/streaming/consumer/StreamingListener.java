@@ -32,7 +32,7 @@ import org.ballerinalang.jvm.values.api.BValueCreator;
 import org.ballerinalang.jvm.values.connector.CallableUnitCallback;
 import org.ballerinalang.nats.Constants;
 import org.ballerinalang.nats.Utils;
-import org.ballerinalang.nats.observability.NatsMetricsReporter;
+import org.ballerinalang.nats.observability.NatsMetricsUtil;
 import org.ballerinalang.nats.observability.NatsObservabilityConstants;
 import org.ballerinalang.nats.observability.NatsObserverContext;
 
@@ -52,14 +52,14 @@ public class StreamingListener implements MessageHandler {
     private BRuntime runtime;
     private String connectedUrl;
     private boolean manualAck;
-    private NatsMetricsReporter natsMetricsReporter;
+    private NatsMetricsUtil natsMetricsUtil;
 
     public StreamingListener(ObjectValue service, boolean manualAck, BRuntime runtime,
-                             String connectedUrl, NatsMetricsReporter natsMetricsReporter) {
+                             String connectedUrl, NatsMetricsUtil natsMetricsUtil) {
         this.service = service;
         this.runtime = runtime;
         this.manualAck = manualAck;
-        this.natsMetricsReporter = natsMetricsReporter;
+        this.natsMetricsUtil = natsMetricsUtil;
         this.connectedUrl = connectedUrl;
     }
 
@@ -68,7 +68,7 @@ public class StreamingListener implements MessageHandler {
      */
     @Override
     public void onMessage(Message msg) {
-        natsMetricsReporter.reportConsume(msg.getSubject(), msg.getData().length);
+        natsMetricsUtil.reportConsume(msg.getSubject(), msg.getData().length);
         ObjectValue ballerinaNatsMessage = BallerinaValues.createObjectValue(
                 Constants.NATS_PACKAGE_ID, NATS_STREAMING_MESSAGE_OBJ_NAME, msg.getSubject(),
                 BValueCreator.createArrayValue(msg.getData()), msg.getReplyTo());
@@ -95,11 +95,11 @@ public class StreamingListener implements MessageHandler {
         } catch (NumberFormatException e) {
             ErrorValue dataBindError = Utils
                     .createNatsError("The received message is unsupported by the resource signature");
-            natsMetricsReporter.reportConsumerError(subject, NatsObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
+            natsMetricsUtil.reportConsumerError(subject, NatsObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
             executeErrorResource(subject, ballerinaNatsMessage, dataBindError);
         } catch (ErrorValue e) {
             executeErrorResource(subject, ballerinaNatsMessage, e);
-            natsMetricsReporter.reportConsumerError(subject, NatsObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
+            natsMetricsUtil.reportConsumerError(subject, NatsObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
         }
     }
 
@@ -109,13 +109,11 @@ public class StreamingListener implements MessageHandler {
             NatsObserverContext observerContext = new NatsObserverContext(NatsObservabilityConstants.CONTEXT_CONSUMER,
                                                                           connectedUrl, subject);
             properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
-            runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
-                                      new DispatcherCallback(subject, natsMetricsReporter), properties,
-                                      ballerinaNatsMessage, true);
+            runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE, new DispatcherCallback(subject, natsMetricsUtil),
+                                      properties, ballerinaNatsMessage, true);
         } else {
-            runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
-                                      new DispatcherCallback(subject, natsMetricsReporter), null,
-                                      ballerinaNatsMessage, true);
+            runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE, new DispatcherCallback(subject, natsMetricsUtil),
+                                      null, ballerinaNatsMessage, true);
         }
     }
 
@@ -125,13 +123,11 @@ public class StreamingListener implements MessageHandler {
             NatsObserverContext observerContext = new NatsObserverContext(NatsObservabilityConstants.CONTEXT_CONSUMER,
                                                                           connectedUrl, subject);
             properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
-            runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
-                                      new DispatcherCallback(subject, natsMetricsReporter), properties,
-                                      ballerinaNatsMessage, true, typeBoundData, true);
+            runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE, new DispatcherCallback(subject, natsMetricsUtil),
+                                      properties, ballerinaNatsMessage, true, typeBoundData, true);
         } else {
-            runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE,
-                                      new DispatcherCallback(subject, natsMetricsReporter), null,
-                                      ballerinaNatsMessage, true, typeBoundData, true);
+            runtime.invokeMethodAsync(service, ON_MESSAGE_RESOURCE, new DispatcherCallback(subject, natsMetricsUtil),
+                                      null, ballerinaNatsMessage, true, typeBoundData, true);
         }
     }
 
@@ -141,10 +137,10 @@ public class StreamingListener implements MessageHandler {
             NatsObserverContext observerContext = new NatsObserverContext(NatsObservabilityConstants.CONTEXT_CONSUMER,
                                                                           connectedUrl, subject);
             properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
-            runtime.invokeMethodAsync(service, ON_ERROR_RESOURCE, new DispatcherCallback(subject, natsMetricsReporter),
+            runtime.invokeMethodAsync(service, ON_ERROR_RESOURCE, new DispatcherCallback(subject, natsMetricsUtil),
                                       properties, ballerinaNatsMessage, true, error, true);
         } else {
-            runtime.invokeMethodAsync(service, ON_ERROR_RESOURCE, new DispatcherCallback(subject, natsMetricsReporter),
+            runtime.invokeMethodAsync(service, ON_ERROR_RESOURCE, new DispatcherCallback(subject, natsMetricsUtil),
                                       null, ballerinaNatsMessage, true, error, true);
         }
     }
@@ -153,21 +149,21 @@ public class StreamingListener implements MessageHandler {
     private static class DispatcherCallback implements CallableUnitCallback {
 
         private String subject;
-        private NatsMetricsReporter natsMetricsReporter;
+        private NatsMetricsUtil natsMetricsUtil;
 
-        public DispatcherCallback(String subject, NatsMetricsReporter natsMetricsReporter) {
+        public DispatcherCallback(String subject, NatsMetricsUtil natsMetricsUtil) {
             this.subject = subject;
-            this.natsMetricsReporter = natsMetricsReporter;
+            this.natsMetricsUtil = natsMetricsUtil;
         }
 
         @Override
         public void notifySuccess() {
-            natsMetricsReporter.reportDelivery(subject);
+            natsMetricsUtil.reportDelivery(subject);
         }
 
         @Override
         public void notifyFailure(ErrorValue error) {
-            natsMetricsReporter.reportConsumerError(subject, NatsObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
+            natsMetricsUtil.reportConsumerError(subject, NatsObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
             ErrorHandlerUtils.printError(error);
         }
     }

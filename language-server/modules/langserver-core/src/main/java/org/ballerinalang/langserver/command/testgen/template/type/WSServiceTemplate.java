@@ -20,7 +20,6 @@ import org.ballerinalang.langserver.command.testgen.renderer.RendererOutput;
 import org.ballerinalang.langserver.command.testgen.renderer.TemplateBasedRendererOutput;
 import org.ballerinalang.langserver.command.testgen.template.AbstractTestTemplate;
 import org.ballerinalang.langserver.command.testgen.template.PlaceHolder;
-import org.ballerinalang.langserver.commons.LSContext;
 import org.ballerinalang.net.http.websocket.WebSocketConstants;
 import org.wso2.ballerinalang.compiler.tree.BLangAnnotationAttachment;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
@@ -49,9 +48,8 @@ public class WSServiceTemplate extends AbstractTestTemplate {
 
     public WSServiceTemplate(BLangPackage builtTestFile, BLangService service,
                              BLangTypeInit init,
-                             BiConsumer<Integer, Integer> focusLineAcceptor,
-                             LSContext context) {
-        super(builtTestFile, focusLineAcceptor, context);
+                             BiConsumer<Integer, Integer> focusLineAcceptor) {
+        super(builtTestFile, focusLineAcceptor);
         String tempServiceUri = WS + DEFAULT_IP + ":" + DEFAULT_PORT;
         boolean isSecureTemp = isSecureService(init);
         String protocol = ((isSecureTemp) ? WSS : WS);

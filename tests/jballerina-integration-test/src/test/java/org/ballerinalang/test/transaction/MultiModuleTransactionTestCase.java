@@ -32,9 +32,7 @@ import java.util.HashMap;
 /**
  * Test transaction behavior in multi module scenario.
  */
-//TODO Table remove - Fix
-@Test(groups = "brokenOnTableRemove", enabled = false)
-//@Test(groups = "transactions-test")
+@Test(groups = "transactions-test")
 public class MultiModuleTransactionTestCase extends BaseTest {
     private BMainInstance balClient;
     private String basePath;

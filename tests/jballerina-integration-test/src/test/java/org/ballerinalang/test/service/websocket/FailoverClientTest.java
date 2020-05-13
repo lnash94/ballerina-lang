@@ -87,10 +87,10 @@ public class FailoverClientTest extends WebSocketTestCommons {
 
     @Test(description = "Tests the failover client when getting a handshake timeout")
     public void testHandshakeTimeout() throws URISyntaxException, InterruptedException, BallerinaTestException {
-        firstRemoteServer = initiateServer(FIRST_SERVER_PORT);
         WebSocketTestClient client = initiateClient("ws://localhost:21034");
+        firstRemoteServer = initiateServer(FIRST_SERVER_PORT);
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        countDownLatch.await(30, TimeUnit.SECONDS);
+        countDownLatch.await(TIMEOUT_IN_SECS, TimeUnit.SECONDS);
         sendTextDataAndAssert(client);
         closeConnection(client, firstRemoteServer);
     }
@@ -140,8 +140,6 @@ public class FailoverClientTest extends WebSocketTestCommons {
     private WebSocketRemoteServer initiateServer(int port) throws InterruptedException, BallerinaTestException {
         WebSocketRemoteServer remoteServer = new WebSocketRemoteServer(port);
         remoteServer.run();
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        countDownLatch.await(TIMEOUT_IN_SECS, TimeUnit.SECONDS);
         return remoteServer;
     }
 

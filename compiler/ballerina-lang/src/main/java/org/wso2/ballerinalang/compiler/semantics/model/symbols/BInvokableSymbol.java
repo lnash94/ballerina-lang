@@ -25,10 +25,8 @@ import org.wso2.ballerinalang.compiler.semantics.model.types.BType;
 import org.wso2.ballerinalang.compiler.util.Name;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @since 0.94
@@ -49,8 +47,6 @@ public class BInvokableSymbol extends BVarSymbol implements InvokableSymbol {
     public String source;
     public SchedulerPolicy schedulerPolicy = SchedulerPolicy.PARENT;
 
-    public Set<BVarSymbol> dependentGlobalVars;
-
     public BInvokableSymbol(int tag,
                             int flags,
                             Name name,
@@ -60,7 +56,6 @@ public class BInvokableSymbol extends BVarSymbol implements InvokableSymbol {
         super(flags, name, pkgID, type, owner);
         this.tag = tag;
         this.params = new ArrayList<>();
-        this.dependentGlobalVars = new HashSet<>();
     }
 
     @Override

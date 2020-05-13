@@ -34,7 +34,7 @@ import org.ballerinalang.jvm.values.ObjectValue;
 import org.ballerinalang.jvm.values.connector.CallableUnitCallback;
 import org.ballerinalang.nats.Constants;
 import org.ballerinalang.nats.Utils;
-import org.ballerinalang.nats.observability.NatsMetricsReporter;
+import org.ballerinalang.nats.observability.NatsMetricsUtil;
 import org.ballerinalang.nats.observability.NatsObservabilityConstants;
 import org.ballerinalang.nats.observability.NatsObserverContext;
 
@@ -57,14 +57,14 @@ public class DefaultMessageHandler implements MessageHandler {
     private ObjectValue serviceObject;
     private String connectedUrl;
     private BRuntime runtime;
-    private NatsMetricsReporter natsMetricsReporter;
+    private NatsMetricsUtil natsMetricsUtil;
 
     DefaultMessageHandler(ObjectValue serviceObject, BRuntime runtime, String connectedUrl,
-                          NatsMetricsReporter natsMetricsReporter) {
+                          NatsMetricsUtil natsMetricsUtil) {
         this.serviceObject = serviceObject;
         this.runtime = runtime;
         this.connectedUrl = connectedUrl;
-        this.natsMetricsReporter = natsMetricsReporter;
+        this.natsMetricsUtil = natsMetricsUtil;
     }
 
     /**
@@ -72,7 +72,7 @@ public class DefaultMessageHandler implements MessageHandler {
      */
     @Override
     public void onMessage(Message message) {
-        natsMetricsReporter.reportConsume(message.getSubject(), message.getData().length);
+        natsMetricsUtil.reportConsume(message.getSubject(), message.getData().length);
         ArrayValue msgData = new ArrayValueImpl(message.getData());
         ObjectValue msgObj = BallerinaValues.createObjectValue(Constants.NATS_PACKAGE_ID,
                                                                Constants.NATS_MESSAGE_OBJ_NAME, message.getSubject(),
@@ -99,8 +99,8 @@ public class DefaultMessageHandler implements MessageHandler {
             countDownLatch.await();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            natsMetricsReporter.reportConsumerError(msgObj.getStringValue(Constants.SUBJECT),
-                                                    NatsObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
+            natsMetricsUtil.reportConsumerError(msgObj.getStringValue(Constants.SUBJECT),
+                                                NatsObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
             throw Utils.createNatsError(Constants.THREAD_INTERRUPTED_ERROR);
         }
     }
@@ -121,12 +121,12 @@ public class DefaultMessageHandler implements MessageHandler {
         } catch (NumberFormatException e) {
             ErrorValue dataBindError = Utils
                     .createNatsError("The received message is unsupported by the resource signature");
-            ErrorHandler.dispatchError(serviceObject, msgObj, dataBindError, runtime, natsMetricsReporter);
+            ErrorHandler.dispatchError(serviceObject, msgObj, dataBindError, runtime, natsMetricsUtil);
         } catch (ErrorValue e) {
-            ErrorHandler.dispatchError(serviceObject, msgObj, e, runtime, natsMetricsReporter);
+            ErrorHandler.dispatchError(serviceObject, msgObj, e, runtime, natsMetricsUtil);
         } catch (InterruptedException e) {
-            natsMetricsReporter.reportConsumerError(msgObj.getStringValue(Constants.SUBJECT),
-                                                    NatsObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
+            natsMetricsUtil.reportConsumerError(msgObj.getStringValue(Constants.SUBJECT),
+                                                NatsObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
             Thread.currentThread().interrupt();
             throw Utils.createNatsError(Constants.THREAD_INTERRUPTED_ERROR);
         }
@@ -141,11 +141,11 @@ public class DefaultMessageHandler implements MessageHandler {
                                                                           msgObj.getStringValue(Constants.SUBJECT));
             properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
             runtime.invokeMethodAsync(serviceObject, ON_MESSAGE_RESOURCE,
-                                      new ResponseCallback(countDownLatch, subject, natsMetricsReporter),
+                                      new ResponseCallback(countDownLatch, subject, natsMetricsUtil),
                                       properties, msgObj, Boolean.TRUE);
         } else {
             runtime.invokeMethodAsync(serviceObject, ON_MESSAGE_RESOURCE,
-                                      new ResponseCallback(countDownLatch, subject, natsMetricsReporter),
+                                      new ResponseCallback(countDownLatch, subject, natsMetricsUtil),
                                       msgObj, Boolean.TRUE);
         }
     }
@@ -159,11 +159,11 @@ public class DefaultMessageHandler implements MessageHandler {
                                                                           msgObj.getStringValue(Constants.SUBJECT));
             properties.put(ObservabilityConstants.KEY_OBSERVER_CONTEXT, observerContext);
             runtime.invokeMethodAsync(serviceObject, ON_MESSAGE_RESOURCE,
-                                      new ResponseCallback(countDownLatch, subject, natsMetricsReporter),
+                                      new ResponseCallback(countDownLatch, subject, natsMetricsUtil),
                                       properties, msgObj, true, typeBoundData, true);
         } else {
             runtime.invokeMethodAsync(serviceObject, ON_MESSAGE_RESOURCE,
-                                      new ResponseCallback(countDownLatch, subject, natsMetricsReporter),
+                                      new ResponseCallback(countDownLatch, subject, natsMetricsUtil),
                                       msgObj, true, typeBoundData, true);
         }
     }
@@ -174,12 +174,12 @@ public class DefaultMessageHandler implements MessageHandler {
     public static class ResponseCallback implements CallableUnitCallback {
         private CountDownLatch countDownLatch;
         private String subject;
-        private NatsMetricsReporter natsMetricsReporter;
+        private NatsMetricsUtil natsMetricsUtil;
 
-        ResponseCallback(CountDownLatch countDownLatch, String subject, NatsMetricsReporter natsMetricsReporter) {
+        ResponseCallback(CountDownLatch countDownLatch, String subject, NatsMetricsUtil natsMetricsUtil) {
             this.countDownLatch = countDownLatch;
             this.subject = subject;
-            this.natsMetricsReporter = natsMetricsReporter;
+            this.natsMetricsUtil = natsMetricsUtil;
         }
 
         /**
@@ -187,7 +187,7 @@ public class DefaultMessageHandler implements MessageHandler {
          */
         @Override
         public void notifySuccess() {
-            natsMetricsReporter.reportDelivery(subject);
+            natsMetricsUtil.reportDelivery(subject);
             countDownLatch.countDown();
         }
 
@@ -197,7 +197,7 @@ public class DefaultMessageHandler implements MessageHandler {
         @Override
         public void notifyFailure(ErrorValue error) {
             ErrorHandlerUtils.printError(error);
-            natsMetricsReporter.reportConsumerError(subject, NatsObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
+            natsMetricsUtil.reportConsumerError(subject, NatsObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
             countDownLatch.countDown();
         }
     }

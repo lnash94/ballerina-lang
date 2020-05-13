@@ -120,7 +120,7 @@
       "documentation": {
         "right": {
           "kind": "markdown",
-          "value": "**Package:** _ballerina/config_  \n  \nChecks whether the given key is in the configuration registry.\n```ballerina\n# boolean configAvailable = config:contains(\"host\");\n# ```\n  \n**Params**  \n- `string` key: The configuration key to be looked-up  \n  \n**Returns** `boolean`   \n- Returns true if the key is present; if not returs false  \n  \n"
+           "value": "**Package:** _ballerina/config_  \n  \nChecks whether the given key is in the configuration registry.\n```ballerina\n# boolean configAvailable = config:contains(\"host\");\n# ```\n  \n**Params**  \n- `string` key: The configuration key to be looked-up  \n  \n**Returns** `boolean`   \n- Returns true if the key is present; if not returs false  \n  \n"
         }
       },
       "sortText": "120",

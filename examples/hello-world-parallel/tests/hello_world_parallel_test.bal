@@ -1,7 +1,8 @@
+import ballerina/io;
 import ballerina/runtime;
 import ballerina/test;
 
-(string|error)[] outputs = [];
+string[] outputs = [];
 int counter = 0;
 
 // This is the mock function that replaces the real function.
@@ -9,10 +10,10 @@ int counter = 0;
     moduleName: "ballerina/io",
     functionName: "println"
 }
-public function mockPrint(any|error... s) {
+public function mockPrint(any... s) {
     string outStr = "";
     foreach var str in s {
-        outStr = outStr + str.toString();
+        outStr = outStr + string.convert(str);
     }
     lock {
         outputs[counter] = outStr;
@@ -20,7 +21,7 @@ public function mockPrint(any|error... s) {
     }
 }
 
-@test:Config {}
+@test:Config
 function testFunc() {
     // Invoking the main function
     main();
@@ -43,12 +44,12 @@ function testFunc() {
     } else {
         // The output is in random order
         foreach var x in outputs {
-            string value = x.toString();
-            if (value == "Hello, World! #m") {
+            string value = string.convert(x);
+            if (value.equalsIgnoreCase("Hello, World! #m")) {
                 // continue;
-            } else if (value == "Hello, World! #n") {
+            } else if (value.equalsIgnoreCase("Hello, World! #n")) {
                 // continue;
-            } else if (value == "Hello, World! #k") {
+            } else if (value.equalsIgnoreCase("Hello, World! #k")) {
                 // continue;
             } else {
                 test:assertFail(msg = "The output doesn't contain the expected.");

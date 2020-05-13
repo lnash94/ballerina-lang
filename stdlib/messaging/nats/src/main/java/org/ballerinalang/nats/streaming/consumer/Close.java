@@ -23,7 +23,7 @@ import io.nats.streaming.Subscription;
 import org.ballerinalang.jvm.values.ObjectValue;
 import org.ballerinalang.nats.Constants;
 import org.ballerinalang.nats.connection.NatsStreamingConnection;
-import org.ballerinalang.nats.observability.NatsMetricsReporter;
+import org.ballerinalang.nats.observability.NatsMetricsUtil;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,8 +43,8 @@ public class Close {
                         .getNativeData(Constants.STREAMING_SUBSCRIPTION_LIST);
         for (Map.Entry<ObjectValue, Subscription> entry : subscriptionsMap.entrySet()) {
             String subject = entry.getValue().getSubject();
-            NatsMetricsReporter.reportStreamingUnsubscription(streamingConnection.getNatsConnection().getConnectedUrl(),
-                                                              subject);
+            NatsMetricsUtil.reportStreamingUnsubscription(streamingConnection.getNatsConnection().getConnectedUrl(),
+                                                          subject);
         }
         return NatsStreamingConnection.closeConnection(streamingListener, natsConnection);
     }

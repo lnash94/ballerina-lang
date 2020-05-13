@@ -15,6 +15,7 @@
  */
 package org.ballerinalang.docgen.generator.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
  */
 public class Listener extends Object {
 
-    public List<Function> lifeCycleMethods;
+    public List<Function> lifeCycleMethods = new ArrayList<>();
 
     public Listener(String name, String description, boolean isDeprecated, List<DefaultableVariable> fields,
             List<Function> methods) {

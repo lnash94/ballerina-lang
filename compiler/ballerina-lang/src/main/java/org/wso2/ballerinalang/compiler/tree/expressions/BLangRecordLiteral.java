@@ -30,7 +30,6 @@ import org.wso2.ballerinalang.compiler.util.diagnotic.DiagnosticPos;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import static org.ballerinalang.model.tree.NodeKind.RECORD_LITERAL_KEY_VALUE;
@@ -41,6 +40,7 @@ import static org.ballerinalang.model.tree.NodeKind.RECORD_LITERAL_SPREAD_OP;
  *
  * @see BLangStructLiteral
  * @see BLangMapLiteral
+ * @see BLangTableLiteral
  * @since 0.94
  */
 public class BLangRecordLiteral extends BLangExpression implements RecordLiteralNode {
@@ -93,12 +93,10 @@ public class BLangRecordLiteral extends BLangExpression implements RecordLiteral
 
         public BLangRecordKey key;
         public BLangExpression valueExpr;
-        public boolean isReadonly;
 
         public BLangRecordKeyValueField() {
         }
 
-        @Deprecated
         public BLangRecordKeyValueField(BLangRecordKey key, BLangExpression valueExpr) {
             this.key = key;
             this.valueExpr = valueExpr;
@@ -141,8 +139,6 @@ public class BLangRecordLiteral extends BLangExpression implements RecordLiteral
      * @since 1.2.0
      */
     public static class BLangRecordVarNameField extends BLangSimpleVarRef implements RecordVarNameFieldNode {
-
-        public boolean isReadonly;
 
         @Override
         public boolean isKeyValueField() {
@@ -231,7 +227,6 @@ public class BLangRecordLiteral extends BLangExpression implements RecordLiteral
      */
     public static class BLangStructLiteral extends BLangRecordLiteral {
         public BAttachedFunction initializer;
-        public TreeMap<Integer, BVarSymbol> enclMapSymbols;
 
         public BLangStructLiteral(DiagnosticPos pos, BType structType) {
             super(pos);

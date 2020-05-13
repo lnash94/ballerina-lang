@@ -1,41 +1,51 @@
 /*
- *  Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- *  WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
+ * Copyright (c) 2019, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+ * <p>
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
+
 package org.ballerinalang.jvm.types;
 
+import org.ballerinalang.jvm.TypeChecker;
 import org.ballerinalang.jvm.values.TableValue;
-import org.ballerinalang.jvm.values.TableValueImpl;
 
 /**
- * {@code BTableType} represents tabular data in Ballerina.
+ * {@code BTableType} represents a type of a table in Ballerina.
+ * <p>
+ * Tables are defined using the table keyword as follows:
+ * table tableName
+ * <p>
+ * All tables are unbounded in length and support column based indexing.
  *
- * @since 1.3.0
+ * @since 0.995.0
  */
+@SuppressWarnings("unchecked")
 public class BTableType extends BType {
 
     private BType constraint;
-    private BType keyType;
-    private String[] fieldNames;
 
-    public BTableType(BType constraint, String[] fieldNames) {
-        super(TypeConstants.TABLE_TNAME, null, TableValue.class);
+    /**
+     * Create a table type from the given name.
+     *
+     * @param typeName string name of the type.
+     * @param constraint constraint type which particular table is bound to.
+     * @param pkg package for the type.
+     */
+    public BTableType(String typeName, BType constraint, BPackage pkg) {
+        super(typeName, pkg, TableValue.class);
         this.constraint = constraint;
-        this.fieldNames = fieldNames;
-        this.keyType = null;
     }
 
     public BTableType(BType constraint) {
@@ -43,25 +53,33 @@ public class BTableType extends BType {
         this.constraint = constraint;
     }
 
+    /**
+     * Returns element types which this table is constrained to.
+     *
+     * @return constraint type.
+     */
     public BType getConstrainedType() {
         return constraint;
     }
 
-    public BType getKeyType() {
-        return keyType;
-    }
-
-    public String[] getFieldNames() {
-        return fieldNames;
+    /**
+     * Returns element type which this table contains.
+     *
+     * @return element type.
+     * @deprecated use {@link #getConstrainedType()} instead.
+     */
+    @Deprecated
+    public BType getElementType() {
+        return constraint;
     }
 
     @Override
-    public <V> V getZeroValue() {
-        return (V) new TableValueImpl<BAnydataType, V>(new BTableType(constraint));
+    public <V extends Object> V getZeroValue() {
+        return (V) new TableValue(this, null, null);
     }
 
     @Override
-    public <V> V getEmptyValue() {
+    public <V extends Object> V getEmptyValue() {
         return getZeroValue();
     }
 
@@ -72,23 +90,11 @@ public class BTableType extends BType {
 
     @Override
     public String toString() {
-        if (constraint == null) {
+        if (constraint == BTypes.typeAnydata) {
             return super.toString();
         }
 
-        StringBuilder keyStringBuilder = new StringBuilder();
-        if (fieldNames != null) {
-            for (String fieldName : fieldNames) {
-                if (!keyStringBuilder.toString().equals("")) {
-                    keyStringBuilder.append(", ");
-                }
-                keyStringBuilder.append(fieldName);
-            }
-            return super.toString() + "<" + constraint.getName() + "> key(" + keyStringBuilder.toString() + ")";
-        }
-
-        return super.toString() + "<" + constraint.getName() + ">" +
-                ((keyType != null) ? (" key<" + keyType + ">") : "");
+        return "table" + "<" + constraint.getName() + ">";
     }
 
     @Override
@@ -98,18 +104,10 @@ public class BTableType extends BType {
         }
 
         BTableType other = (BTableType) obj;
-        if (constraint == other.constraint && keyType == other.keyType) {
+        if (constraint == other.constraint) {
             return true;
         }
 
-        if (constraint == null || other.constraint == null) {
-            return false;
-        }
-
-        if (keyType == null || other.keyType == null) {
-            return false;
-        }
-
-        return constraint.equals(other.constraint) && keyType.equals(other.keyType);
+        return TypeChecker.checkIsType(constraint, other.constraint);
     }
 }

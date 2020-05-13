@@ -281,12 +281,11 @@ public class CodeActionTest {
                 {"fixReturnType1.json", "fixReturnType.bal"},
                 {"fixReturnType2.json", "fixReturnType.bal"},
                 {"fixReturnType3.json", "fixReturnType.bal"},
-                //TODO Table remove - Fix
-//                {"markUntaintedCodeAction1.json", "taintedVariable.bal"},
-//                {"markUntaintedCodeAction2.json", "taintedVariable.bal"},
+                {"markUntaintedCodeAction1.json", "taintedVariable.bal"},
+                {"markUntaintedCodeAction2.json", "taintedVariable.bal"},
                 {"variableAssignmentRequiredCodeAction1.json", "createVariable.bal"},
                 {"variableAssignmentRequiredCodeAction2.json", "createVariable.bal"},
-                {"variableAssignmentRequiredCodeAction3.json", "createVariable.bal"},
+//                {"variableAssignmentRequiredCodeAction3.json", "createVariable.bal"},
                 {"variableAssignmentRequiredCodeAction4.json", "createVariable.bal"},
                 {"variableAssignmentRequiredCodeAction5.json", "createVariable2.bal"},
                 {"variableAssignmentRequiredCodeAction6.json", "createVariable2.bal"},
@@ -294,7 +293,7 @@ public class CodeActionTest {
                 {"variableAssignmentRequiredCodeAction8.json", "createVariable3.bal"},
                 {"variableAssignmentRequiredCodeAction9.json", "createVariable3.bal"},
                 {"variableAssignmentRequiredCodeAction10.json", "createVariable3.bal"},
-//                {"variableAssignmentRequiredCodeAction11.json", "createVariable3.bal"},
+                {"variableAssignmentRequiredCodeAction11.json", "createVariable3.bal"},
                 {"variableAssignmentRequiredCodeAction12.json", "createVariable3.bal"},
                 {"variableAssignmentRequiredCodeAction13.json", "createVariable3.bal"},
                 {"variableAssignmentRequiredCodeAction14.json", "createVariable3.bal"},
@@ -323,16 +322,13 @@ public class CodeActionTest {
                 {"variableAssignmentRequiredCodeAction37.json", "createVariable5.bal"},
                 {"variableAssignmentRequiredCodeAction38.json", "createVariable5.bal"},
                 {"variableAssignmentRequiredCodeAction39.json", "createVariable5.bal"},
-                {"variableAssignmentRequiredCodeAction40.json", "createVariable5.bal"},
                 {"ignoreReturnValueCodeAction.json", "createVariable.bal"},
                 {"typeGuardCodeAction1.json", "typeGuard.bal"},
                 {"typeGuardCodeAction2.json", "typeGuard.bal"},
                 {"typeGuardCodeAction3.json", "typeGuard.bal"},
 //                {"typeGuardCodeAction4.json", "typeGuard.bal"},
                 {"implementFuncObj.json", "implementFuncObj.bal"},
-                {"optimizeImports.json", "optimizeImports.bal"},
-                {"changeAbstractTypeObj1.json", "changeAbstractType.bal"},
-                {"changeAbstractTypeObj2.json", "changeAbstractType.bal"}
+                {"optimizeImports.json", "optimizeImports.bal"}
         };
     }
 
@@ -361,6 +357,8 @@ public class CodeActionTest {
                 {"packagePull2.json", "packagePull.bal"},
                 {"packagePull3.json", "packagePull2.bal"},
                 {"packagePull4.json", "packagePull2.bal"},
+                {"changeAbstractTypeObj1.json", "changeAbstractType.bal"},
+                {"changeAbstractTypeObj2.json", "changeAbstractType.bal"},
         };
     }
 

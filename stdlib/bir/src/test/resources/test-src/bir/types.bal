@@ -87,8 +87,12 @@ error e = error("not good");
 Employee teacher = {id : 2345343, name: "Marco Polo"};
 
 // expected: table<record {int id; string name; }>
-type employeeTable table<Employee> employeeTable key(id);
-
-
+table<Employee> employeeTable = table {
+        {id, name},
+        [
+            {1, "Employee1"},
+            {2, "Employee2"}
+        ]
+    };
 
 

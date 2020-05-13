@@ -33,9 +33,6 @@ public class BLangIndexBasedAccess extends BLangAccessExpression implements Inde
 
     public BLangExpression indexExpr;
 
-    // Only used at Desugar and after.
-    public boolean isStoreOnCreation = false;
-
     @Override
     public BLangExpression getExpression() {
         return expr;
@@ -72,14 +69,6 @@ public class BLangIndexBasedAccess extends BLangAccessExpression implements Inde
             this.indexExpr = indexExpr;
         }
 
-        public BLangArrayAccessExpr(DiagnosticPos pos, BLangExpression varRef, BLangExpression indexExpr,
-                                    boolean isStoreOnCreation) {
-            this.pos = pos;
-            this.expr = varRef;
-            this.indexExpr = indexExpr;
-            this.isStoreOnCreation = isStoreOnCreation;
-        }
-
         @Override
         public void accept(BLangNodeVisitor visitor) {
             visitor.visit(this);
@@ -97,14 +86,6 @@ public class BLangIndexBasedAccess extends BLangAccessExpression implements Inde
             this.indexExpr = keyExpr;
         }
 
-        public BLangMapAccessExpr(DiagnosticPos pos, BLangExpression varExpr, BLangExpression keyExpr,
-                                  boolean isStoreOnCreation) {
-            this.pos = pos;
-            this.expr = varExpr;
-            this.indexExpr = keyExpr;
-            this.isStoreOnCreation = isStoreOnCreation;
-        }
-
         @Override
         public void accept(BLangNodeVisitor visitor) {
             visitor.visit(this);
@@ -117,23 +98,6 @@ public class BLangIndexBasedAccess extends BLangAccessExpression implements Inde
     public static class BLangJSONAccessExpr extends BLangIndexBasedAccess {
 
         public BLangJSONAccessExpr(DiagnosticPos pos, BLangExpression varExpr, BLangExpression keyExpr) {
-            this.pos = pos;
-            this.expr = varExpr;
-            this.indexExpr = keyExpr;
-        }
-
-        @Override
-        public void accept(BLangNodeVisitor visitor) {
-            visitor.visit(this);
-        }
-    }
-
-    /**
-     * @since 1.3.0
-     */
-    public static class BLangTableAccessExpr extends BLangIndexBasedAccess {
-
-        public BLangTableAccessExpr(DiagnosticPos pos, BLangExpression varExpr, BLangExpression keyExpr) {
             this.pos = pos;
             this.expr = varExpr;
             this.indexExpr = keyExpr;
@@ -203,15 +167,6 @@ public class BLangIndexBasedAccess extends BLangAccessExpression implements Inde
             this.symbol = fieldSymbol;
         }
 
-        public BLangStructFieldAccessExpr(DiagnosticPos pos, BLangExpression varRef, BLangExpression keyExpr,
-                                          BVarSymbol fieldSymbol, boolean except, boolean isStoreOnCreation) {
-            this.pos = pos;
-            this.expr = varRef;
-            this.indexExpr = keyExpr;
-            this.symbol = fieldSymbol;
-            this.isStoreOnCreation = isStoreOnCreation;
-        }
-
         @Override
         public void accept(BLangNodeVisitor visitor) {
             visitor.visit(this);
@@ -221,10 +176,8 @@ public class BLangIndexBasedAccess extends BLangAccessExpression implements Inde
     /**
      * @since 0.980.0
      */
-    @Deprecated
     public static class BLangTupleAccessExpr extends BLangIndexBasedAccess {
 
-        @Deprecated
         public BLangTupleAccessExpr(DiagnosticPos pos, BLangExpression varRef, BLangExpression indexExpr) {
             this.pos = pos;
             this.expr = varRef;

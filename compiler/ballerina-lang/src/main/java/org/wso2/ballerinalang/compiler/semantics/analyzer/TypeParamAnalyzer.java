@@ -38,7 +38,6 @@ import org.wso2.ballerinalang.compiler.semantics.model.types.BField;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BInvokableType;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BMapType;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BObjectType;
-import org.wso2.ballerinalang.compiler.semantics.model.types.BReadonlyType;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BRecordType;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BServiceType;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BStreamType;
@@ -182,14 +181,12 @@ public class TypeParamAnalyzer {
                     }
                 }
                 return false;
+            case TypeTags.TABLE:
+                return containsTypeParam(((BTableType) type).constraint, resolvedTypes);
             case TypeTags.MAP:
                 return containsTypeParam(((BMapType) type).constraint, resolvedTypes);
             case TypeTags.STREAM:
                 return containsTypeParam(((BStreamType) type).constraint, resolvedTypes);
-            case TypeTags.TABLE:
-                return (containsTypeParam(((BTableType) type).constraint, resolvedTypes) ||
-                        ((BTableType) type).keyTypeConstraint != null) &&
-                        containsTypeParam(((BTableType) type).keyTypeConstraint, resolvedTypes);
             case TypeTags.RECORD:
                 BRecordType recordType = (BRecordType) type;
                 for (BField field : recordType.fields) {
@@ -259,8 +256,6 @@ public class TypeParamAnalyzer {
                 return new BAnyType(type.tag, null, name, flag);
             case TypeTags.ANYDATA:
                 return new BAnydataType(type.tag, null, name, flag);
-            case TypeTags.READONLY: // TODO: 4/5/20 validate for cloneXxx
-                return new BReadonlyType(type.tag, null, name, flag);
         }
         // For others, we will use TSymbol.
         return type;
@@ -305,6 +300,12 @@ public class TypeParamAnalyzer {
                                                  result);
                 }
                 return;
+            case TypeTags.TABLE:
+                if (actualType.tag == TypeTags.TABLE) {
+                    findTypeParam(pos, ((BTableType) expType).constraint, ((BTableType) actualType).constraint, env,
+                                  resolvedTypes, result);
+                }
+                return;
             case TypeTags.MAP:
                 if (actualType.tag == TypeTags.MAP) {
                     findTypeParam(pos, ((BMapType) expType).constraint, ((BMapType) actualType).constraint, env,
@@ -319,12 +320,6 @@ public class TypeParamAnalyzer {
                 if (actualType.tag == TypeTags.STREAM) {
                     findTypeParamInStream(pos, ((BStreamType) expType), ((BStreamType) actualType), env, resolvedTypes,
                                           result);
-                }
-                return;
-            case TypeTags.TABLE:
-                if (actualType.tag == TypeTags.TABLE) {
-                    findTypeParamInTable(pos, ((BTableType) expType), ((BTableType) actualType), env, resolvedTypes,
-                            result);
                 }
                 return;
             case TypeTags.TUPLE:
@@ -400,26 +395,6 @@ public class TypeParamAnalyzer {
         findTypeParam(pos, expType.constraint, actualType.constraint, env, resolvedTypes, result);
         findTypeParam(pos, expType.error, (actualType.error != null) ? actualType.error : symTable.nilType, env,
                       resolvedTypes, result);
-    }
-
-    private void findTypeParamInTable(DiagnosticPos pos, BTableType expType, BTableType actualType, SymbolEnv env,
-                                      HashSet<BType> resolvedTypes, FindTypeParamResult result) {
-        findTypeParam(pos, expType.constraint, actualType.constraint, env, resolvedTypes, result);
-        if (expType.keyTypeConstraint != null) {
-            if (actualType.keyTypeConstraint != null) {
-                findTypeParam(pos, expType.keyTypeConstraint, actualType.keyTypeConstraint, env, resolvedTypes, result);
-            } else if (actualType.fieldNameList != null) {
-                List<BType> memberTypes = new ArrayList<>();
-                actualType.fieldNameList.forEach(field -> memberTypes
-                        .add(types.getTableConstraintField(actualType.constraint, field).type));
-                if (memberTypes.size() == 1) {
-                    findTypeParam(pos, expType.keyTypeConstraint, memberTypes.get(0), env, resolvedTypes, result);
-                } else {
-                    BTupleType tupleType = new BTupleType(memberTypes);
-                    findTypeParam(pos, expType.keyTypeConstraint, tupleType, env, resolvedTypes, result);
-                }
-            }
-        }
     }
 
     private void findTypeParamInTupleForArray(DiagnosticPos pos, BArrayType expType, BTupleType actualType,
@@ -560,6 +535,9 @@ public class TypeParamAnalyzer {
             case TypeTags.ARRAY:
                 BType elementType = ((BArrayType) expType).eType;
                 return new BArrayType(getMatchingBoundType(elementType, env, resolvedTypes));
+            case TypeTags.TABLE:
+                return new BTableType(TypeTags.TABLE, getMatchingBoundType((((BTableType) expType)).constraint, env,
+                        resolvedTypes), symTable.tableType.tsymbol);
             case TypeTags.MAP:
                 BType constraint = ((BMapType) expType).constraint;
                 return new BMapType(TypeTags.MAP, getMatchingBoundType(constraint, env, resolvedTypes),
@@ -569,15 +547,6 @@ public class TypeParamAnalyzer {
                 BType streamError = (((BStreamType) expType).error != null) ? getMatchingOptionalBoundType((BUnionType)
                         ((BStreamType) expType).error, env, resolvedTypes) : null;
                 return new BStreamType(TypeTags.STREAM, streamConstraint, streamError, symTable.streamType.tsymbol);
-            case TypeTags.TABLE:
-                BType tableConstraint = getMatchingBoundType(((BTableType) expType).constraint, env, resolvedTypes);
-                BTableType tableType = new BTableType(TypeTags.TABLE, tableConstraint, symTable.tableType.tsymbol);
-                if (((BTableType) expType).keyTypeConstraint != null) {
-                    BType keyTypeConstraint = getMatchingBoundType(((BTableType) expType).keyTypeConstraint, env,
-                            resolvedTypes);
-                    tableType.keyTypeConstraint = keyTypeConstraint;
-                }
-                return tableType;
             case TypeTags.TUPLE:
                 return getMatchingTupleBoundType((BTupleType) expType, env, resolvedTypes);
             case TypeTags.RECORD:

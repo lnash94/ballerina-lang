@@ -17,22 +17,29 @@
  */
 package org.ballerinalang.test.types.string;
 
+import org.ballerinalang.model.values.BInteger;
 import org.ballerinalang.model.values.BString;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.test.util.BCompileUtil;
 import org.ballerinalang.test.util.BRunUtil;
+import org.ballerinalang.test.util.CompileResult;
 import org.ballerinalang.util.exceptions.BLangRuntimeException;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import static org.ballerinalang.test.util.BRunUtil.IS_STRING_VALUE_PROP;
 
 /**
  * Test StringValue impl of ballerina string.
  */
-public class StringValueBasicsTest extends BStringTestCommons {
+public class StringValueBasicsTest {
+    private CompileResult result;
 
     @BeforeClass
     public void setup() {
+        System.setProperty(IS_STRING_VALUE_PROP, "true");
         result = BCompileUtil.compile("test-src/types/string/string-value-test.bal");
     }
 
@@ -45,28 +52,38 @@ public class StringValueBasicsTest extends BStringTestCommons {
 
     @Test
     public void testNonBMPStringLength() {
-        testAndAssert("nonBMPLength", 5);
+        BValue[] returns = BRunUtil.invoke(result, "nonBMPLength");
+        Assert.assertEquals(returns[0].getClass(), BInteger.class);
+        Assert.assertEquals(((BInteger) returns[0]).intValue(), 5);
     }
 
     @Test
     public void testRecordStringValue() {
-        testAndAssert("recordStringValue", 5);
+        BValue[] returns = BRunUtil.invoke(result, "recordStringValue");
+        Assert.assertEquals(returns[0].getClass(), BInteger.class);
+        Assert.assertEquals(((BInteger) returns[0]).intValue(), 5);
         //TODO assert return value has BString
     }
 
     @Test
     public void testError() {
-        testAndAssert("testError", 5);
+        BValue[] returns = BRunUtil.invoke(result, "testError");
+        Assert.assertEquals(returns[0].getClass(), BInteger.class);
+        Assert.assertEquals(((BInteger) returns[0]).intValue(), 5);
     }
 
     @Test
     public void testArrayStore() {
-        testAndAssert("testArrayStore", 10);
+        BValue[] returns = BRunUtil.invoke(result, "testArrayStore");
+        Assert.assertEquals(returns[0].getClass(), BInteger.class);
+        Assert.assertEquals(((BInteger) returns[0]).intValue(), 10);
     }
 
     @Test
     public void testStringIndexAccess() {
-        testAndAssert("testStringIndexAccess", 1);
+        BValue[] returns = BRunUtil.invoke(result, "testStringIndexAccess");
+        Assert.assertEquals(returns[0].getClass(), BInteger.class);
+        Assert.assertEquals(((BInteger) returns[0]).intValue(), 1);
     }
 
     @Test(expectedExceptions = BLangRuntimeException.class,
@@ -77,7 +94,19 @@ public class StringValueBasicsTest extends BStringTestCommons {
 
     @Test
     public void testCastToString() {
-        testAndAssert("anyToStringCasting", 6);
-        testAndAssert("anydataToStringCast", 6);
+        BValue[] returns = BRunUtil.invoke(result, "anyToStringCasting");
+        Assert.assertEquals(returns[0].getClass(), BInteger.class);
+        Assert.assertEquals(((BInteger) returns[0]).intValue(), 6);
+
+        BValue[] returns2 = BRunUtil.invoke(result, "anydataToStringCast");
+        Assert.assertEquals(returns2[0].getClass(), BInteger.class);
+        Assert.assertEquals(((BInteger) returns2[0]).intValue(), 6);
+
     }
+
+    @AfterClass
+    public void down() {
+        System.clearProperty(IS_STRING_VALUE_PROP);
+    }
+
 }

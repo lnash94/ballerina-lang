@@ -81,8 +81,7 @@ public class SingleBalFileTestCase extends BaseTest {
      *
      * @throws BallerinaTestException When running commands.
      */
-    //TODO Table remove - Fix
-    @Test(description = "Test building and running TestProject", enabled = false)
+    @Test(description = "Test building and running TestProject")
     public void testSingleBalFileWithJDBCUsage() throws BallerinaTestException {
         String sqlBalFile = "jdbc_select.bal";
         Path testProjectPath = Paths.get("src", "test", "resources", "packaging", "singleBalFile", "sql")

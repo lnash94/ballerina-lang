@@ -19,6 +19,10 @@ function name3() {
     "cherry"});
 }
 
+function  tableReturnFunction ()   returns    (   table<any>  )   {
+    return;
+}
+
 public function main() {
     string text = "Sample String";
     int number = 34;

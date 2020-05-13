@@ -18,6 +18,7 @@
 package org.wso2.ballerinalang.compiler.bir.codegen.interop;
 
 import org.ballerinalang.compiler.BLangCompilerException;
+import org.wso2.ballerinalang.compiler.bir.codegen.Nilable;
 import org.wso2.ballerinalang.compiler.bir.model.BIRNode.BIRAnnotationArrayValue;
 import org.wso2.ballerinalang.compiler.bir.model.BIRNode.BIRAnnotationAttachment;
 import org.wso2.ballerinalang.compiler.bir.model.BIRNode.BIRAnnotationLiteralValue;
@@ -52,7 +53,8 @@ public class AnnotationProc {
     public static final String PARAM_TYPES_FIELD_NAME = "paramTypes";
     public static final String DIMENSIONS_FIELD_NAME = "dimensions";
 
-    static InteropValidationRequest getInteropAnnotValue(BIRFunction birFunc) {
+    static @Nilable
+    InteropValidationRequest getInteropAnnotValue(BIRFunction birFunc) {
 
         BIRAnnotationAttachment annotAttach = getInteropAnnotAttachment(birFunc);
         if (annotAttach == null) {
@@ -63,7 +65,8 @@ public class AnnotationProc {
         return createJInteropValidationRequest(annotTagRef, annotAttach, birFunc);
     }
 
-    private static BIRAnnotationAttachment getInteropAnnotAttachment(BIRFunction birFunc) {
+    private static @Nilable
+    BIRAnnotationAttachment getInteropAnnotAttachment(BIRFunction birFunc) {
 
         for (BIRAnnotationAttachment annotationAttachment : birFunc.annotAttachments) {
             if (isInteropAnnotAttachment(annotationAttachment)) {
@@ -122,11 +125,12 @@ public class AnnotationProc {
                 birFunc.type, getFieldMethodFromAnnotTag(annotTagRef));
     }
 
-    private static List<JType> buildParamTypeConstraints(BIRAnnotationValue annotValue) {
+    private static @Nilable
+    List<JType> buildParamTypeConstraints(@Nilable BIRAnnotationValue annotValue) {
 
         if (annotValue instanceof BIRAnnotationArrayValue) {
-            BIRAnnotationValue[] annotArrayElements = ((BIRAnnotationArrayValue) annotValue).annotArrayValue;
-            List<JType> constraints = new ArrayList<>();
+            @Nilable BIRAnnotationValue[] annotArrayElements = ((BIRAnnotationArrayValue) annotValue).annotArrayValue;
+            @Nilable List<JType> constraints = new ArrayList<>();
             for (BIRAnnotationValue annotArrayElement : annotArrayElements) {
                 JType jType;
                 if (annotArrayElement instanceof BIRAnnotationLiteralValue) {
@@ -150,7 +154,7 @@ public class AnnotationProc {
         return null;
     }
 
-    private static Object getLiteralValueFromAnnotValue(BIRAnnotationValue annotValue) {
+    private static Object getLiteralValueFromAnnotValue(@Nilable BIRAnnotationValue annotValue) {
 
         if (annotValue == null) {
             return null;
@@ -163,21 +167,21 @@ public class AnnotationProc {
     }
 
     private static String getJMethodNameFromAnnot(String annotTagRef,
-                                                  BIRAnnotationValue jNameValueEntry,
+                                                  @Nilable BIRAnnotationValue jNameValueEntry,
                                                   BIRFunction birFunc) {
 
         if (annotTagRef.equals(CONSTRUCTOR_ANNOT_TAG)) {
             return "<init>";
         } else {
-            String methodName = (String) getLiteralValueFromAnnotValue(jNameValueEntry);
+            @Nilable String methodName = (String) getLiteralValueFromAnnotValue(jNameValueEntry);
             return methodName != null ? methodName : birFunc.name.value;
         }
     }
 
-    private static String getJFieldNameFromAnnot(BIRAnnotationValue jNameValueEntry,
+    private static String getJFieldNameFromAnnot(@Nilable BIRAnnotationValue jNameValueEntry,
                                                  BIRFunction birFunc) {
 
-        String fieldName = (String) getLiteralValueFromAnnotValue(jNameValueEntry);
+        @Nilable String fieldName = (String) getLiteralValueFromAnnotValue(jNameValueEntry);
         return fieldName != null ? fieldName : birFunc.name.value;
     }
 }

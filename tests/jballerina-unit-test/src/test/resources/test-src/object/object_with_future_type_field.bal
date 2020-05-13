@@ -15,7 +15,7 @@
 // under the License.
 
 public type Foo object {
-    public future<int> intFuture = getFuture();
+    public future<int> intFuture = start getIntValue();
 };
 
 Foo globalFoo = new;
@@ -29,8 +29,4 @@ public function getIntFromFutureField() returns int {
 
 public function getIntValue() returns int {
     return 10;
-}
-
-public function getFuture() returns future<int> {
-    return start getIntValue();
 }

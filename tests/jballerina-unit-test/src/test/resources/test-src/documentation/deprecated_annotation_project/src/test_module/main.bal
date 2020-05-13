@@ -178,7 +178,7 @@ public function sayHello(string name) {
 # + return - full name
 public function getFullName(string title, @deprecated string fName,  string mName = "Chris",
                                                     @deprecated string lName = "Wood") returns string {
-    return fName + mName + lName;
+    return fname + mname + lname;
 }
 
 //========= OBJECT MEMBERS ================================

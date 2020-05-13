@@ -34,6 +34,7 @@ import org.ballerinalang.jvm.values.api.BMap;
 import org.ballerinalang.jvm.values.api.BObject;
 import org.ballerinalang.jvm.values.api.BStream;
 import org.ballerinalang.jvm.values.api.BString;
+import org.ballerinalang.jvm.values.api.BTable;
 import org.ballerinalang.jvm.values.api.BTypedesc;
 import org.ballerinalang.jvm.values.api.BXML;
 
@@ -277,6 +278,8 @@ class JMethodResolver {
                     return this.classLoader.loadClass(BError.class.getCanonicalName()).isAssignableFrom(jType);
                 case TypeTags.STREAM_TAG:
                     return this.classLoader.loadClass(BStream.class.getCanonicalName()).isAssignableFrom(jType);
+                case TypeTags.TABLE_TAG:
+                    return this.classLoader.loadClass(BTable.class.getCanonicalName()).isAssignableFrom(jType);
                 case TypeTags.XML_TAG:
                     return this.classLoader.loadClass(BXML.class.getCanonicalName()).isAssignableFrom(jType);
                 case TypeTags.TUPLE_TAG:
@@ -407,6 +410,8 @@ class JMethodResolver {
                     return this.classLoader.loadClass(BError.class.getCanonicalName()).isAssignableFrom(jType);
                 case TypeTags.STREAM_TAG:
                     return this.classLoader.loadClass(BStream.class.getCanonicalName()).isAssignableFrom(jType);
+                case TypeTags.TABLE_TAG:
+                    return this.classLoader.loadClass(BTable.class.getCanonicalName()).isAssignableFrom(jType);
                 case TypeTags.XML_TAG:
                     return this.classLoader.loadClass(BXML.class.getCanonicalName()).isAssignableFrom(jType);
                 case TypeTags.TUPLE_TAG:

@@ -19,7 +19,6 @@
 package org.ballerinalang.langlib.value;
 
 import org.ballerinalang.jvm.scheduling.Strand;
-import org.ballerinalang.jvm.values.api.BString;
 import org.ballerinalang.jvm.values.utils.StringUtils;
 import org.ballerinalang.model.types.TypeKind;
 import org.ballerinalang.natives.annotations.Argument;
@@ -42,9 +41,5 @@ public class ToJsonString {
 
     public static String toJsonString(Strand strand, Object value) {
         return StringUtils.getJsonString(value);
-    }
-
-    public static BString toJsonString_bstring(Strand strand, Object value) {
-        return org.ballerinalang.jvm.StringUtils.fromString(toJsonString(strand, value));
     }
 }

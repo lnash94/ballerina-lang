@@ -21,7 +21,7 @@ import io.nats.streaming.AckHandler;
 import org.ballerinalang.jvm.values.ErrorValue;
 import org.ballerinalang.jvm.values.connector.NonBlockingCallback;
 import org.ballerinalang.nats.Utils;
-import org.ballerinalang.nats.observability.NatsMetricsReporter;
+import org.ballerinalang.nats.observability.NatsMetricsUtil;
 import org.ballerinalang.nats.observability.NatsObservabilityConstants;
 
 /**
@@ -30,12 +30,12 @@ import org.ballerinalang.nats.observability.NatsObservabilityConstants;
 public class AckListener implements AckHandler {
     private NonBlockingCallback nonBlockingCallback;
     private String subject;
-    private NatsMetricsReporter natsMetricsReporter;
+    private NatsMetricsUtil natsMetricsUtil;
 
-    AckListener(NonBlockingCallback nonBlockingCallback, String subject, NatsMetricsReporter natsMetricsReporter) {
+    AckListener(NonBlockingCallback nonBlockingCallback, String subject, NatsMetricsUtil natsMetricsUtil) {
         this.nonBlockingCallback = nonBlockingCallback;
         this.subject = subject;
-        this.natsMetricsReporter = natsMetricsReporter;
+        this.natsMetricsUtil = natsMetricsUtil;
     }
 
     /**
@@ -44,10 +44,10 @@ public class AckListener implements AckHandler {
     @Override
     public void onAck(String nuid, Exception ex) {
         if (ex == null) {
-            natsMetricsReporter.reportAcknowledgement(subject);
+            natsMetricsUtil.reportAcknowledgement(subject);
             nonBlockingCallback.setReturnValues(nuid);
         } else {
-            natsMetricsReporter.reportProducerError(subject, NatsObservabilityConstants.ERROR_TYPE_ACKNOWLEDGEMENT);
+            natsMetricsUtil.reportProducerError(subject, NatsObservabilityConstants.ERROR_TYPE_ACKNOWLEDGEMENT);
             ErrorValue error = Utils.createNatsError(nuid, ex.getMessage());
             nonBlockingCallback.setReturnValues(error);
         }

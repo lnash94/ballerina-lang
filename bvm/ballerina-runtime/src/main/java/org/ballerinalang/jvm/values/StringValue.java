@@ -22,7 +22,7 @@ import org.ballerinalang.jvm.types.BTypes;
 import org.ballerinalang.jvm.values.api.BString;
 
 /**
- * Class representing ballerina strings.
+ * Interface representing ballerina strings.
  *
  * @since 1.0.5
  */

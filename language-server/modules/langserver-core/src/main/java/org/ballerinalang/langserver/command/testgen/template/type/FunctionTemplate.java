@@ -21,7 +21,6 @@ import org.ballerinalang.langserver.command.testgen.renderer.RendererOutput;
 import org.ballerinalang.langserver.command.testgen.renderer.TemplateBasedRendererOutput;
 import org.ballerinalang.langserver.command.testgen.template.AbstractTestTemplate;
 import org.ballerinalang.langserver.command.testgen.template.PlaceHolder;
-import org.ballerinalang.langserver.commons.LSContext;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BNilType;
 import org.wso2.ballerinalang.compiler.tree.BLangFunction;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
@@ -47,9 +46,8 @@ public class FunctionTemplate extends AbstractTestTemplate {
     private final boolean hasParams;
 
     public FunctionTemplate(BLangPackage builtTestFile, BLangFunction function,
-                            BiConsumer<Integer, Integer> focusLineAcceptor, TestFunctionGenerator generator,
-                            LSContext context) {
-        super(builtTestFile, focusLineAcceptor, context);
+                            BiConsumer<Integer, Integer> focusLineAcceptor, TestFunctionGenerator generator) {
+        super(builtTestFile, focusLineAcceptor);
         String functionName = function.name.value;
         this.testFunctionName = getSafeName("test" + upperCaseFirstLetter(functionName));
         this.hasReturnType = (function.returnTypeNode != null && !(function.returnTypeNode.type instanceof BNilType));

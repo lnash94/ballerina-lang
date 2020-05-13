@@ -25,7 +25,7 @@ import org.ballerinalang.jvm.values.ObjectValue;
 import org.ballerinalang.jvm.values.connector.CallableUnitCallback;
 import org.ballerinalang.nats.Constants;
 import org.ballerinalang.nats.Utils;
-import org.ballerinalang.nats.observability.NatsMetricsReporter;
+import org.ballerinalang.nats.observability.NatsMetricsUtil;
 import org.ballerinalang.nats.observability.NatsObservabilityConstants;
 
 import java.util.Arrays;
@@ -46,17 +46,17 @@ public class ErrorHandler {
      * @param serviceObject   ObjectValue service
      * @param msgObj          Message object
      * @param e               ErrorValue
-     * @param natsMetricsReporter Nats Metrics Util
+     * @param natsMetricsUtil Nats Metrics Util
      */
     static void dispatchError(ObjectValue serviceObject, ObjectValue msgObj, ErrorValue e, BRuntime runtime,
-                              NatsMetricsReporter natsMetricsReporter) {
+                              NatsMetricsUtil natsMetricsUtil) {
         boolean onErrorResourcePresent = Arrays.stream(serviceObject.getType().getAttachedFunctions())
                 .anyMatch(resource -> resource.getName().equals(ON_ERROR_RESOURCE));
         if (onErrorResourcePresent) {
             CountDownLatch countDownLatch = new CountDownLatch(1);
             runtime.invokeMethodAsync(serviceObject, ON_ERROR_RESOURCE,
                                       new ResponseCallback(countDownLatch, msgObj.getStringValue(Constants.SUBJECT),
-                                                           natsMetricsReporter), msgObj, true, e, true);
+                                                           natsMetricsUtil), msgObj, true, e, true);
             try {
                 countDownLatch.await();
             } catch (InterruptedException ex) {
@@ -75,12 +75,12 @@ public class ErrorHandler {
     public static class ResponseCallback implements CallableUnitCallback {
         private CountDownLatch countDownLatch;
         private String subject;
-        private NatsMetricsReporter natsMetricsReporter;
+        private NatsMetricsUtil natsMetricsUtil;
 
         ResponseCallback(CountDownLatch countDownLatch, String subject,
-                         NatsMetricsReporter natsMetricsReporter) {
+                         NatsMetricsUtil natsMetricsUtil) {
             this.countDownLatch = countDownLatch;
-            this.natsMetricsReporter = natsMetricsReporter;
+            this.natsMetricsUtil = natsMetricsUtil;
             this.subject = subject;
         }
 
@@ -90,7 +90,7 @@ public class ErrorHandler {
         @Override
         public void notifySuccess() {
             countDownLatch.countDown();
-            natsMetricsReporter.reportConsumerError(subject, NatsObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
+            natsMetricsUtil.reportConsumerError(subject, NatsObservabilityConstants.ERROR_TYPE_MSG_RECEIVED);
         }
 
         /**
@@ -99,7 +99,7 @@ public class ErrorHandler {
         @Override
         public void notifyFailure(ErrorValue error) {
             ErrorHandlerUtils.printError(error);
-            natsMetricsReporter.reportConsumerError(subject, NatsObservabilityConstants.ERROR_TYPE_ON_ERROR);
+            natsMetricsUtil.reportConsumerError(subject, NatsObservabilityConstants.ERROR_TYPE_ON_ERROR);
             countDownLatch.countDown();
         }
     }

@@ -18,9 +18,7 @@
 apply from: "$rootDir/gradle/javaProject.gradle"
 
 configurations {
-    baloCreat {
-        transitive false
-    }
+    baloCreat
     baloImplementation {
         transitive false
     }

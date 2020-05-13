@@ -17,7 +17,6 @@
 */
 package org.ballerinalang.model.tree.expressions;
 
-import org.ballerinalang.model.tree.ActionNode;
 import org.wso2.ballerinalang.compiler.tree.BLangIdentifier;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangExpression;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangWaitForAllExpr;
@@ -29,7 +28,7 @@ import java.util.List;
  *
  * @since 0.985
  */
-public interface WaitForAllExpressionNode extends ExpressionNode, ActionNode {
+public interface WaitForAllExpressionNode extends ExpressionNode {
 
     List<BLangWaitForAllExpr.BLangWaitKeyValue> getKeyValuePairs();
 

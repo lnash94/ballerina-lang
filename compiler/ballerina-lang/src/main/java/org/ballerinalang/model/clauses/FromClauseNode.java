@@ -40,4 +40,5 @@ public interface FromClauseNode extends Node {
     VariableDefinitionNode getVariableDefinitionNode();
 
     void setVariableDefinitionNode(VariableDefinitionNode variableDefinitionNode);
+
 }

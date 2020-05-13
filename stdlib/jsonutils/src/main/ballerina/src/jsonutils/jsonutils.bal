@@ -48,26 +48,24 @@ function externFromXML(xml x, XmlOptions options = {}) returns json|error|handle
     class: "org.ballerinalang.stdlib.jsonutils.FromXML"
 } external;
 
+# Converts a table to its JSON representation.
+# ```ballerina
+# table<Person> tableValue = table{
+#     { key id, age, salary, name, married },
+#     [ { 1, 30,  300.5, "Mary", true },
+#         { 2, 20,  300.5, "John", true }
+#     ]
+# };
+# json jsonValue = jsonutils:fromTable(tableValue);
+# ```
+#
+# + tableValue - The source table to be converted to JSON
+# + return - The JSON representation of the source table
+public function fromTable(table<record{}> tableValue) returns json {
+    return externFromTable(tableValue);
+}
 
-//TODO Table remove - Fix
-//# Converts a table to its JSON representation.
-//# ```ballerina
-//# table<Person> tableValue = table{
-//#     { key id, age, salary, name, married },
-//#     [ { 1, 30,  300.5, "Mary", true },
-//#         { 2, 20,  300.5, "John", true }
-//#     ]
-//# };
-//# json jsonValue = jsonutils:fromTable(tableValue);
-//# ```
-//#
-//# + tableValue - The source table to be converted to JSON
-//# + return - The JSON representation of the source table
-//public function fromTable(table<record{}> tableValue) returns json {
-//    return externFromTable(tableValue);
-//}
-//
-//function externFromTable(table<record{}> tableValue) returns json = @java:Method {
-//    name: "fromTable",
-//    class: "org.ballerinalang.stdlib.jsonutils.FromTable"
-//} external;
+function externFromTable(table<record{}> tableValue) returns json = @java:Method {
+    name: "fromTable",
+    class: "org.ballerinalang.stdlib.jsonutils.FromTable"
+} external;

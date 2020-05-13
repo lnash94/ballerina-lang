@@ -21,7 +21,7 @@ package org.ballerinalang.nats.streaming.producer;
 import org.ballerinalang.jvm.values.ObjectValue;
 import org.ballerinalang.nats.Constants;
 import org.ballerinalang.nats.connection.NatsStreamingConnection;
-import org.ballerinalang.nats.observability.NatsMetricsReporter;
+import org.ballerinalang.nats.observability.NatsMetricsUtil;
 
 /**
  * Close NATS producer using the connection.
@@ -31,7 +31,7 @@ import org.ballerinalang.nats.observability.NatsMetricsReporter;
 public class Close {
 
     public static Object streamingProducerClose(ObjectValue streamingClientObject, ObjectValue natsConnection) {
-        ((NatsMetricsReporter) natsConnection.getNativeData(Constants.NATS_METRIC_UTIL)).reportProducerClose();
+        ((NatsMetricsUtil) natsConnection.getNativeData(Constants.NATS_METRIC_UTIL)).reportProducerClose();
         return NatsStreamingConnection.closeConnection(streamingClientObject, natsConnection);
     }
 }

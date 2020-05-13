@@ -17,7 +17,6 @@
  */
 package org.ballerinalang.jvm.values.api;
 
-import org.ballerinalang.jvm.scheduling.Strand;
 import org.ballerinalang.jvm.types.BType;
 
 /**
@@ -39,10 +38,4 @@ public interface BTypedesc extends BRefValue {
      * @return describing type
      */
     BType getDescribingType();
-
-    /**
-     * @param strand strand to be used to run the user-defined-type initialization code.
-     * @return instantiated object
-     */
-    Object instantiate(Strand strand);
 }

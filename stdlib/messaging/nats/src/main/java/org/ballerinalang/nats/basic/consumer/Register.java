@@ -26,7 +26,7 @@ import org.ballerinalang.jvm.values.MapValue;
 import org.ballerinalang.jvm.values.ObjectValue;
 import org.ballerinalang.nats.Constants;
 import org.ballerinalang.nats.Utils;
-import org.ballerinalang.nats.observability.NatsMetricsReporter;
+import org.ballerinalang.nats.observability.NatsMetricsUtil;
 import org.ballerinalang.nats.observability.NatsObservabilityConstants;
 
 import java.io.PrintStream;
@@ -58,7 +58,7 @@ public class Register {
                 Utils.getSubscriptionConfig(service.getType().getAnnotation(Constants.NATS_PACKAGE,
                                                                             Constants.SUBSCRIPTION_CONFIG));
         if (subscriptionConfig == null) {
-            NatsMetricsReporter.reportConsumerError(NatsObservabilityConstants.ERROR_TYPE_SUBSCRIPTION);
+            NatsMetricsUtil.reportConsumerError(NatsObservabilityConstants.ERROR_TYPE_SUBSCRIPTION);
             return BallerinaErrors.createError(Constants.NATS_ERROR_CODE,
                                                errorMessage + " Cannot find subscription configuration.");
         }
@@ -66,10 +66,9 @@ public class Register {
         String subject = subscriptionConfig.getStringValue(Constants.SUBJECT);
         BRuntime runtime = BRuntime.getCurrentRuntime();
         ObjectValue connectionObject = (ObjectValue) listenerObject.get(Constants.CONNECTION_OBJ);
-        NatsMetricsReporter natsMetricsReporter =
-                (NatsMetricsReporter) connectionObject.getNativeData(Constants.NATS_METRIC_UTIL);
+        NatsMetricsUtil natsMetricsUtil = (NatsMetricsUtil) connectionObject.getNativeData(Constants.NATS_METRIC_UTIL);
         Dispatcher dispatcher = natsConnection.createDispatcher(new DefaultMessageHandler(
-                service, runtime, natsConnection.getConnectedUrl(), natsMetricsReporter));
+                service, runtime, natsConnection.getConnectedUrl(), natsMetricsUtil));
 
         // Add dispatcher. This is needed when closing the connection.
         @SuppressWarnings("unchecked")
@@ -86,7 +85,7 @@ public class Register {
                 dispatcher.subscribe(subject);
             }
         } catch (IllegalArgumentException | IllegalStateException ex) {
-            natsMetricsReporter.reportConsumerError(subject, NatsObservabilityConstants.ERROR_TYPE_SUBSCRIPTION);
+            natsMetricsUtil.reportConsumerError(subject, NatsObservabilityConstants.ERROR_TYPE_SUBSCRIPTION);
             return BallerinaErrors.createError(Constants.NATS_ERROR_CODE,
                                                errorMessage + ex.getMessage());
         }
@@ -98,7 +97,7 @@ public class Register {
                 (ArrayList<String>) listenerObject
                         .getNativeData(BASIC_SUBSCRIPTION_LIST);
         subscriptionsList.add(subject);
-        NatsMetricsReporter.reportSubscription(natsConnection.getConnectedUrl(), subject);
+        NatsMetricsUtil.reportSubscription(natsConnection.getConnectedUrl(), subject);
         return null;
     }
 

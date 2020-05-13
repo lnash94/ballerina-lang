@@ -25,6 +25,7 @@ import com.google.gson.JsonParser;
 import org.ballerinalang.compiler.CompilerPhase;
 import org.ballerinalang.langserver.command.executors.AddAllDocumentationExecutor;
 import org.ballerinalang.langserver.command.executors.AddDocumentationExecutor;
+import org.ballerinalang.langserver.command.executors.ChangeAbstractTypeObjExecutor;
 import org.ballerinalang.langserver.command.executors.CreateFunctionExecutor;
 import org.ballerinalang.langserver.command.executors.CreateTestExecutor;
 import org.ballerinalang.langserver.command.executors.ImportModuleExecutor;
@@ -160,6 +161,26 @@ public class CommandExecutionTest {
         Assert.assertEquals(responseJson, expected, "Test Failed for: " + config);
     }
 
+    @Test(dataProvider = "change-abstract-type-data-provider", enabled = false)
+    public void testChangeAbstractTypeObj(String config, String source) throws IOException {
+        LSContextManager.getInstance().clearAllContexts();
+        String configJsonPath = "command" + File.separator + config;
+        Path sourcePath = sourcesPath.resolve("source").resolve(source);
+        TestUtil.openDocument(serviceEndpoint, sourcePath);
+        JsonObject configJsonObject = FileUtils.fileContentAsObject(configJsonPath);
+        JsonObject expected = configJsonObject.get("expected").getAsJsonObject();
+        List<Object> args = new ArrayList<>();
+        JsonObject arguments = configJsonObject.get("arguments").getAsJsonObject();
+        args.add(new CommandArgument(CommandConstants.ARG_KEY_DOC_URI, sourcePath.toUri().toString()));
+        args.add(new CommandArgument(CommandConstants.ARG_KEY_NODE_LINE, arguments.get("node.line").getAsString()));
+        args.add(new CommandArgument(CommandConstants.ARG_KEY_NODE_COLUMN, arguments.get("node.column").getAsString()));
+        JsonObject responseJson = getCommandResponse(args, ChangeAbstractTypeObjExecutor.COMMAND);
+        responseJson.get("result").getAsJsonObject().get("edit").getAsJsonObject().getAsJsonArray("documentChanges")
+                .forEach(element -> element.getAsJsonObject().remove("textDocument"));
+        TestUtil.closeDocument(serviceEndpoint, sourcePath);
+        Assert.assertEquals(responseJson, expected, "Test Failed for: " + config);
+    }
+
     @Test(dataProvider = "testgen-fail-data-provider", enabled = false)
     public void testTestGenerationFailCases(String config, Path source) throws IOException {
         String configJsonPath = "command" + File.separator + config;
@@ -180,7 +201,7 @@ public class CommandExecutionTest {
             args.add(new CommandArgument(CommandConstants.ARG_KEY_DOC_URI, sourcePath.toUri().toString()));
             args.add(new CommandArgument(CommandConstants.ARG_KEY_NODE_LINE, arguments.get("node.line").getAsString()));
             args.add(new CommandArgument(CommandConstants.ARG_KEY_NODE_COLUMN,
-                    arguments.get("node.column").getAsString()));
+                                         arguments.get("node.column").getAsString()));
             JsonObject responseJson = getCommandResponse(args, CreateTestExecutor.COMMAND);
             JsonElement resultElm = responseJson.get("result");
             if (resultElm.getAsBoolean()) {
@@ -209,7 +230,7 @@ public class CommandExecutionTest {
             args.add(new CommandArgument(CommandConstants.ARG_KEY_DOC_URI, sourcePath.toUri().toString()));
             args.add(new CommandArgument(CommandConstants.ARG_KEY_NODE_LINE, arguments.get("node.line").getAsString()));
             args.add(new CommandArgument(CommandConstants.ARG_KEY_NODE_COLUMN,
-                    arguments.get("node.column").getAsString()));
+                                         arguments.get("node.column").getAsString()));
             JsonObject responseJson = getCommandResponse(args, CreateTestExecutor.COMMAND);
             JsonElement resultElm = responseJson.get("result");
             String content = resultElm.getAsJsonObject().get("edit").getAsJsonObject()
@@ -245,13 +266,13 @@ public class CommandExecutionTest {
             testablePkg.getCompilationUnits()
                     .forEach(unit -> unit.getTopLevelNodes()
                             .forEach(node -> {
-                                        if (node instanceof BLangImportPackage) {
-                                            BLangImportPackage importPkg = (BLangImportPackage) node;
-                                            imports.removeIf(pkgName -> {
-                                                return pkgName.equals(importPkg.orgName.value + "/" + importPkg.alias);
-                                            });
-                                        }
-                                    }
+                                         if (node instanceof BLangImportPackage) {
+                                             BLangImportPackage importPkg = (BLangImportPackage) node;
+                                             imports.removeIf(pkgName -> {
+                                                 return pkgName.equals(importPkg.orgName.value + "/" + importPkg.alias);
+                                             });
+                                         }
+                                     }
                             )
                     );
             // Remove found values from the expected values
@@ -346,7 +367,7 @@ public class CommandExecutionTest {
         args.add(new CommandArgument(CommandConstants.ARG_KEY_NODE_COLUMN, arguments.get("node.column").getAsString()));
         args.add(new CommandArgument(CommandConstants.ARG_KEY_PATH, arguments.get("resource.path").getAsString()));
         args.add(new CommandArgument(CommandConstants.ARG_KEY_PARAMETER,
-                arguments.get("resource.parameter").getAsString()));
+                                     arguments.get("resource.parameter").getAsString()));
         args.add(new CommandArgument(CommandConstants.ARG_KEY_METHOD, arguments.get("resource.method").getAsString()));
         JsonObject responseJson = getCommandResponse(args, AddMissingParameterInBallerinaExecutor.COMMAND);
         responseJson.get("result").getAsJsonObject().get("edit").getAsJsonObject().getAsJsonArray("documentChanges")
@@ -489,6 +510,15 @@ public class CommandExecutionTest {
         return new Object[][]{
 //                {"testGenerationForFunctions.json", Paths.get("testgen", "module1", "functions.bal")},
                 {"testGenerationForServices.json", Paths.get("testgen", "module2", "services.bal")}
+        };
+    }
+
+    @DataProvider(name = "change-abstract-type-data-provider")
+    public Object[][] testChangeAbstractTypeDataProvider() {
+        log.info("Test workspace/executeCommand for command {}", CreateTestExecutor.COMMAND);
+        return new Object[][]{
+                {"changeAbstractTypeObj1.json", "changeAbstractType.bal"},
+                {"changeAbstractTypeObj2.json", "changeAbstractType.bal"},
         };
     }
 

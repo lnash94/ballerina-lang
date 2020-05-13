@@ -120,7 +120,6 @@ public class LSStandardLibCache {
         if (cacheUpdating || importPackages == null || importPackages.isEmpty()) {
             return;
         }
-        cacheUpdating = true;
         Set<String> cachedModules = topLevelNodeCache.asMap().keySet();
         List<BLangImportPackage> evalModules = importPackages.parallelStream()
                 .filter(importModule -> !cachedModules.contains(LSStdLibCacheUtil.getCacheableKey(importModule)))
@@ -128,6 +127,7 @@ public class LSStandardLibCache {
         // Populate cache entries in a separate thread
         new Thread(() -> {
             try {
+                cacheUpdating = true;
                 evalModules.forEach(module -> {
                     String orgName = module.getOrgName().getValue();
                     String moduleName = LSStdLibCacheUtil.getCacheableKey(module);
@@ -178,7 +178,6 @@ public class LSStandardLibCache {
         if (cacheUpdating) {
             return;
         }
-        cacheUpdating = true;
         new Thread(() -> {
             try {
                 for (String langLib : langLibs) {
@@ -197,35 +196,30 @@ public class LSStandardLibCache {
     private List<TopLevelNode> getNodesForModule(String moduleName) throws UnsupportedEncodingException {
         Compiler compiler = getCompiler(CommonUtil.LS_STDLIB_CACHE_DIR.resolve(moduleName).toString());
         BLangPackage bLangPackage = compiler.compile(moduleName);
-        List<TopLevelNode> nodes = new ArrayList<>();
-        bLangPackage.getCompilationUnits().forEach(compilationUnit -> {
-            List<TopLevelNode> cNodes = compilationUnit.topLevelNodes.stream()
-                    .filter(topLevelNode -> {
-                        BLangIdentifier nodeName;
-                        switch (topLevelNode.getKind()) {
-                            case FUNCTION:
-                                nodeName = ((BLangFunction) topLevelNode).name;
-                                break;
-                            case TYPE_DEFINITION:
-                                nodeName = ((BLangTypeDefinition) topLevelNode).name;
-                                break;
-                            case CONSTANT:
-                                nodeName = ((BLangConstant) topLevelNode).name;
-                                break;
-                            // TODO: Handle XML Namespace Declarations
-                            case ANNOTATION:
-                                nodeName = ((BLangAnnotation) topLevelNode).name;
-                                break;
-                            default:
-                                nodeName = null;
-                                break;
-                        }
-                        return nodeName != null && !nodeName.getValue().contains("$");
-                    })
-                    .collect(Collectors.toList());
-            nodes.addAll(cNodes);
-        });
-        return nodes;
+        return bLangPackage.topLevelNodes.stream()
+                .filter(topLevelNode -> {
+                    BLangIdentifier nodeName;
+                    switch (topLevelNode.getKind()) {
+                        case FUNCTION:
+                            nodeName = ((BLangFunction) topLevelNode).name;
+                            break;
+                        case TYPE_DEFINITION:
+                            nodeName = ((BLangTypeDefinition) topLevelNode).name;
+                            break;
+                        case CONSTANT:
+                            nodeName = ((BLangConstant) topLevelNode).name;
+                            break;
+                        // TODO: Handle XML Namespace Declarations
+                        case ANNOTATION:
+                            nodeName = ((BLangAnnotation) topLevelNode).name;
+                            break;
+                        default:
+                            nodeName = null;
+                            break;
+                    }
+                    return nodeName != null && !nodeName.getValue().contains("$");
+                })
+                .collect(Collectors.toList());
     }
 
     private CompilerContext createNewCompilerContext(String projectDir) {

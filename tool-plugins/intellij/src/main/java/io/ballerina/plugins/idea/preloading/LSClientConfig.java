@@ -32,7 +32,7 @@ public class LSClientConfig {
         this.allowExperimental = false;
         this.debugLog = false;
         this.traceLog = false;
-        this.goToDefinition = new GoToDefinitionConfig(true);
+        this.goToDefinition = new GoToDefinitionConfig(false);
     }
 
     public void setAllowExperimental(boolean allowExperimental) {

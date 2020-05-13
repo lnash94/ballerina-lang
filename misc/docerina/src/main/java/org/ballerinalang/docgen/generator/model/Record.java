@@ -15,6 +15,7 @@
  */
 package org.ballerinalang.docgen.generator.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,7 +23,7 @@ import java.util.List;
  */
 public class Record extends Construct {
 
-    public List<DefaultableVariable> fields;
+    public List<DefaultableVariable> fields  = new ArrayList<>();
     public boolean isAnonymous = false;
 
     public Record(String name, String description, boolean isDeprecated, boolean isAnonymous,

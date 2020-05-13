@@ -33,6 +33,7 @@
             <run>
                 <exclude name="brokenOnJBallerina"/>
                 <exclude name="brokenOnSpecDeviation"/>
+                <exclude name="brokenOnXMLLangLibChange"/>
             </run>
         </groups>
         <packages>
@@ -62,7 +63,6 @@
             <package name="org.ballerinalang.test.types.map.*"/>
             <package name="org.ballerinalang.test.types.string.*"/>
             <package name="org.ballerinalang.test.types.stream.*"/>
-            <package name="org.ballerinalang.test.types.table.*"/>
             <package name="org.ballerinalang.test.types.errors.*"/>
             <package name="org.ballerinalang.test.types.var.*"/>
             <package name="org.ballerinalang.test.types.uniontypes.*"/>
@@ -129,6 +129,7 @@
             <package name="org.ballerinalang.test.javainterop.*"/>
             <package name="org.ballerinalang.test.execution.*" />
             <package name="org.ballerinalang.test.query.*" />
+            <package name="org.ballerinalang.test.docerina.*"/>
         </packages>
 
         <classes>
@@ -152,6 +153,7 @@
                     <exclude name="testLockInRecords"/>
                 </methods>
             </class>
+            <class name="org.ballerinalang.test.types.table.TableLiteralSyntaxTest"/>
             <!--<class name="org.ballerinalang.test.types.table.TableLiteralIterableTest"/>-->
             <!--<class name="org.ballerinalang.test.types.TypeUnificationTest"/>-->
             <!--<class name="org.ballerinalang.test.error.ErrorTest" />-->

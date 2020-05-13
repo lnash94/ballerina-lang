@@ -47,9 +47,9 @@ type Foo client object {
 
 function testFunc1() {
     Foo x = new;
-    // invalid remote method call '.pqr()': use '->pqr()' for remote method calls
+    // invalid remote function invocation syntax, use '->' operator
     var y = x.pqr("test");
-    // invalid method call '->abc()': '->' can only be used with remote methods
+    // undefined remote function 'abc' in endpoint Foo
     var z = x->abc("test");
 }
 
@@ -81,7 +81,7 @@ Foo gep = new;
 function testFunc5() {
     var y = gep->pqr("test");
 
-    // invalid remote method call '.pqr()': use '->pqr()' for remote method calls
+    // invalid remote function invocation syntax, use '->' operator
     var z = gep.pqr("test");
 }
 
@@ -89,7 +89,7 @@ function testFunc5() {
 function testFunc6(Foo ep, string b) {
     var y = ep->pqr("test");
 
-    // invalid remote method call '.pqr()': use '->pqr()' for remote method calls
+    // invalid remote function invocation syntax, use '->' operator
     var z = ep.pqr("test");
 }
 

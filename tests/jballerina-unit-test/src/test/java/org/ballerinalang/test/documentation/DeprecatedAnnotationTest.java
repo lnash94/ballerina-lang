@@ -66,7 +66,7 @@ public class DeprecatedAnnotationTest {
 
         List<BLangPackage> modules = new LinkedList<>();
         modules.add((BLangPackage) result.getAST());
-        Map<String, ModuleDoc> docsMap = BallerinaDocGenerator.generateModuleDocs(
+        Map<String, ModuleDoc> docsMap = BallerinaDocGenerator.generateModuleDocsFromBLangPackages(
                 Paths.get("src/test/resources", sourceRoot).toAbsolutePath().toString(), modules);
         List<ModuleDoc> moduleDocList = new ArrayList<>(docsMap.values());
         moduleDocList.sort(Comparator.comparing(pkg -> pkg.bLangPackage.packageID.toString()));

@@ -60,21 +60,19 @@ public class EntityHeaders {
         try {
             getOrCreateHeadersBasedOnPosition(entityObj, position).add(headerName, headerValue);
         } catch (IllegalArgumentException ex) {
-            throw BallerinaErrors.createError(HEADER_OPERATION_ERROR, StringUtils.fromString(ex.getMessage()));
+            throw BallerinaErrors.createError(HEADER_OPERATION_ERROR, ex.getMessage());
         }
     }
 
     public static String getHeader(ObjectValue entityObj, String headerName, Object position) {
         HttpHeaders httpHeaders = getHeadersBasedOnPosition(entityObj, position);
         if (httpHeaders == null) {
-            throw BallerinaErrors.createError(HEADER_NOT_FOUND_ERROR,
-                                              StringUtils.fromString("Http header does not exist"));
+            throw BallerinaErrors.createError(HEADER_NOT_FOUND_ERROR, "Http header does not exist");
         }
         if (httpHeaders.get(headerName) != null) {
             return httpHeaders.get(headerName);
         } else {
-            throw BallerinaErrors.createError(HEADER_NOT_FOUND_ERROR,
-                                              StringUtils.fromString("Http header does not exist"));
+            throw BallerinaErrors.createError(HEADER_NOT_FOUND_ERROR, "Http header does not exist");
         }
     }
 
@@ -142,7 +140,7 @@ public class EntityHeaders {
         try {
             getOrCreateHeadersBasedOnPosition(entityObj, position).set(headerName, headerValue);
         } catch (IllegalArgumentException ex) {
-            throw BallerinaErrors.createError(HEADER_OPERATION_ERROR, StringUtils.fromString(ex.getMessage()));
+            throw BallerinaErrors.createError(HEADER_OPERATION_ERROR, ex.getMessage());
         }
     }
 

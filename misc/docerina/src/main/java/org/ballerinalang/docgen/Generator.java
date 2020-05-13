@@ -299,8 +299,8 @@ public class Generator {
                     }
                 }
                 DefaultableVariable field = new DefaultableVariable(name, desc,
-                        isDeprecated(param.getAnnotationAttachments()),
-                        Type.fromTypeNode(param.typeNode, param.type, module.id), defaultValue);
+                        isDeprecated(param.getAnnotationAttachments()), Type.fromTypeNode(param.typeNode, module.id),
+                        defaultValue);
                 fields.add(field);
             }
         }
@@ -335,12 +335,11 @@ public class Generator {
                                             Module module) {
         List<Function> functions = new ArrayList<>();
         String name = parent.getName().getValue();
-
         // handle anonymous names
         if (name != null && name.contains("$anonType$")) {
-            name = "T" + name.substring(name.lastIndexOf('$') + 1);
+            name = "T" + name.substring(name.lastIndexOf('$') + 1);;
         }
-
+        
         String description = description(parent);
         boolean isDeprecated = isDeprecated(parent.getAnnotationAttachments());
 

@@ -16,7 +16,6 @@
 package org.ballerinalang.openapi;
 
 import com.github.jknack.handlebars.Context;
-import com.github.jknack.handlebars.EscapingStrategy;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.context.FieldValueResolver;
@@ -270,7 +269,7 @@ public class CodeGenerator {
         cpTemplateLoader.setSuffix(GeneratorConstants.TEMPLATES_SUFFIX);
         fileTemplateLoader.setSuffix(GeneratorConstants.TEMPLATES_SUFFIX);
 
-        Handlebars handlebars = new Handlebars().with(cpTemplateLoader, fileTemplateLoader).with(EscapingStrategy.NOOP);
+        Handlebars handlebars = new Handlebars().with(cpTemplateLoader, fileTemplateLoader);
         handlebars.setInfiniteLoops(true); //This will allow templates to call themselves with recursion.
         handlebars.registerHelpers(StringHelpers.class);
         handlebars.registerHelper("equals", (object, options) -> {

@@ -15,8 +15,6 @@
  */
 package org.ballerinalang.docgen.generator.model;
 
-import com.google.gson.annotations.Expose;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,15 +23,10 @@ import java.util.List;
  */
 public class Module {
 
-    @Expose
     public String id;
-    @Expose
     public String summary;
-    @Expose
     public String description;
-    @Expose
     public String orgName;
-    @Expose
     public String version;
 
     // constructs

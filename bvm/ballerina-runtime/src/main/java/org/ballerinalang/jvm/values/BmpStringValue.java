@@ -15,7 +15,6 @@
   *  specific language governing permissions and limitations
   *  under the License.
   */
-
 package org.ballerinalang.jvm.values;
 
  import org.ballerinalang.jvm.values.api.BString;
@@ -25,7 +24,7 @@ package org.ballerinalang.jvm.values;
   *
   * @since 1.0.5
   */
- public class BmpStringValue implements StringValue {
+public class BmpStringValue implements StringValue {
 
      private final String value;
 
@@ -52,47 +51,23 @@ package org.ballerinalang.jvm.values;
      public BString concat(BString str) {
          if (str instanceof BmpStringValue) {
              return new BmpStringValue(this.value + ((BmpStringValue) str).value);
-         } else if (str instanceof NonBmpStringValue) {
-             return new NonBmpStringValue(this.value + str.getValue(), ((NonBmpStringValue) str).getSurrogates());
          } else {
              throw new RuntimeException("not impl yet");
          }
      }
 
-     @Override
-     public String stringValue() {
-         return value;
-     }
+    @Override
+    public String stringValue() {
+        return value;
+    }
 
-     @Override
-     public int hashCode() {
-         return value.hashCode();
-     }
+    @Override
+    public BString bStringValue() {
+        return null;
+    }
 
-     @Override
-     public boolean equals(Object str) {
-         if (str == this) {
-             return true;
-         }
-         if (str instanceof BString) {
-             return ((BString) str).getValue().equals(value);
-         }
-         return false;
-     }
-
-     @Override
-     public String toString() {
-         return value;
-     }
-
-     @Override
-     public Long indexOf(BString str, int fromIndex) {
-         long index = value.indexOf(str.getValue(), fromIndex);
-         return index >= 0 ? index : null;
-     }
-
-     @Override
-     public BString substring(int beginIndex, int endIndex) {
-         return new BmpStringValue(value.substring(beginIndex, endIndex));
-     }
- }
+    @Override
+    public int hashCode() {
+        return value.hashCode();
+    }
+}

@@ -14,6 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/java;
+
 # Represents a ReadableCSVChannel which could be used to read records from CSV file.
 public type ReadableCSVChannel object {
     private ReadableTextRecordChannel? dc;
@@ -84,7 +86,7 @@ public type ReadableCSVChannel object {
 # ```ballerina
 # io:Error? err = readableCSVChannel.close();
 # ```
-#
+# 
 # + return - `io:Error` if any error occurred
     public function close() returns Error? {
         if(self.dc is ReadableTextRecordChannel){
@@ -94,21 +96,20 @@ public type ReadableCSVChannel object {
         return ();
     }
 
-//TODO Table remove - Fix
-//# Returns a table, which corresponds to the CSV records.
-//# ```ballerina
-//# var tblResult = readableCSVChannel.getTable(Employee);
-//# ```
-//#
-//# + structType - The object in which the CSV records should be deserialized
-//# + return - Table, which represents the CSV records or else an `io:Error`
-    //public function getTable(typedesc<record {}> structType) returns @tainted table<record {}>|Error {
-    //    return getTableExtern(self, structType);
-    //}
+# Returns a table, which corresponds to the CSV records.
+# ```ballerina
+# var tblResult = readableCSVChannel.getTable(Employee);
+# ```
+#
+# + structType - The object in which the CSV records should be deserialized
+# + return - Table, which represents the CSV records or else an `io:Error`
+    public function getTable(typedesc<record {}> structType) returns @tainted table<record {}>|Error {
+        return getTableExtern(self, structType);
+    }
 };
 
-//function getTableExtern(ReadableCSVChannel csvChannel, typedesc<record {}> structType)
-//            returns @tainted table<record {}>|Error = @java:Method {
-//    name: "getTable",
-//    class: "org.ballerinalang.stdlib.io.nativeimpl.GetTable"
-//} external;
+function getTableExtern(ReadableCSVChannel csvChannel, typedesc<record {}> structType)
+            returns @tainted table<record {}>|Error = @java:Method {
+    name: "getTable",
+    class: "org.ballerinalang.stdlib.io.nativeimpl.GetTable"
+} external;

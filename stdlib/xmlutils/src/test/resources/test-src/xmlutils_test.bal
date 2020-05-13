@@ -33,14 +33,13 @@ function testFromJSON() returns xml|error {
     return x;
 }
 
-//TODO Table remove - Fix
-//public function testFromTable() returns string {
-//    table<Person> personTable = table{
-//        { key id, age, salary, name, married },
-//        [ { 1, 30,  300.5, "Mary", true },
-//          { 2, 20,  300.5, "John", true }
-//        ]
-//    };
-//
-//    return xmlutils:fromTable(personTable).toString();
-//}
+public function testFromTable() returns string {
+    table<Person> personTable = table{
+        { key id, age, salary, name, married },
+        [ { 1, 30,  300.5, "Mary", true },
+          { 2, 20,  300.5, "John", true }
+        ]
+    };
+
+    return xmlutils:fromTable(personTable).toString();
+}

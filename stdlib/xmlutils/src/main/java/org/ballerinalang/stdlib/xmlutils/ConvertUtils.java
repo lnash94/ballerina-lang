@@ -19,7 +19,10 @@
 package org.ballerinalang.stdlib.xmlutils;
 
 import org.ballerinalang.jvm.BallerinaErrors;
+import org.ballerinalang.jvm.XMLFactory;
 import org.ballerinalang.jvm.values.MapValue;
+import org.ballerinalang.jvm.values.TableValue;
+import org.ballerinalang.jvm.values.XMLValue;
 
 /**
  * This class work as a bridge with ballerina and a Java implementation of ballerina/xmlutils modules.
@@ -51,14 +54,13 @@ public class ConvertUtils {
         }
     }
 
-    //TODO Table remove - Fix
-//    /**
-//     * Converts a given table to its XML representation.
-//     *
-//     * @param tableValue Table record pointer
-//     * @return XML record that construct from the table
-//     */
-//    public static XMLValue fromTable(TableValue tableValue) {
-//        return XMLFactory.tableToXML(tableValue);
-//    }
+    /**
+     * Converts a given table to its XML representation.
+     *
+     * @param tableValue Table record pointer
+     * @return XML record that construct from the table
+     */
+    public static XMLValue fromTable(TableValue tableValue) {
+        return XMLFactory.tableToXML(tableValue);
+    }
 }

@@ -75,8 +75,7 @@ import org.wso2.ballerinalang.compiler.tree.expressions.BLangServiceConstructorE
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangSimpleVarRef;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangStatementExpression;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangStringTemplateLiteral;
-import org.wso2.ballerinalang.compiler.tree.expressions.BLangTableConstructorExpr;
-import org.wso2.ballerinalang.compiler.tree.expressions.BLangTableMultiKeyExpr;
+import org.wso2.ballerinalang.compiler.tree.expressions.BLangTableLiteral;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangTernaryExpr;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangTrapExpr;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangTupleVarRef;
@@ -274,14 +273,6 @@ public class ConstantPropagation extends BLangNodeVisitor {
         rewrite(bLangInvocationNode.requiredArgs);
         rewrite(bLangInvocationNode.restArgs);
         result = bLangInvocationNode;
-    }
-
-    @Override
-    public void visit(BLangInvocation.BLangActionInvocation actionInv) {
-        actionInv.expr = rewrite(actionInv.expr);
-        rewrite(actionInv.requiredArgs);
-        rewrite(actionInv.restArgs);
-        result = actionInv;
     }
 
     @Override
@@ -492,6 +483,12 @@ public class ConstantPropagation extends BLangNodeVisitor {
     }
 
     @Override
+    public void visit(BLangTableLiteral tableLiteral) {
+        rewrite(tableLiteral.tableDataRows);
+        result = tableLiteral;
+    }
+
+    @Override
     public void visit(BLangTupleVarRef varRefExpr) {
         rewrite(varRefExpr.expressions);
         result = varRefExpr;
@@ -518,12 +515,6 @@ public class ConstantPropagation extends BLangNodeVisitor {
         indexAccessExpr.expr = rewrite(indexAccessExpr.expr);
         indexAccessExpr.indexExpr = rewrite(indexAccessExpr.indexExpr);
         result = indexAccessExpr;
-    }
-
-    @Override
-    public void visit(BLangTableMultiKeyExpr tableMultiKeyExpr) {
-        rewrite(tableMultiKeyExpr.multiKeyIndexExprs);
-        result = tableMultiKeyExpr;
     }
 
     @Override
@@ -557,12 +548,6 @@ public class ConstantPropagation extends BLangNodeVisitor {
     public void visit(BLangListConstructorExpr listConstructorExpr) {
         rewrite(listConstructorExpr.exprs);
         result = listConstructorExpr;
-    }
-
-    @Override
-    public void visit(BLangTableConstructorExpr tableConstructorExpr) {
-        rewrite(tableConstructorExpr.recordLiteralList);
-        result = tableConstructorExpr;
     }
 
     @Override

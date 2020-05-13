@@ -183,23 +183,8 @@ public type TypeParser object {
     }
 
     function parseTableType() returns BTableType {
-        // Dummy constraint until actual constraint is read
-        BTableType obj = { tConstraint:TYPE_NIL, isTableKeySpecifier:false , tKeyTypeConstraint:TYPE_NIL, fieldNames:[]};
+        BTableType obj = { tConstraint:TYPE_NIL }; // Dummy constraint until actual constraint is read
         obj.tConstraint = self.parseTypeCpRef();
-        boolean isTableKeySpecifier = self.readBoolean();
-        if(isTableKeySpecifier) {
-            obj.isTableKeySpecifier = true;
-            int size = self.readInt32();
-            int c = 0;
-            string?[] fieldNames = [];
-            while c < size {
-                fieldNames[c] = self.readStringCpRef();
-                c = c + 1;
-            }
-            obj.fieldNames = fieldNames;
-        } else {
-            obj.tKeyTypeConstraint = self.parseTypeCpRef();
-        }
         return obj;
     }
 

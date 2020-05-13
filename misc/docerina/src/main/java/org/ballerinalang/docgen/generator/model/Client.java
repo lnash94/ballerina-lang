@@ -15,6 +15,7 @@
  */
 package org.ballerinalang.docgen.generator.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,12 +24,12 @@ import java.util.stream.Collectors;
  */
 public class Client extends Object {
 
-    public List<Function> remoteMethods;
+    public List<Function> remoteMethods = new ArrayList<>();
 
     public Client(String name, String description, boolean isDeprecated, List<DefaultableVariable> fields,
             List<Function> methods) {
         super(name, description, isDeprecated, fields, methods);
-        this.remoteMethods = getRemoteMethods();
+        this.remoteMethods = getRemoteMethods(methods);
         this.otherMethods = getOtherMethods(methods);
     }
 
@@ -39,7 +40,7 @@ public class Client extends Object {
                 .collect(Collectors.toList());
     }
 
-    public List<Function> getRemoteMethods() {
+    public List<Function> getRemoteMethods(List<Function> methods) {
         return this.methods.stream()
                 .filter(function -> function.isRemote)
                 .collect(Collectors.toList());

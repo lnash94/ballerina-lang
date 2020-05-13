@@ -78,12 +78,11 @@ public class Sort {
                 input.add(k, aux.get(j++));
             } else if (j > hi) {
                 input.add(k, aux.get(i++));
-            } else if (comparator.call(new Object[]{strand, aux.get(j), true, aux.get(i), true}) < 0) {
+            } else if (comparator.apply(new Object[]{strand, aux.get(j), true, aux.get(i), true}) < 0) {
                 input.add(k, aux.get(j++));
             } else {
                 input.add(k, aux.get(i++));
             }
         }
     }
-
 }

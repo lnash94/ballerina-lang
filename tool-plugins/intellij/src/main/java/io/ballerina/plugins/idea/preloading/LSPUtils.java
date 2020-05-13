@@ -23,11 +23,15 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.util.Pair;
-import io.ballerina.plugins.idea.configuration.BallerinaProjectSettings;
 import io.ballerina.plugins.idea.extensions.BallerinaLSPExtensionManager;
 import io.ballerina.plugins.idea.notifiers.BallerinaAutoDetectNotifier;
 import io.ballerina.plugins.idea.sdk.BallerinaSdk;
+import io.ballerina.plugins.idea.sdk.BallerinaSdkService;
 import io.ballerina.plugins.idea.sdk.BallerinaSdkUtils;
+import io.ballerina.plugins.idea.settings.autodetect.BallerinaAutoDetectionSettings;
+import io.ballerina.plugins.idea.settings.experimental.BallerinaExperimentalFeatureSettings;
+import io.ballerina.plugins.idea.settings.langserverlogs.LangServerLogsSettings;
+import io.ballerina.plugins.idea.settings.soucenavigation.BallerinaSourceNavigationSettings;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -51,10 +55,6 @@ import static io.ballerina.plugins.idea.BallerinaConstants.LAUNCHER_SCRIPT_PATH;
 import static io.ballerina.plugins.idea.BallerinaConstants.SYS_PROP_EXPERIMENTAL;
 import static io.ballerina.plugins.idea.BallerinaConstants.SYS_PROP_LS_DEBUG;
 import static io.ballerina.plugins.idea.BallerinaConstants.SYS_PROP_LS_TRACE;
-import static io.ballerina.plugins.idea.sdk.BallerinaSdkService.getBallerinaExecutablePath;
-import static io.ballerina.plugins.idea.sdk.BallerinaSdkUtils.execBalHomeCmd;
-import static io.ballerina.plugins.idea.sdk.BallerinaSdkUtils.getMajorVersion;
-import static io.ballerina.plugins.idea.sdk.BallerinaSdkUtils.getMinorVersion;
 
 /**
  * Language server protocol related utils.
@@ -81,7 +81,6 @@ public class LSPUtils {
             LOG.warn("unexpected error occurred when notifying plugin config changes to language server.", e);
             return false;
         }
-
         String balSdkPath = balSdk.first;
         String version = BallerinaSdkUtils.retrieveBallerinaVersion(balSdkPath);
         if (version == null) {
@@ -96,10 +95,11 @@ public class LSPUtils {
 
         // Checks user-configurable settings and sets flags accordingly.
         LSClientConfig clientConfig = new LSClientConfig();
-        clientConfig.setAllowExperimental(BallerinaProjectSettings.getStoredSettings(project).isAllowExperimental());
-        clientConfig.setDebugLog(BallerinaProjectSettings.getStoredSettings(project).isLsDebugLogs());
-        clientConfig.setTraceLog(BallerinaProjectSettings.getStoredSettings(project).isLsTraceLogs());
-        clientConfig.setGoToDefStdLibs(BallerinaProjectSettings.getStoredSettings(project).isStdlibGotoDef());
+        clientConfig.setAllowExperimental(BallerinaExperimentalFeatureSettings.getInstance(project)
+                .isAllowedExperimental());
+        clientConfig.setDebugLog(LangServerLogsSettings.getInstance(project).isLangServerDebugLogsEnabled());
+        clientConfig.setTraceLog(LangServerLogsSettings.getInstance(project).isLangServerTraceLogsEnabled());
+        clientConfig.setGoToDefStdLibs(BallerinaSourceNavigationSettings.getInstance(project).isEnableStdlibGotoDef());
 
         IntellijLanguageClient.didChangeConfiguration(new DidChangeConfigurationParams(clientConfig), project);
         return true;
@@ -132,7 +132,7 @@ public class LSPUtils {
                     showInIdeaEventLog(project, "Auto-Detected Ballerina Home: " + balSdkPath);
                 }
                 return success;
-            } else if (BallerinaProjectSettings.getStoredSettings(project).isAutodetect()) {
+            } else if (BallerinaAutoDetectionSettings.getInstance(project).isAutoDetectionEnabled()) {
                 showInIdeaEventLog(project, "Auto-Detection Failed for: " + project.getBasePath());
             }
             return false;
@@ -176,7 +176,7 @@ public class LSPUtils {
 
         if (balSdkPath != null) {
             return new Pair<>(balSdkPath, false);
-        } else if (BallerinaProjectSettings.getStoredSettings(project).isAutodetect()) {
+        } else if (BallerinaAutoDetectionSettings.getInstance(project).isAutoDetectionEnabled()) {
             if (verboseMode) {
                 showInIdeaEventLog(project, String.format("No ballerina SDK is found for project: %s\n " +
                         "Trying to Auto detect Ballerina Home...", project.getBasePath()));
@@ -225,17 +225,17 @@ public class LSPUtils {
 
         processBuilder = new ProcessBuilder(args);
         // Checks user-configurable setting for allowing ballerina experimental features and sets the flag accordingly.
-        if (BallerinaProjectSettings.getStoredSettings(project).isAllowExperimental()) {
+        if (BallerinaExperimentalFeatureSettings.getInstance(project).isAllowedExperimental()) {
             processBuilder.environment().put(SYS_PROP_EXPERIMENTAL, "true");
         }
 
         // Checks user-configurable setting for allowing language server debug logs and sets the flag accordingly.
-        if (BallerinaProjectSettings.getStoredSettings(project).isLsDebugLogs()) {
+        if (LangServerLogsSettings.getInstance(project).isLangServerDebugLogsEnabled()) {
             processBuilder.environment().put(SYS_PROP_LS_DEBUG, "true");
         }
 
         // Checks user-configurable setting for allowing language server trace logs and sets the flag accordingly.
-        if (BallerinaProjectSettings.getStoredSettings(project).isLsTraceLogs()) {
+        if (LangServerLogsSettings.getInstance(project).isLangServerTraceLogsEnabled()) {
             processBuilder.environment().put(SYS_PROP_LS_TRACE, "true");
         }
 
@@ -259,21 +259,21 @@ public class LSPUtils {
 
         ProcessBuilder cmdProcessBuilder = new ProcessBuilder(args);
         // Checks user-configurable setting for allowing ballerina experimental features and sets the flag accordingly.
-        if (BallerinaProjectSettings.getStoredSettings(project).isAllowExperimental()) {
+        if (BallerinaExperimentalFeatureSettings.getInstance(project).isAllowedExperimental()) {
             cmdProcessBuilder.environment().put(ENV_EXPERIMENTAL, "true");
         }
 
         // Checks user-configurable setting for allowing language server debug logs and sets the flag accordingly.
-        if (BallerinaProjectSettings.getStoredSettings(project).isLsDebugLogs()) {
+        if (LangServerLogsSettings.getInstance(project).isLangServerDebugLogsEnabled()) {
             cmdProcessBuilder.environment().put(ENV_DEBUG_LOG, "true");
         }
 
         // Checks user-configurable setting for allowing language server trace logs and sets the flag accordingly.
-        if (BallerinaProjectSettings.getStoredSettings(project).isLsTraceLogs()) {
+        if (LangServerLogsSettings.getInstance(project).isLangServerTraceLogsEnabled()) {
             cmdProcessBuilder.environment().put(ENV_TRACE_LOG, "true");
         }
 
-        if (BallerinaProjectSettings.getStoredSettings(project).isStdlibGotoDef()) {
+        if (BallerinaSourceNavigationSettings.getInstance(project).isEnableStdlibGotoDef()) {
             cmdProcessBuilder.environment().put(ENV_DEF_STDLIBS, "true");
         }
 
@@ -287,10 +287,10 @@ public class LSPUtils {
         try {
             // If the user has configured an SDK.
             if (!autoDetected) {
-                String balExecPath = getBallerinaExecutablePath(balSdkPath);
+                String balExecPath = BallerinaSdkService.getBallerinaExecutablePath(balSdkPath);
                 String homeCmd = OSUtils.isWindows() ? String.format("\"%s\" %s", balExecPath, BALLERINA_HOME_CMD) :
                         String.format("%s %s", balExecPath, BALLERINA_HOME_CMD);
-                String ballerinaPath = execBalHomeCmd(homeCmd);
+                String ballerinaPath = BallerinaSdkUtils.execBalHomeCmd(homeCmd);
                 if (!ballerinaPath.isEmpty()) {
                     cmdArgs.add(balExecPath);
                     cmdArgs.add(BALLERINA_LS_CMD);
@@ -300,7 +300,7 @@ public class LSPUtils {
                 // Checks if the ballerina command works.
                 String ballerinaPath = "";
                 try {
-                    ballerinaPath = execBalHomeCmd(String.format("%s %s", BALLERINA_CMD,
+                    ballerinaPath = BallerinaSdkUtils.execBalHomeCmd(String.format("%s %s", BALLERINA_CMD,
                             BALLERINA_HOME_CMD));
                 } catch (BallerinaCmdException ignored) {
                     // We do nothing here as we need to fall back for default installer based locations, since
@@ -335,16 +335,16 @@ public class LSPUtils {
     }
 
     private static boolean hasLangServerCmdSupport(String balVersion) {
-        int majorV = Integer.parseInt(getMajorVersion(balVersion));
-        int minorV = Integer.parseInt(getMinorVersion(balVersion));
+        int majorV = Integer.parseInt(BallerinaSdkUtils.getMajorVersion(balVersion));
+        int minorV = Integer.parseInt(BallerinaSdkUtils.getMinorVersion(balVersion));
 
         // returns true if the ballerina version >= 1.2.0.
         return majorV == 1 && minorV >= 2;
     }
 
     public static boolean hasDidChangeConfigSupport(String balVersion) {
-        int majorV = Integer.parseInt(getMajorVersion(balVersion));
-        int minorV = Integer.parseInt(getMinorVersion(balVersion));
+        int majorV = Integer.parseInt(BallerinaSdkUtils.getMajorVersion(balVersion));
+        int minorV = Integer.parseInt(BallerinaSdkUtils.getMinorVersion(balVersion));
 
         // returns true if the ballerina version >= 1.2.0.
         return majorV == 1 && minorV >= 2;

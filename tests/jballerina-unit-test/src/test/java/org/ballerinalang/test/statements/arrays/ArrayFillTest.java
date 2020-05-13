@@ -225,7 +225,17 @@ public class ArrayFillTest {
     @Test
     public void testTableArrayFill() {
         BValue[] args = new BValue[]{new BInteger(index)};
-        BRunUtil.invoke(compileResult, "testTableArrayFill", args);
+        BValue[] returns = BRunUtil.invoke(compileResult, "testTableArrayFill", args);
+        BValueArray tableArr = (BValueArray) returns[0];
+        assertEquals(tableArr.size(), index + 1);
+
+        for (int i = 0; i < index; i++) {
+            assertEquals(tableArr.getBValue(i).stringValue(), "table<Employee> {index: [], primaryKey: [], data: []}");
+        }
+
+        assertEquals(tableArr.getBValue(index).stringValue(), "table<Employee> {index: [], primaryKey: [\"id\"], " +
+                "data: [{id:1, name:\"John\", salary:50000.0}]}");
+        assertEquals(returns[1].stringValue(), "John");
     }
 
     @Test

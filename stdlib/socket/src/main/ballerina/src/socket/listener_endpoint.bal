@@ -14,8 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/java;
 import ballerina/lang.'object as lang;
+import ballerina/java;
 
 # Represents the socket listener on which the socket listener service is registered and started.
 public type Listener object {
@@ -83,8 +83,8 @@ public type Listener object {
 # + s - Type descriptor of the service
 # + return - `()` or else a `socket:Error` upon failure to detach the service
     public function __detach(service s) returns error? {
-    // Socket listener operations are strictly bound to the attached service. In fact, a listener doesn't support
-    // multiple services. Therefore, an already attached service is not removed during the detachment.
+        // Socket listener operations are strictly bound to the attached service. In fact, listener doesn't support
+        // for multiple services. So not removing already attached service during the detach.
     }
 };
 

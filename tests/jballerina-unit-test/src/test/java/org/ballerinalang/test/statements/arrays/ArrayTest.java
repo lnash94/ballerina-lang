@@ -216,24 +216,4 @@ public class ArrayTest {
     public void testObjectDynamicArrayFilling() {
         BRunUtil.invokeFunction(compileResult, "testObjectDynamicArrayFilling");
     }
-
-    @Test
-    public void testMultidimensionalArrayString() {
-        BRunUtil.invokeFunction(compileResult, "testMultidimensionalArrayString");
-    }
-
-    @Test
-    public void testArrayMapString() {
-        BRunUtil.invokeFunction(compileResult, "testArrayMapString");
-    }
-
-    @Test
-    public void testArrayUnionType() {
-        BRunUtil.invokeFunction(compileResult, "testArrayUnionType");
-    }
-
-    @Test
-    public void testArrayTupleType() {
-        BRunUtil.invokeFunction(compileResult, "testArrayTupleType");
-    }
 }

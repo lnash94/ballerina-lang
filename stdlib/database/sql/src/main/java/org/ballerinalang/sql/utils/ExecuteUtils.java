@@ -18,13 +18,10 @@
 package org.ballerinalang.sql.utils;
 
 import org.ballerinalang.jvm.BallerinaValues;
-import org.ballerinalang.jvm.values.MapValue;
 import org.ballerinalang.jvm.values.ObjectValue;
 import org.ballerinalang.sql.Constants;
 import org.ballerinalang.sql.datasource.SQLDatasource;
-import org.ballerinalang.sql.exception.ApplicationError;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -44,19 +41,16 @@ import java.util.Map;
  */
 public class ExecuteUtils {
 
-    public static Object nativeExecute(ObjectValue client, MapValue<String, Object> paramSQLString) {
+    public static Object nativeExecute(ObjectValue client, String sqlQuery) {
         Object dbClient = client.getNativeData(Constants.DATABASE_CLIENT);
         if (dbClient != null) {
             SQLDatasource sqlDatasource = (SQLDatasource) dbClient;
             Connection connection = null;
             PreparedStatement statement = null;
             ResultSet resultSet = null;
-            String sqlQuery = null;
             try {
-                sqlQuery = Utils.getSqlQuery(paramSQLString);
                 connection = sqlDatasource.getSQLConnection();
                 statement = connection.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
-                Utils.setParams(connection, statement, paramSQLString);
                 int count = statement.executeUpdate();
                 Object lastInsertedId = null;
                 if (!isDdlStatement(sqlQuery)) {
@@ -73,9 +67,6 @@ public class ExecuteUtils {
             } catch (SQLException e) {
                 return ErrorGenerator.getSQLDatabaseError(e,
                         "Error while executing sql query: " + sqlQuery + ". ");
-            } catch (ApplicationError | IOException e) {
-                return ErrorGenerator.getSQLApplicationError("Error while executing sql query: "
-                        + sqlQuery + ". " + e.getMessage());
             } finally {
                 Utils.closeResources(resultSet, statement, connection);
             }

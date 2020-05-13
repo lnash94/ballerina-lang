@@ -17,7 +17,6 @@
  */
 package org.wso2.ballerinalang.compiler.bir.codegen.interop;
 
-import org.ballerinalang.jvm.values.TableValue;
 import org.ballerinalang.jvm.values.api.BArray;
 import org.ballerinalang.jvm.values.api.BDecimal;
 import org.ballerinalang.jvm.values.api.BError;
@@ -27,6 +26,7 @@ import org.ballerinalang.jvm.values.api.BMap;
 import org.ballerinalang.jvm.values.api.BObject;
 import org.ballerinalang.jvm.values.api.BStream;
 import org.ballerinalang.jvm.values.api.BString;
+import org.ballerinalang.jvm.values.api.BTable;
 import org.ballerinalang.jvm.values.api.BTypedesc;
 import org.ballerinalang.jvm.values.api.BXML;
 import org.ballerinalang.util.diagnostic.DiagnosticCode;
@@ -317,6 +317,8 @@ class JMethodResolver {
                     return this.classLoader.loadClass(BObject.class.getCanonicalName()).isAssignableFrom(jType);
                 case TypeTags.ERROR:
                     return this.classLoader.loadClass(BError.class.getCanonicalName()).isAssignableFrom(jType);
+                case TypeTags.TABLE:
+                    return this.classLoader.loadClass(BTable.class.getCanonicalName()).isAssignableFrom(jType);
                 case TypeTags.XML:
                 case TypeTags.XML_ELEMENT:
                 case TypeTags.XML_PI:
@@ -364,8 +366,6 @@ class JMethodResolver {
                     return this.classLoader.loadClass(BTypedesc.class.getCanonicalName()).isAssignableFrom(jType);
                 case TypeTags.STREAM:
                     return this.classLoader.loadClass(BStream.class.getCanonicalName()).isAssignableFrom(jType);
-                case TypeTags.TABLE:
-                    return this.classLoader.loadClass(TableValue.class.getCanonicalName()).isAssignableFrom(jType);
                 default:
                     return false;
             }
@@ -459,6 +459,8 @@ class JMethodResolver {
                     return this.classLoader.loadClass(BObject.class.getCanonicalName()).isAssignableFrom(jType);
                 case TypeTags.ERROR:
                     return this.classLoader.loadClass(BError.class.getCanonicalName()).isAssignableFrom(jType);
+                case TypeTags.TABLE:
+                    return this.classLoader.loadClass(BTable.class.getCanonicalName()).isAssignableFrom(jType);
                 case TypeTags.XML:
                 case TypeTags.XML_ELEMENT:
                 case TypeTags.XML_PI:
@@ -506,8 +508,6 @@ class JMethodResolver {
                     return this.classLoader.loadClass(BTypedesc.class.getCanonicalName()).isAssignableFrom(jType);
                 case TypeTags.STREAM:
                     return this.classLoader.loadClass(BStream.class.getCanonicalName()).isAssignableFrom(jType);
-                case TypeTags.TABLE:
-                    return this.classLoader.loadClass(TableValue.class.getCanonicalName()).isAssignableFrom(jType);
                 default:
                     return false;
             }
@@ -675,15 +675,15 @@ class JMethodResolver {
 
         if (kind == JMethodKind.CONSTRUCTOR) {
             return new JInteropException(OVERLOADED_METHODS,
-                    "Overloaded constructors with '" + paramCount + "' parameter(s) in class '" +
+                                         "Overloaded constructors with '" + paramCount + "' parameter(s) in class '" +
                             declaringClass + "', please specify class names for each parameter " +
                             "in 'paramTypes' field in the annotation");
         } else {
             return new JInteropException(OVERLOADED_METHODS,
-                    "Overloaded methods '" + methodName + "' with '" + paramCount +
-                            "' parameter(s) in class '" + declaringClass +
-                            "', please specify class names for each parameter " +
-                            "with 'paramTypes' field in the annotation");
+                                         "Overloaded methods '" + methodName + "' with '" + paramCount +
+                                         "' parameter(s) in class '" + declaringClass +
+                                         "', please specify class names for each parameter " +
+                                         "with 'paramTypes' field in the annotation");
         }
     }
 
@@ -695,13 +695,13 @@ class JMethodResolver {
         String paramTypesSig = getParamTypesAsString(constraints);
         if (kind == JMethodKind.CONSTRUCTOR) {
             return new JInteropException(OVERLOADED_METHODS,
-                    "More than one public constructors that match with the parameter types '" +
-                            paramTypesSig + "' found in class '" + declaringClass + "'");
+                                         "More than one public constructors that match with the parameter types '" +
+                                         paramTypesSig + "' found in class '" + declaringClass + "'");
         } else {
             return new JInteropException(OVERLOADED_METHODS,
-                    "More than one public methods '" + methodName +
-                            "' that match with the parameter types '" + paramTypesSig +
-                            "' found in class '" + declaringClass + "'");
+                                         "More than one public methods '" + methodName +
+                                         "' that match with the parameter types '" + paramTypesSig +
+                                         "' found in class '" + declaringClass + "'");
         }
     }
 
@@ -716,7 +716,6 @@ class JMethodResolver {
 
     private JInteropException getNoSuchMethodError(String methodName, Class<?> jType, BType bType,
                                                    Class<?> declaringClass) {
-
         return new JInteropException(DiagnosticCode.METHOD_SIGNATURE_DOES_NOT_MATCH,
                 "Incompatible param type for method '" + methodName + "' in class '" + declaringClass.getName() +
                         "': Java type '" + jType.getName() + "' will not be matched to ballerina type '" +
@@ -724,7 +723,6 @@ class JMethodResolver {
     }
 
     private JInteropException getParamCountMismatchError(JMethodRequest jMethodRequest) {
-
         return new JInteropException(DiagnosticCode.METHOD_SIGNATURE_DOES_NOT_MATCH,
                 "Parameter count does not match with Java method '" + jMethodRequest.methodName + "' found in class '" +
                         jMethodRequest.declaringClass.getName() + "'");

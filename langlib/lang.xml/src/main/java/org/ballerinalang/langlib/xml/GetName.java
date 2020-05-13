@@ -17,12 +17,10 @@
  */
 package org.ballerinalang.langlib.xml;
 
-import org.ballerinalang.jvm.StringUtils;
 import org.ballerinalang.jvm.scheduling.Strand;
 import org.ballerinalang.jvm.util.exceptions.BLangExceptionHelper;
 import org.ballerinalang.jvm.util.exceptions.RuntimeErrors;
 import org.ballerinalang.jvm.values.XMLValue;
-import org.ballerinalang.jvm.values.api.BString;
 import org.ballerinalang.model.types.TypeKind;
 import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
@@ -55,9 +53,5 @@ public class GetName {
         }
 
         return null;
-    }
-
-    public static BString getName_bstring(Strand strand, XMLValue xmlVal) {
-        return StringUtils.fromString(getName(strand, xmlVal));
     }
 }

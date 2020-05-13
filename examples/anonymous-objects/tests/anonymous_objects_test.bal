@@ -1,18 +1,21 @@
 import ballerina/test;
+import ballerina/io;
 
-(any|error)[] outputs = [];
+any[] outputs = [];
+int count = 0;
 
 @test:Mock {
     moduleName: "ballerina/io",
     functionName: "println"
 }
-public function mockPrint(any|error... s) {
-    outputs.push(s[0]);
+public function mockPrint(any... s) {
+    outputs[count] = string.convert(s[0]);
+    count += 1;
 }
 
-@test:Config {}
+@test:Config
 function testFunc() {
     main();
-    test:assertEquals(outputs[0], "Colombo");
-    test:assertEquals(outputs[1], "UK");
+    test:assertEquals(outputs[0], "{name:\"John Doe\", age:25, address:{city:\"Colombo\", country:\"Sri Lanka\"}}");
+    test:assertEquals(outputs[1], "{name:\"Jane Doe\", age:20, address:{city:\"London\", country:\"UK\"}}");
 }

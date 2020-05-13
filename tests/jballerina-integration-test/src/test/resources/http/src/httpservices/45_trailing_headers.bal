@@ -101,7 +101,7 @@ service passthroughsvc on epBackend {
         if (responseFromBackend is http:Response) {
             var resultSentToClient = caller->respond(<@untainted> responseFromBackend);
         } else {
-            var resultSentToClient = caller->respond("No response from backend");
+            var resultSentToClient = caller->respond("No response from the backend");
         }
     }
 
@@ -113,7 +113,7 @@ service passthroughsvc on epBackend {
             responseFromBackend.setHeader("barr", "this is a new trailer", position = "trailing");
             var resultSentToClient = caller->respond(<@untainted> responseFromBackend);
         } else {
-            var resultSentToClient = caller->respond("No response from backend");
+            var resultSentToClient = caller->respond("No response from the backend");
         }
     }
 }

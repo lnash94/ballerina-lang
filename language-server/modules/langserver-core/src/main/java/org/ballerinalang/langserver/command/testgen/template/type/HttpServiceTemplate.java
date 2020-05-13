@@ -20,7 +20,6 @@ import org.ballerinalang.langserver.command.testgen.renderer.RendererOutput;
 import org.ballerinalang.langserver.command.testgen.renderer.TemplateBasedRendererOutput;
 import org.ballerinalang.langserver.command.testgen.template.AbstractTestTemplate;
 import org.ballerinalang.langserver.command.testgen.template.PlaceHolder;
-import org.ballerinalang.langserver.commons.LSContext;
 import org.ballerinalang.net.http.HttpConstants;
 import org.wso2.ballerinalang.compiler.tree.BLangAnnotationAttachment;
 import org.wso2.ballerinalang.compiler.tree.BLangFunction;
@@ -51,9 +50,8 @@ public class HttpServiceTemplate extends AbstractTestTemplate {
 
     public HttpServiceTemplate(BLangPackage builtTestFile, BLangService service,
                                BLangTypeInit init,
-                               BiConsumer<Integer, Integer> focusLineAcceptor,
-                               LSContext context) {
-        super(builtTestFile, focusLineAcceptor, context);
+                               BiConsumer<Integer, Integer> focusLineAcceptor) {
+        super(builtTestFile, focusLineAcceptor);
         String serviceName = service.name.value;
         String serviceUriTemp = HTTP + DEFAULT_IP + ":" + DEFAULT_PORT;
 
@@ -99,7 +97,7 @@ public class HttpServiceTemplate extends AbstractTestTemplate {
         // Iterate through resources
         for (BLangFunction resource : resources) {
             HttpResourceTemplate resTemplate = new HttpResourceTemplate(serviceUriStrName, serviceBasePath, resource,
-                                                                        httpEndpoint, context);
+                                                                        httpEndpoint);
             resTemplate.render(serviceOutput);
         }
 

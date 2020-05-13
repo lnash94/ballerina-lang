@@ -7,18 +7,12 @@ function testBasicTypes() returns [typedesc<any>, typedesc<any>, typedesc<any>, 
     return [a, b, c, d, e];
 }
 
-function testRefTypes(){
+function testRefTypes() returns [typedesc<any>, typedesc<any>, typedesc<any>, typedesc<any>] {
     typedesc<xml> a = xml;
     typedesc<json> b = json;
     typedesc<map<any>> c = map<any>;
     typedesc<table<Employee>> d = table<Employee>;
-
-    [typedesc<any>, typedesc<any>, typedesc<any>, typedesc<any>] tupleValue = [a, b, c, d];
-
-    assertEquality("typedesc xml<lang.xml:Element|lang.xml:Comment|lang.xml:ProcessingInstruction|lang.xml:Text>", tupleValue[0].toString());
-    assertEquality("typedesc json", b.toString());
-    assertEquality("typedesc map", c.toString());
-    assertEquality("typedesc table<Employee>", d.toString());
+    return [a, b, c, d];
 }
 
 function testObjectTypes() returns [typedesc<any>, typedesc<any>] {
@@ -107,20 +101,4 @@ function testCustomErrorTypeDesc() {
     if (!(te is typedesc<FooError>)) {
         panic error("AssertionError", message = "expected typedesc<FooError> but found: " + te.toString());
     }
-}
-
-type AssertionError error<ASSERTION_ERROR_REASON>;
-
-const ASSERTION_ERROR_REASON = "AssertionError";
-
-function assertEquality(any|error expected, any|error actual) {
-    if expected is anydata && actual is anydata && expected == actual {
-        return;
-    }
-
-    if expected === actual {
-        return;
-    }
-
-    panic AssertionError(message = "expected '" + expected.toString() + "', found '" + actual.toString () + "'");
 }

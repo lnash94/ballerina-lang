@@ -20,14 +20,12 @@ package org.ballerinalang.jvm;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.ballerinalang.jvm.types.BArrayType;
 import org.ballerinalang.jvm.types.BMapType;
-import org.ballerinalang.jvm.types.BType;
 import org.ballerinalang.jvm.types.BTypes;
 import org.ballerinalang.jvm.types.TypeTags;
 import org.ballerinalang.jvm.util.exceptions.BallerinaException;
 import org.ballerinalang.jvm.values.ArrayValue;
 import org.ballerinalang.jvm.values.ArrayValueImpl;
 import org.ballerinalang.jvm.values.MapValueImpl;
-import org.ballerinalang.jvm.values.api.BString;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -41,14 +39,11 @@ import java.util.Deque;
 
 /**
  * This class represents a JSON parser.
- *
+ * 
  * @since 0.995.0
  */
 @SuppressWarnings("unchecked")
 public class JSONParser {
-
-    public static final String IS_STRING_VALUE_PROP = "ballerina.bstring";
-    public static final boolean USE_BSTRING = System.getProperty(IS_STRING_VALUE_PROP) != null;
 
     private static ThreadLocal<StateMachine> tlStateMachine = new ThreadLocal<StateMachine>() {
         @Override
@@ -59,28 +54,26 @@ public class JSONParser {
 
     /**
      * Parses the contents in the given {@link InputStream} and returns a json.
-     *
+     * 
      * @param in input stream which contains the JSON content
      * @return JSON structure
      * @throws BallerinaException for any parsing error
      */
     public static Object parse(InputStream in) throws BallerinaException {
-        Object jsonObj = parse(in, Charset.defaultCharset().name());
-        return changeForBString(jsonObj);
+        return parse(in, Charset.defaultCharset().name());
     }
 
     /**
      * Parses the contents in the given {@link InputStream} and returns a json.
-     *
-     * @param in          input stream which contains the JSON content
+     * 
+     * @param in input stream which contains the JSON content
      * @param charsetName the character set name of the input stream
      * @return JSON structure
      * @throws BallerinaException for any parsing error
      */
     public static Object parse(InputStream in, String charsetName) throws BallerinaException {
         try {
-            Object jsonObj = parse(new InputStreamReader(new BufferedInputStream(in), charsetName));
-            return changeForBString(jsonObj);
+            return parse(new InputStreamReader(new BufferedInputStream(in), charsetName));
         } catch (IOException e) {
             throw BallerinaErrors.createError("Error in parsing JSON data: " + e.getMessage());
         }
@@ -88,45 +81,18 @@ public class JSONParser {
 
     /**
      * Parses the contents in the given string and returns a json.
-     *
+     * 
      * @param jsonStr the string which contains the JSON content
      * @return JSON structure
      * @throws BallerinaException for any parsing error
      */
     public static Object parse(String jsonStr) throws BallerinaException {
-        Object jsonObj = parse(new StringReader(jsonStr));
-        return changeForBString(jsonObj);
-    }
-
-    private static Object changeForBString(Object jsonObj) {
-        if (USE_BSTRING) {
-            BType type = TypeChecker.getType(jsonObj);
-            switch (type.getTag()) {
-                case TypeTags.STRING_TAG:
-                    if (jsonObj instanceof String) {
-                        return StringUtils.fromString((String) jsonObj);
-                    }
-                    break;
-                case TypeTags.MAP_TAG:
-                    MapValueImpl<String, Object> map = (MapValueImpl<String, Object>) jsonObj;
-                    MapValueImpl<BString, Object> resultMap = new MapValueImpl<>(type);
-                    map.forEach((key, value) -> resultMap.put(StringUtils.fromString(key), changeForBString(value)));
-                    return resultMap;
-                case TypeTags.ARRAY_TAG:
-                    ArrayValue arrayValue = (ArrayValue) jsonObj;
-                    ArrayValue resultArrayValue = new ArrayValueImpl((BArrayType) type);
-                    for (int i = 0; i < arrayValue.size(); i++) {
-                        resultArrayValue.add(i, changeForBString(arrayValue.get(i)));
-                    }
-                    return resultArrayValue;
-            }
-        }
-        return jsonObj;
+        return parse(new StringReader(jsonStr));
     }
 
     /**
      * Parses the contents in the given {@link Reader} and returns a json.
-     *
+     * 
      * @param reader reader which contains the JSON content
      * @return JSON structure
      * @throws BallerinaException for any parsing error
@@ -832,14 +798,14 @@ public class JSONParser {
                     double doubleValue = Double.parseDouble(str);
                     switch (type) {
                         case ARRAY_ELEMENT:
-                            ((ArrayValue) this.currentJsonNode).append(doubleValue);
+                            ((ArrayValue) this.currentJsonNode).append(new Double(doubleValue));
                             break;
                         case FIELD:
                             ((MapValueImpl<String, Object>) this.currentJsonNode).put(this.fieldNames.pop(),
-                                                                                      doubleValue);
+                                    new Double(doubleValue));
                             break;
                         case VALUE:
-                            currentJsonNode = doubleValue;
+                            currentJsonNode = new Double(doubleValue);
                             break;
                         default:
                             break;
@@ -898,14 +864,14 @@ public class JSONParser {
                         long longValue = Long.parseLong(str);
                         switch (type) {
                             case ARRAY_ELEMENT:
-                                ((ArrayValue) this.currentJsonNode).append(longValue);
+                                ((ArrayValue) this.currentJsonNode).append(new Long(longValue));
                                 break;
                             case FIELD:
                                 ((MapValueImpl<String, Object>) this.currentJsonNode).put(this.fieldNames.pop(),
-                                                                                          longValue);
+                                        new Long(longValue));
                                 break;
                             case VALUE:
-                                currentJsonNode = longValue;
+                                currentJsonNode = new Long(longValue);
                                 break;
                             default:
                                 break;

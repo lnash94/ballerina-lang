@@ -20,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.ballerinalang.annotation.JavaSPIService;
-import org.ballerinalang.langserver.common.ImportsAcceptor;
 import org.ballerinalang.langserver.common.constants.CommandConstants;
 import org.ballerinalang.langserver.common.utils.CommonUtil;
 import org.ballerinalang.langserver.common.utils.FunctionGenerator;
@@ -48,6 +47,7 @@ import org.eclipse.lsp4j.services.LanguageClient;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BObjectTypeSymbol;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BTypeSymbol;
 import org.wso2.ballerinalang.compiler.tree.BLangCompilationUnit;
+import org.wso2.ballerinalang.compiler.tree.BLangImportPackage;
 import org.wso2.ballerinalang.compiler.tree.BLangNode;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import org.wso2.ballerinalang.compiler.tree.BLangTypeDefinition;
@@ -61,6 +61,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import static org.ballerinalang.langserver.command.CommandUtil.applyWorkspaceEdit;
 import static org.ballerinalang.langserver.compiler.LSCompilerUtil.getUntitledFilePath;
@@ -152,17 +153,23 @@ public class CreateFunctionExecutor implements LSCommandExecutor {
         List<TextEdit> edits = new ArrayList<>();
         if (parent != null && packageNode != null) {
             PackageID currentPkgId = packageNode.packageID;
-            ImportsAcceptor importsAcceptor = new ImportsAcceptor(context);
-
-            returnType = FunctionGenerator.generateTypeDefinition(importsAcceptor, currentPkgId, parent, context);
+            BiConsumer<String, String> importsAcceptor = (orgName, alias) -> {
+                boolean notFound = packageNode.getImports().stream().noneMatch(
+                        pkg -> (pkg.orgName.value.equals(orgName) && pkg.alias.value.equals(alias))
+                );
+                if (notFound) {
+                    String pkgName = orgName + "/" + alias;
+                    edits.add(addPackage(pkgName, context));
+                }
+            };
+            returnType = FunctionGenerator.generateTypeDefinition(importsAcceptor, currentPkgId, parent);
             returnValue = FunctionGenerator.generateReturnValue(importsAcceptor, currentPkgId, parent,
-                                                                "    return {%1};", context);
+                                                                "    return {%1};");
             List<String> arguments = FunctionGenerator.getFuncArguments(importsAcceptor, currentPkgId, functionNode,
                                                                         context);
             if (arguments != null) {
                 funcArgs = String.join(", ", arguments);
             }
-            edits.addAll(importsAcceptor.getNewImportTextEdits());
         } else {
             throw new LSCommandExecutorException("Error occurred when retrieving function node!");
         }
@@ -219,6 +226,23 @@ public class CreateFunctionExecutor implements LSCommandExecutor {
             }
         }
         return new ImmutablePair<>(null, hasFunctions);
+    }
+
+    private TextEdit addPackage(String pkgName, LSContext context) {
+        DiagnosticPos pos = null;
+        // Filter the imports except the runtime import
+        List<BLangImportPackage> imports = CommonUtil.getCurrentFileImports(context);
+        if (!imports.isEmpty()) {
+            BLangImportPackage lastImport = CommonUtil.getLastItem(imports);
+            pos = lastImport.getPosition();
+        }
+
+        int endCol = 0;
+        int endLine = pos == null ? 0 : pos.getEndLine();
+
+        String editText = "import " + pkgName + ";\n";
+        Range range = new Range(new Position(endLine, endCol), new Position(endLine, endCol));
+        return new TextEdit(range, editText);
     }
 
     /**

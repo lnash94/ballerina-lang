@@ -99,5 +99,4 @@ public class BallerinaRemoteSettingsEditor extends SettingsEditor<BallerinaRemot
         myPortField.setPreferredWidth(100);
         myPort.setComponent(myPortField);
     }
-
 }

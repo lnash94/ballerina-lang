@@ -105,7 +105,6 @@ public class SmtpUtil {
         Address[] replyToAddressArray = extractAddressLists(message, EmailConstants.MESSAGE_REPLY_TO);
         String subject = message.getStringValue(EmailConstants.MESSAGE_SUBJECT);
         String messageBody = message.getStringValue(EmailConstants.MESSAGE_MESSAGE_BODY);
-        String bodyContentType = message.getStringValue(EmailConstants.MESSAGE_BODY_CONTENT_TYPE);
         String fromAddress = message.getStringValue(EmailConstants.MESSAGE_FROM);
         if (fromAddress == null || fromAddress.isEmpty()) {
             fromAddress = username;
@@ -129,18 +128,17 @@ public class SmtpUtil {
         }
         ArrayValue attachments = message.getArrayValue(EmailConstants.MESSAGE_ATTACHMENTS);
         if (attachments == null) {
-            emailMessage.setContent(messageBody, bodyContentType);
+            emailMessage.setText(messageBody);
         } else {
-            addBodyAndAttachments(emailMessage, messageBody, bodyContentType, attachments);
+            addBodyAndAttachments(emailMessage, messageBody, attachments);
         }
         return emailMessage;
     }
 
-    private static void addBodyAndAttachments(MimeMessage emailMessage, String messageBody, String bodyContentType,
-                                              ArrayValue attachments)
+    private static void addBodyAndAttachments(MimeMessage emailMessage, String messageBody, ArrayValue attachments)
             throws MessagingException, IOException {
         BodyPart messageBodyPart = new MimeBodyPart();
-        messageBodyPart.setContent(messageBody, bodyContentType);
+        messageBodyPart.setText(messageBody);
         Multipart multipart = new MimeMultipart();
         multipart.addBodyPart(messageBodyPart);
         for (int i = 0; i < attachments.size(); i++) {
@@ -225,13 +223,9 @@ public class SmtpUtil {
     }
 
     private static String[] getNullCheckedStringArray(MapValue mapValue, String parameter) {
-        if (mapValue != null) {
-            ArrayValue arrayValue = mapValue.getArrayValue(parameter);
-            if (arrayValue != null) {
-                return arrayValue.getStringArray();
-            } else {
-                return new String[0];
-            }
+        ArrayValue arrayValue = mapValue.getArrayValue(parameter);
+        if (arrayValue != null) {
+            return arrayValue.getStringArray();
         } else {
             return new String[0];
         }

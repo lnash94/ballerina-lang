@@ -141,9 +141,3 @@ function testRemoveIfHasKeyNegative2() returns boolean {
     }
     return <string> s == "Sri Lanka";
 }
-
-function testMapToString() returns string {
-    map<map<json>> arr = {};
-    typedesc<any> t = typeof arr;
-    return t.toString();
-}

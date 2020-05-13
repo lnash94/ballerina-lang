@@ -40,12 +40,12 @@ type Person record {
 };
 
 type TableEmployee record {|
-    readonly int id;
+    int id;
     string name;
 |};
 
 type TableEmployeeTwo record {|
-    readonly boolean id;
+    boolean id;
     string name;
 |};
 
@@ -296,24 +296,28 @@ function testRecordCastNegative() {
 }
 
 function testTableCastPositive() returns boolean {
-    table<TableEmployee> t1 = table key(id) [
-            { id: 1, name: "Mary" },
-            { id: 2, name: "John" },
-            { id: 3, name: "Jim" }
-        ];
-
+    table<TableEmployee> t1 = table {
+        { key id, name },
+        [
+            { 1, "Mary" },
+            { 2, "John" },
+            { 3, "Jim" }
+        ]
+    };
     anydata a = t1;
     table<TableEmployee> t2 = <table<TableEmployee>> a;
     return t1 === t2;
 }
 
 function testTableCastNegative() {
-    table<TableEmployee> t1 = table key(id)[
-            { id: 1, name: "Mary" },
-            { id: 2, name: "John" },
-            { id: 3, name: "Jim" }
-        ];
-
+    table<TableEmployee> t1 = table {
+        { key id, name },
+        [
+            { 1, "Mary" },
+            { 2, "John" },
+            { 3, "Jim" }
+        ]
+    };
     anydata a = t1;
     table<TableEmployeeTwo> t2 = <table<TableEmployeeTwo>> a;
 }
@@ -625,7 +629,7 @@ function testSimpleTypeToUnionCastPositive() returns boolean {
 function testDirectlyUnmatchedUnionToUnionCastPositive() returns boolean {
     string s = "hello world";
     string|typedesc<anydata> v1 = s;
-    json v2 = <json> v1;
+    json|table<Lead> v2 = <json|table<Lead>> v1;
     boolean castSuccessful = s == v2;
 
     Lead lead = { name: "Em", id: 2000, rating: 10.0 };

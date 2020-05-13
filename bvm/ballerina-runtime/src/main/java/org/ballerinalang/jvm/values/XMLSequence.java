@@ -23,6 +23,7 @@ import org.ballerinalang.jvm.types.BTypes;
 import org.ballerinalang.jvm.util.BLangConstants;
 import org.ballerinalang.jvm.util.exceptions.BallerinaErrorReasons;
 import org.ballerinalang.jvm.values.api.BMap;
+import org.ballerinalang.jvm.values.api.BString;
 import org.ballerinalang.jvm.values.api.BXML;
 import org.ballerinalang.jvm.values.freeze.FreezeUtils;
 import org.ballerinalang.jvm.values.freeze.State;
@@ -32,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static org.ballerinalang.jvm.util.BLangConstants.STRING_EMPTY_VALUE;
 import static org.ballerinalang.jvm.util.BLangConstants.STRING_NULL_VALUE;
@@ -180,7 +180,6 @@ public final class XMLSequence extends XMLValue {
     }
 
     @Override
-    @Deprecated
     public void setAttributes(BMap<String, ?> attributes) {
         synchronized (this) {
             if (freezeStatus.getState() != State.UNFROZEN) {
@@ -333,11 +332,6 @@ public final class XMLSequence extends XMLValue {
         return new XMLSequence(elementsSeq);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(children);
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -429,6 +423,11 @@ public final class XMLSequence extends XMLValue {
             handleXmlException("failed to get xml as string: ", t);
         }
         return BLangConstants.STRING_NULL_VALUE;
+    }
+
+    @Override
+    public BString bStringValue() {
+        return null;
     }
 
 
@@ -569,6 +568,11 @@ public final class XMLSequence extends XMLValue {
     @Override
     public IteratorValue getIterator() {
         return new IteratorValue() {
+            @Override
+            public BString bStringValue() {
+                return null;
+            }
+
             Iterator<BXML> iterator = children.iterator();
 
             @Override

@@ -64,7 +64,4 @@ public class SelectDescendants {
         }
         return null;
     }
-    public static XMLValue selectDescendants_bstring(Strand strand, XMLValue xml, ArrayValue qnames) {
-        return selectDescendants(strand, xml, qnames);
-    }
 }
