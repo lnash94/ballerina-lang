@@ -264,8 +264,30 @@ class ValidatorUtil {
                         List<OpenAPIParameter> operationParamNames = openAPIPathSummary
                                 .getParamNamesForOperation(resourceMethod);
                         List<ResourceParameter> resourceParamNames = resourceSummary.getParamNames();
+//                        Handle the request body parameters.
+                        Map<String, Schema> operationRequestBParamNames = openAPIPathSummary
+                                .getRequestBodyForOperation(resourceMethod);
                         for (ResourceParameter parameter : resourceParamNames) {
                             boolean isExist = false;
+
+//                           If request body not empty handle the validate of request body parameters
+                            if (!operationRequestBParamNames.isEmpty()) {
+                                if (parameter.getName().equals(resourceSummary.getBody())) {
+                                    for (Map.Entry<String, Schema> entry : operationRequestBParamNames.entrySet()) {
+                                        if (entry.getValue().getProperties()==null && entry.getValue()
+                                                .get$ref()!=null) {
+                                            isExist = validateResourceAgainstOpenAPIParams(parameter,
+                                                    parameter.getParameter().symbol, openAPIComponentSummary
+                                                            .getSchema(getcomponetName(entry.getValue().get$ref())),
+                                                    dLog, resourceMethod, resourceSummary.getPath(), kind);
+                                        } else {
+                                            isExist = validateResourceAgainstOpenAPIParams(parameter,
+                                                    parameter.getParameter().symbol, entry.getValue() , dLog,
+                                                    resourceMethod, resourceSummary.getPath(), kind);
+                                        }
+                                    }
+                                }
+                            }
                             for (OpenAPIParameter openAPIParameter : operationParamNames) {
                                 if (parameter.getName().equals(resourceSummary.getBody())) {
                                     // TODO: Process request body.
@@ -841,4 +863,14 @@ class ValidatorUtil {
                 ErrorMessages.unimplementedOpenAPIOperationsForPath(methods,
                         openApiSummary.getPath()));
     }
+
+//    Return openapi component for given reference
+private static String getcomponetName(String ref){
+    String componentName = null;
+    if (ref != null && ref.startsWith("#")) {
+        String[] splitRef = ref.split("/");
+        componentName = splitRef[splitRef.length - 1];
+    }
+    return componentName;
+}
 }
