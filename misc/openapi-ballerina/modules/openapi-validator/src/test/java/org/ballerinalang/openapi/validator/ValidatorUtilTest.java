@@ -17,8 +17,6 @@ package org.ballerinalang.openapi.validator;
 
 import io.swagger.v3.oas.models.OpenAPI;
 
-import org.ballerinalang.openapi.validator.OpenApiValidatorUtil;
-import org.ballerinalang.tool.BLauncherException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -27,8 +25,6 @@ import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Unit tests for {}.
@@ -44,17 +40,19 @@ public class ValidatorUtilTest {
 
     @Test(description = "Test boolean")
     public void testLoadOpenapiTest() throws OpenApiValidatorException {
-        Path contractPath = RES_DIR.resolve("project-based-tests/src/record_handling/resources/petstore.yaml");
+        Path contractPath = RES_DIR.resolve("project-based-tests/src/record/resources/petstore.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
 //        Assert.assertEquals(BJsonSchemaUtil.validateBallerinaType(api.getComponents().getSchemas().get("User")),true);
     }
 
-//    @Test(description = "Travse the schema")
-//    public void testLoadBType() throws UnsupportedEncodingException {
-//        Path sourceRoot = RES_DIR.resolve("project-based-tests");
-//        bLangPackage = OpenApiValidatorUtil.compileModule(sourceRoot, OpenApiValidatorUtil.getModuleName("record_handling"));
+    @Test(description = "Travse the schema")
+    public void testLoadBType() throws UnsupportedEncodingException {
+        Path sourceRoot = RES_DIR.resolve("project-based-tests");
+//        Path sourceRoot = RES_DIR.resolve("project-based-tests/src/record");
+        bLangPackage = OpenApiValidatorUtil.compileModule(sourceRoot, OpenApiValidatorUtil.getModuleName("record"));
+//        bLangPackage = OpenApiValidatorUtil.compileFile(sourceRoot,"petstore_service.bal");
 //        System.out.println(bLangPackage);
-//        Assert.assertEquals(BJsonSchemaUtil.validateBallerinaType( bLangPackage.getTypeDefinitions().get(0).symbol),true);
+        Assert.assertEquals(BJsonSchemaUtil.validateBallerinaType( bLangPackage.getFunctions().get(0).mapSymbol),true);
 
 
 //        String balfile = sourceRoot.resolve("recordHandlingService.bal").toString();
@@ -62,21 +60,21 @@ public class ValidatorUtilTest {
 //        Path programDir = balFpath.toAbsolutePath().getParent();
 //        String filename = balFpath.toAbsolutePath().getFileName().toString();
 //        bLangPackage = OpenApiValidatorUtil.compileFile(programDir, filename);
+//        bLangPackage.getTypeDefinitions().get(0).symbol
 
-
-//    }
-
-    @Test(description = "Test json schema missing fields")
-    public void missJsonFields (){
-        Path sourceRoot = RES_DIR.resolve("project-based-tests/openapi-validator/");
-        List<String> argList = new ArrayList<>();
-        argList.add("record_handling");
-        try {
-            OpenApiValidatorUtil.execute(argList,false,sourceRoot);
-//            Assert.assertEquals(BJsonSchemaUtil.validateBallerinaType( bLangPackage.getTypeDefinitions().get(0).symbol),true);
-        } catch (BLauncherException e) {
-            List<String> exception = e.getMessages();
-
-        }
     }
+
+//    @Test(description = "Test json schema missing fields")
+//    public void missJsonFields (){
+//        Path sourceRoot = RES_DIR.resolve("project-based-tests/openapi-validator/");
+//        List<String> argList = new ArrayList<>();
+//        argList.add("record_handling");
+//        try {
+//            OpenApiValidatorUtil.execute(argList,false,sourceRoot);
+////            Assert.assertEquals(BJsonSchemaUtil.validateBallerinaType( bLangPackage.getTypeDefinitions().get(0).symbol),true);
+//        } catch (BLauncherException e) {
+//            List<String> exception = e.getMessages();
+//
+//        }
+//    }
 }

@@ -207,8 +207,6 @@ public class OpenApiValidatorUtil {
         return context;
     }
 
-
-
     public static String getModuleName(String moduleName) {
         String pattern = Pattern.quote(File.separator);
         String[] splitedTokens = moduleName.split(pattern);
