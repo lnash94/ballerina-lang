@@ -27,6 +27,8 @@ dependencies {
 
     implementation project(':ballerina-tool')
     implementation project(':ballerina-lang')
+    implementation project(':language-server:language-server-compiler')
+
     testCompile 'org.testng:testng'
 }
 
