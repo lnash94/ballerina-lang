@@ -49,7 +49,7 @@ import java.util.Map;
 /**
  * Validator plugin utility class to hold the base functionality.
  */
-class ValidatorUtil {
+public class ValidatorUtil {
     /**
      * Parse and get the {@link OpenAPI} for the given OpenAPI contract.
      *

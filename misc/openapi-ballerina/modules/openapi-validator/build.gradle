@@ -25,8 +25,23 @@ configurations.all {
 dependencies {
     implementation 'io.swagger.parser.v3:swagger-parser'
 
-    implementation project(':ballerina-tool')
+ /*   baloImplementation project(path: ':ballerina-time', configuration: 'baloImplementation')
+    baloImplementation project(path: ':ballerina-lang:annotations', configuration: 'baloImplementation')
+    baloImplementation project(path: ':ballerina-runtime-api', configuration: 'baloImplementation')
+    baloImplementation project(path: ':ballerina-java', configuration: 'baloImplementation')
+*/
+    //interopImports project(':ballerina-time')
+
+    //baloCreat project(':lib-creator')
+    implementation project(':ballerina-lang:annotations')
     implementation project(':ballerina-lang')
+    implementation project(':ballerina-runtime')
+    implementation project(':ballerina-time')
+    implementation project(':ballerina-system')
+    implementation project(':ballerina-java')
+
+    implementation project(':ballerina-tool')
+//    implementation project(':ballerina-lang')
     implementation project(':language-server:language-server-compiler')
 
     testCompile 'org.testng:testng'

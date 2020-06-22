@@ -1,5 +1,5 @@
 import ballerina/http;
-import ballerina/openapi;
+//import ballerina/openapi;
 
 listener http:Listener ep0 = new(9090, config = {host: "localhost"});
 //
