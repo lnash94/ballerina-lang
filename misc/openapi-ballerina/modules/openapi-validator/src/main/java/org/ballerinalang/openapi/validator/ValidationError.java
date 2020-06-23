@@ -2,13 +2,13 @@ package org.ballerinalang.openapi.validator;
 
 public class ValidationError {
     String fieldName;
-    String type;
+    Enum type;
 
     public void ValidationError(){
         fieldName = null;
         type = null;
     }
-    public void ValidationError(String fieldName, String type){
+    public void ValidationError(String fieldName, Enum type){
         this.fieldName =fieldName;
         this.type = type;
     }
@@ -16,13 +16,13 @@ public class ValidationError {
     public void setFieldName(String fieldName){
         this.fieldName = fieldName;
     }
-    public void setType(String type){
+    public void setType(Enum type){
         this.type = type;
     }
     public String getFieldName(){
         return fieldName;
     }
-    public  String getType(){
+    public  Enum getType(){
         return type;
     }
 }

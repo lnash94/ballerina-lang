@@ -17,6 +17,8 @@
 
 apply from: "$rootDir/gradle/javaProject.gradle"
 apply plugin: 'com.github.johnrengelman.shadow'
+//apply from: "$rootDir/misc/openapi-ballerina/modules/openapi-validator/test/resources/project-based-tests/src/gradle/balNativeLibProject.gradle"
+//apply from: "$rootDir/gradle/baseNativeStdLibProject.gradle"
 
 configurations.all {
     resolutionStrategy.preferProjectModules()
@@ -44,6 +46,7 @@ dependencies {
 //    implementation project(':ballerina-lang')
     implementation project(':language-server:language-server-compiler')
 
+//    baloImplementation project(path: ':ballerina-lang:annotations', configuration: 'baloImplementation')
     testCompile 'org.testng:testng'
 }
 
