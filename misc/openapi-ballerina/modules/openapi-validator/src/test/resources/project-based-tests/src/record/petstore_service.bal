@@ -7,7 +7,6 @@ listener http:Listener ep0 = new(9090, config = {host: "localhost"});
 }
 service petstore_service on ep0 {
 
-
 // @http:ResourceConfig {
 //     methods:["POST"],
 //     path:"/pet",

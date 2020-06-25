@@ -17,7 +17,7 @@ type User record {
     string lastName;
     string email2;
     string password;
-    string phone2;
+    string phone;
     int userStatus;
 };
 type Tag record {

@@ -21,10 +21,18 @@
  */
 package org.ballerinalang.openapi.validator;
 
+import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BTypeSymbol;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BVarSymbol;
+import org.wso2.ballerinalang.compiler.semantics.model.types.BField;
+import org.wso2.ballerinalang.compiler.semantics.model.types.BRecordType;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BType;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public  class BJsonSchemaUtil {
     private static OpenAPIComponentSummary openAPIComponentSummary;
@@ -130,6 +138,138 @@ public  class BJsonSchemaUtil {
 //        }
 //    }
 
+    public static List<ValidationError> validateBallerinaType(Parameter parameter, BVarSymbol bVarSymbol) {
+        Schema schema = new Schema();
+        schema = null;
+        return validateBallerinaType(schema, parameter, bVarSymbol );
+    }
+    public static List<ValidationError> validateBallerinaType(Schema schema, BVarSymbol bVarSymbol) {
+//        List<Parameter> parameters = new ArrayList<>();
+        Parameter parameter = new Parameter();
+        parameter = null;
+        return validateBallerinaType(schema,  parameter, bVarSymbol);
+    }
+//List<Parameter> parameters or one parameter
+    public static List<ValidationError> validateBallerinaType(Schema schema,  Parameter parameter, BVarSymbol bVarSymbol) {
+        List<ValidationError> validationErrors = new ArrayList<>();
+        Map<String, Schema> properties = null;
+
+
+        /** Handle path parameters list
+         *
+         */
+//        if (!parameters.isEmpty()) {
+//            for (Parameter parameter: parameters) {
+//                boolean isExist = false;
+//                if (parameter.getName().equals(bVarSymbol.name.getValue())) {
+//                    isExist = true;
+//                    if (!convertOpenAPITypeToBallerina(parameter.getSchema().getType()).equals(bVarSymbol.getType().toString())) {
+//                        isExist = false;
+//                    }
+//                }
+//
+//            }
+//
+//        }
+//        one by one parameter validate
+        if (parameter != null) {
+            if (parameter.getName().equals(bVarSymbol.name.getValue())) {
+                if (!convertOpenAPITypeToBallerina(parameter.getSchema().getType()).equals(bVarSymbol.getType().toString())) {
+                    ValidationError validationError = new ValidationError(parameter.getName().toString(),
+                            convertTypeToEnum(parameter.getSchema().getType().toString()));
+                    validationErrors.add(validationError);
+                }
+            } else {
+                ValidationError validationError = new ValidationError(parameter.getName().toString(),
+                        convertTypeToEnum(parameter.getSchema().getType().toString()));
+                validationErrors.add(validationError);
+            }
+        }
+
+        /** Handle the body parameter with records
+         *  Here validate the BvarType againts to schema
+         */
+//        Boolean tag = false;
+
+        if (schema != null) {
+            if (schema instanceof Schema) {
+                if (schema.getProperties() != null) {
+                    properties = schema.getProperties();
+                } else {
+                    String schema_ref = schema.get$ref();
+                    properties = openAPIComponentSummary.getSchema(getcomponetName(schema_ref)).getProperties();
+                }
+            }
+            if (schema instanceof ObjectSchema) {
+                properties = ((ObjectSchema) schema).getProperties();
+            }
+
+            BType resourceType = bVarSymbol.getType();
+            BRecordType recordType = (BRecordType) resourceType;
+
+            for (BField field : recordType.fields) {
+                boolean isExist = false;
+                for (Map.Entry<String, Schema> entry : properties.entrySet()) {
+                    if (entry.getKey().equals(field.name.getValue())) {
+                        isExist = true;
+                        if (entry.getValue().getType() != null) {
+                            if (!field.getType().getKind().typeName()
+                                    .equals(BJsonSchemaUtil.convertOpenAPITypeToBallerina(entry.getValue()
+                                            .getType()))) {
+                                ValidationError validationError = new ValidationError(
+                                        field.name.getValue().toString(),
+                                        convertTypeToEnum(entry.getValue().getType()));
+                                validationErrors.add(validationError);
+
+                            }
+                        } else {
+//                        TO-DO handle the nexted record
+//                                BType nestedRecord = field.getType();
+//                                BRecordType nestedRecordType = (BRecordType) nestedRecord;
+//                        BJsonSchemaUtil.validateBallerinaType(entry.getValue(), field.symbol, "RAO", validationError);
+                        }
+                    }
+                }
+                if (!isExist) {
+                    ValidationError validationError = new ValidationError(field.name.toString(),
+                            convertTypeToEnum(field.getType().getKind().typeName()));
+                    validationErrors.add(validationError);
+                }
+            }
+        }
+
+        return validationErrors;
+
+    }
+
+    private static Constants.Type convertTypeToEnum(String type) {
+        Constants.Type convertedType;
+        switch (type) {
+            case "integer":
+                convertedType = Constants.Type.INT;
+                break;
+            case "string":
+                convertedType = Constants.Type.STRING;
+                break;
+            case "boolean":
+                convertedType = Constants.Type.BOOLEAN;
+                break;
+            case "array":
+                convertedType = Constants.Type.ARRAY;
+                break;
+            case "object":
+                convertedType = Constants.Type.RECODR;
+                break;
+            case "number":
+                convertedType = Constants.Type.DECIMAL;
+                break;
+            default:
+                convertedType = Constants.Type.ANYDATA;
+        }
+
+        return convertedType;
+    }
+
     private static String convertOpenAPITypeToBallerina(String type) {
         String convertedType;
         switch (type) {
@@ -158,7 +298,7 @@ public  class BJsonSchemaUtil {
         return convertedType;
     }
 
-    private static String getcomponetName(String ref){
+    private static String getcomponetName(String ref) {
         String componentName = null;
         if (ref != null && ref.startsWith("#")) {
             String[] splitRef = ref.split("/");
@@ -166,19 +306,4 @@ public  class BJsonSchemaUtil {
         }
         return componentName;
     }
-
-    public static boolean validateBallerinaType(BVarSymbol bVarSymbol){
-        ValidationError validationError = new ValidationError();
-//        if (schema instanceof Schema) {
-//            return true;
-//        }
-//        , BTypeSymbol bTypeSymbol
-        if(bVarSymbol instanceof BVarSymbol) {
-            return true;
-        }
-
-        return false;
-    }
-
-
 }

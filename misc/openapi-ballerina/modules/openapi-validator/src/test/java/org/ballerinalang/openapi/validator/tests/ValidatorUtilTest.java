@@ -17,10 +17,8 @@ package org.ballerinalang.openapi.validator.tests;
 
 import io.swagger.v3.oas.models.OpenAPI;
 
-import org.ballerinalang.openapi.validator.BJsonSchemaUtil;
-import org.ballerinalang.openapi.validator.OpenApiValidatorException;
-import org.ballerinalang.openapi.validator.OpenApiValidatorUtil;
-import org.ballerinalang.openapi.validator.ValidatorUtil;
+import io.swagger.v3.oas.models.media.ObjectSchema;
+import org.ballerinalang.openapi.validator.*;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -29,6 +27,7 @@ import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 /**
  * Unit tests for {}.
@@ -49,36 +48,69 @@ public class ValidatorUtilTest {
 //        Assert.assertEquals(BJsonSchemaUtil.validateBallerinaType(api.getComponents().getSchemas().get("User")),true);
     }
 
-    @Test(description = "Travse the schema")
+    @Test(description = "Traverse the Btype")
     public void testLoadBType() throws UnsupportedEncodingException {
         Path sourceRoot = RES_DIR.resolve("project-based-tests");
-//        Path sourceRoot = RES_DIR.resolve("project-based-tests/src/record");
         bLangPackage = OpenApiValidatorUtil.compileModule(sourceRoot, OpenApiValidatorUtil.getModuleName("record"));
-//        bLangPackage = OpenApiValidatorUtil.compileFile(sourceRoot,"petstore_service.bal");
-//        System.out.println(bLangPackage);
-//        Assert.assertEquals(BJsonSchemaUtil.validateBallerinaType( bLangPackage.getFunctions().get(0).mapSymbol),true);
-
-
-//        String balfile = sourceRoot.resolve("recordHandlingService.bal").toString();
-//        Path balFpath = Paths.get(balfile);
-//        Path programDir = balFpath.toAbsolutePath().getParent();
-//        String filename = balFpath.toAbsolutePath().getFileName().toString();
-//        bLangPackage = OpenApiValidatorUtil.compileFile(programDir, filename);
-//        bLangPackage.getTypeDefinitions().get(0).symbol
+//        Assert.assertEquals(BJsonSchemaUtil.validateBallerinaType( bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)),true);
 
     }
 
-//    @Test(description = "Test json schema missing fields")
-//    public void missJsonFields (){
-//        Path sourceRoot = RES_DIR.resolve("project-based-tests/openapi-validator/");
-//        List<String> argList = new ArrayList<>();
-//        argList.add("record_handling");
-//        try {
-//            OpenApiValidatorUtil.execute(argList,false,sourceRoot);
-////            Assert.assertEquals(BJsonSchemaUtil.validateBallerinaType( bLangPackage.getTypeDefinitions().get(0).symbol),true);
-//        } catch (BLauncherException e) {
-//            List<String> exception = e.getMessages();
-//
-//        }
-//    }
+    @Test(description = "Test path parameter")
+    public void testInlineValidateBallerinaType() throws OpenApiValidatorException, UnsupportedEncodingException {
+        //load the yaml file
+        Path contractPath = RES_DIR.resolve("project-based-tests/src/path-parameter/resources/petstore_inline.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        //load the resource file
+        Path sourceRoot = RES_DIR.resolve("project-based-tests");
+        bLangPackage = OpenApiValidatorUtil.compileModule(sourceRoot, OpenApiValidatorUtil.getModuleName("path-parameter"));
+
+        Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(api.getPaths().get("/user/{username}").getGet().getParameters().get(0),
+                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)))instanceof List);
+        Assert.assertEquals((BJsonSchemaUtil.validateBallerinaType(api.getPaths().get("/user/{username}").getGet().getParameters().get(0),
+                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)).get(0).getFieldName()),"username");
+//        System.out.println(api.getPaths().get("/user/{username}").getGet().getParameters().get(0));
+//        System.out.println(api.getPaths().get("/user/{username}").getGet().getParameters().get(0).getSchema());
+//        System.out.println(bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2));
+//        System.out.println(bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol);
+    }
+    @Test(description = "Test path multiple parameter")
+    public void testTwoParametersValidateBallerinaType() throws OpenApiValidatorException, UnsupportedEncodingException {
+        //load the yaml file
+        Path contractPath = RES_DIR.resolve("project-based-tests/src/path-2-parameters/resources/path_2para.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        //load the resource file
+        Path sourceRoot = RES_DIR.resolve("project-based-tests");
+        bLangPackage = OpenApiValidatorUtil.compileModule(sourceRoot, OpenApiValidatorUtil.getModuleName("path-2-parameters"));
+
+//        Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(api.getPaths().get("/{param1}/{param2}").getGet().getParameters().get(0),
+//                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)))instanceof List);
+//        Assert.assertEquals((BJsonSchemaUtil.validateBallerinaType(api.getPaths().get("/{param1}/{param2}").getGet().getParameters().get(0),
+//                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)).get(0).getFieldName()),"username");
+//        System.out.println(api.getPaths().get("/{param1}/{param2}").getGet().getParameters());
+//        System.out.println(api.getPaths().get("/{param1}/{param2}").getGet().getParameters().get(0).getSchema());
+//        System.out.println(bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2));
+//        System.out.println(bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol);
+    }
+
+
+    @Test(description = "Test body parameter")
+    public void testValidateBallerinaType() throws OpenApiValidatorException, UnsupportedEncodingException {
+        //load the yaml file
+        Path contractPath = RES_DIR.resolve("project-based-tests/src/record/resources/petstore.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        //load the resource file
+        Path sourceRoot = RES_DIR.resolve("project-based-tests");
+        bLangPackage = OpenApiValidatorUtil.compileModule(sourceRoot, OpenApiValidatorUtil.getModuleName("record"));
+
+        Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(api.getComponents().getSchemas().get("User"),
+                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)))instanceof List);
+        Assert.assertEquals((BJsonSchemaUtil.validateBallerinaType(api.getComponents().getSchemas().get("User"),
+                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)).get(0).getFieldName()),"email2");
+        Assert.assertEquals((BJsonSchemaUtil.validateBallerinaType(api.getComponents().getSchemas().get("User"),
+                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)).get(1).getFieldName()),"phone2");
+
+    }
+
+
 }
