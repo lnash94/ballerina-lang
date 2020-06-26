@@ -131,7 +131,7 @@ definitions:
       id:
         type: "integer"
         format: "int64"
-      username:
+      username1:
         type: "string"
       firstName:
         type: "string"

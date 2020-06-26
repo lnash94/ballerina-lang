@@ -11,11 +11,11 @@ type Category record {
     string name;
 };
 type User record {
-    int id;
+    string id;
     string username;
     string firstName;
     string lastName;
-    string email2;
+    string email;
     string password;
     string phone2;
     int userStatus;

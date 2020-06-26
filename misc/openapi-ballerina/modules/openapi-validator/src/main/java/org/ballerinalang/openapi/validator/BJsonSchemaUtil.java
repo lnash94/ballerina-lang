@@ -153,39 +153,6 @@ public  class BJsonSchemaUtil {
     public static List<ValidationError> validateBallerinaType(Schema schema,  Parameter parameter, BVarSymbol bVarSymbol) {
         List<ValidationError> validationErrors = new ArrayList<>();
         Map<String, Schema> properties = null;
-
-
-        /** Handle path parameters list
-         *
-         */
-//        if (!parameters.isEmpty()) {
-//            for (Parameter parameter: parameters) {
-//                boolean isExist = false;
-//                if (parameter.getName().equals(bVarSymbol.name.getValue())) {
-//                    isExist = true;
-//                    if (!convertOpenAPITypeToBallerina(parameter.getSchema().getType()).equals(bVarSymbol.getType().toString())) {
-//                        isExist = false;
-//                    }
-//                }
-//
-//            }
-//
-//        }
-//        one by one parameter validate
-        if (parameter != null) {
-            if (parameter.getName().equals(bVarSymbol.name.getValue())) {
-                if (!convertOpenAPITypeToBallerina(parameter.getSchema().getType()).equals(bVarSymbol.getType().toString())) {
-                    ValidationError validationError = new ValidationError(parameter.getName().toString(),
-                            convertTypeToEnum(parameter.getSchema().getType().toString()));
-                    validationErrors.add(validationError);
-                }
-            } else {
-                ValidationError validationError = new ValidationError(parameter.getName().toString(),
-                        convertTypeToEnum(parameter.getSchema().getType().toString()));
-                validationErrors.add(validationError);
-            }
-        }
-
         /** Handle the body parameter with records
          *  Here validate the BvarType againts to schema
          */
@@ -197,7 +164,7 @@ public  class BJsonSchemaUtil {
                     properties = schema.getProperties();
                 } else {
                     String schema_ref = schema.get$ref();
-                    properties = openAPIComponentSummary.getSchema(getcomponetName(schema_ref)).getProperties();
+                    properties = openAPIComponentSummary.getSchema(OpenAPISummaryUtil.getcomponetName(schema_ref)).getProperties();
                 }
             }
             if (schema instanceof ObjectSchema) {
@@ -216,14 +183,15 @@ public  class BJsonSchemaUtil {
                             if (!field.getType().getKind().typeName()
                                     .equals(BJsonSchemaUtil.convertOpenAPITypeToBallerina(entry.getValue()
                                             .getType()))) {
-                                ValidationError validationError = new ValidationError(
+                                TypeMismatch validationError = new TypeMismatch(
                                         field.name.getValue().toString(),
-                                        convertTypeToEnum(entry.getValue().getType()));
+                                        convertTypeToEnum(entry.getValue().getType()), convertTypeToEnum(field.getType().getKind().typeName()));
                                 validationErrors.add(validationError);
 
                             }
                         } else {
 //                        TO-DO handle the nexted record
+//                            if (field.)
 //                                BType nestedRecord = field.getType();
 //                                BRecordType nestedRecordType = (BRecordType) nestedRecord;
 //                        BJsonSchemaUtil.validateBallerinaType(entry.getValue(), field.symbol, "RAO", validationError);
@@ -231,11 +199,30 @@ public  class BJsonSchemaUtil {
                     }
                 }
                 if (!isExist) {
-                    ValidationError validationError = new ValidationError(field.name.toString(),
+                    MissingFieldInJsonSchema validationError = new MissingFieldInJsonSchema(field.name.toString(),
                             convertTypeToEnum(field.getType().getKind().typeName()));
                     validationErrors.add(validationError);
                 }
             }
+//            Find missing fields in BallerinaType
+            for (Map.Entry<String, Schema> entry : properties.entrySet()) {
+                    boolean isExist = false;
+                    for (BField field: recordType.fields) {
+                        if (field.name.getValue().equals(entry.getKey())) {
+                            isExist=true;
+//                            if (!field.getType().getKind().typeName()
+//                                    .equals(BJsonSchemaUtil.convertOpenAPITypeToBallerina(entry.getValue()
+//                                            .getType()))){
+//
+//                                typeMismatch.add(field.name.toString());
+//                            }
+                        }
+                    }
+                    if (!isExist) {
+                        MissingFieldInBallerinaType validationError = new MissingFieldInBallerinaType(entry.getKey(), convertTypeToEnum(entry.getValue().getType().toString()));
+                        validationErrors.add(validationError);
+                    }
+                }
         }
 
         return validationErrors;
@@ -296,14 +283,5 @@ public  class BJsonSchemaUtil {
         }
 
         return convertedType;
-    }
-
-    private static String getcomponetName(String ref) {
-        String componentName = null;
-        if (ref != null && ref.startsWith("#")) {
-            String[] splitRef = ref.split("/");
-            componentName = splitRef[splitRef.length - 1];
-        }
-        return componentName;
     }
 }
