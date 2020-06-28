@@ -100,9 +100,9 @@ class ResourceSummary {
                 SimpleVariableNode simpleVariableNode = parameters.get(i);
                 if (simpleVariableNode instanceof BLangSimpleVariable) {
                     BLangSimpleVariable variable = (BLangSimpleVariable) simpleVariableNode;
-                    if (!variable.getName().getValue().equals(this.getBody())) {
+//                    if (!variable.getName().getValue().equals(this.getBody())) {
                         this.parameters.put(variable.getName().getValue(), variable);
-                    }
+//                    }
                 }
             }
         }
