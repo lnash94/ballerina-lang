@@ -8,7 +8,7 @@ type Order record {
 };
 type Category record {
     int id;
-    string name;
+    string name2;
 };
 type User record {
     string id;
