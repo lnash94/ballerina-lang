@@ -57,10 +57,10 @@ public class OpenAPISummaryUtil {
     }    
 //   Get component according to  ref name
     public static Schema getOpenAPIComponent(String ref) throws OpenApiValidatorException {
-        String executionPath = System.getProperty("user.dir");
-        Path execution = Paths.get(executionPath);
-        String contractPath = execution.resolve("src/resources").toAbsolutePath().toString();
-        OpenAPI openAPIContract = ValidatorUtil.parseOpenAPIFile(contractPath);
+//        String executionPath = System.getProperty("user.dir");
+//        Path execution = Paths.get(executionPath);
+//        String contractPath = execution.resolve("src/resources").toAbsolutePath().toString();
+        OpenAPI openAPIContract = ValidatorUtil.parseOpenAPIFile(OpenAPIValidatorPlugin.OpenAPIValidatorPlugin());
         Schema openAPIComponent = openAPIContract.getComponents().getSchemas().get(OpenAPISummaryUtil.getcomponetName(ref));
 //        Schema openAPIComponent = OpenAPISummaryUtil.openAPIComponentSummary.getSchema(getcomponetName(ref));
         return openAPIComponent;

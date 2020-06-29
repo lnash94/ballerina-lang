@@ -16,12 +16,4 @@ service petstore_service_bal on ep1 {
 
  }
 
-//@http:ResourceConfig {
-//        methods:["POST"],
-//        path:"/user",
-//        body:"body"
-//        }
-//        resource function createUser (http:Caller caller, http:Request req,  User  body) returns error? {
-//        }
-
 }
