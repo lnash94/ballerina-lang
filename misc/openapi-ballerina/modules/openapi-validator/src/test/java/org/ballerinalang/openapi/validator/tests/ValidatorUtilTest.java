@@ -16,18 +16,20 @@
 package org.ballerinalang.openapi.validator.tests;
 
 import io.swagger.v3.oas.models.OpenAPI;
-
-import io.swagger.v3.oas.models.media.ObjectSchema;
-import org.ballerinalang.openapi.validator.*;
+import org.ballerinalang.openapi.validator.BJsonSchemaUtil;
+import org.ballerinalang.openapi.validator.MissingFieldInBallerinaType;
+import org.ballerinalang.openapi.validator.MissingFieldInJsonSchema;
+import org.ballerinalang.openapi.validator.OpenApiValidatorException;
+import org.ballerinalang.openapi.validator.OpenApiValidatorUtil;
+import org.ballerinalang.openapi.validator.TypeMismatch;
+import org.ballerinalang.openapi.validator.ValidatorUtil;
 import org.testng.Assert;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,12 +40,8 @@ public class ValidatorUtilTest {
     private OpenAPI api;
     private BLangPackage bLangPackage;
 
-    @BeforeTest(description = "Setup the Openapi schema")
-    public void setup() throws OpenApiValidatorException, UnsupportedEncodingException {
-    }
-
     @Test(description = "Test boolean")
-    public void testLoadOpenapiTest() throws OpenApiValidatorException {
+    public void testLoadOpenapiTest() throws OpenApiValidatorException, OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("project-based-tests/src/record/resources/petstore.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
 //        Assert.assertEquals(BJsonSchemaUtil.validateBallerinaType(api.getComponents().getSchemas().get("User")),true);
@@ -52,13 +50,15 @@ public class ValidatorUtilTest {
     @Test(description = "Traverse the Btype")
     public void testLoadBType() throws UnsupportedEncodingException {
 //        Path sourceRoot = RES_DIR.resolve("project-based-tests");
-        String ballerinaFilePath = RES_DIR.resolve("project-based-tests").resolve("src/record").resolve("petstore_service.bal").toString();
+        String ballerinaFilePath = RES_DIR.resolve("project-based-tests").resolve("src/record").
+                resolve("petstore_service.bal").toString();
         Path filePath = Paths.get(ballerinaFilePath);
         Path programDir = filePath.toAbsolutePath().getParent();
         String fileName = filePath.toAbsolutePath().getFileName().toString();
         bLangPackage = OpenApiValidatorUtil.compileFile(programDir, fileName);
 //        bLangPackage = OpenApiValidatorUtil.compileModule(sourceRoot, OpenApiValidatorUtil.getModuleName("record"));
-//        Assert.assertEquals(BJsonSchemaUtil.validateBallerinaType( bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)),true);
+//        Assert.assertEquals(BJsonSchemaUtil.validateBallerinaType( bLangPackage.getServices().get(0).
+//        resourceFunctions.get(0).symbol.params.get(2)),true);
 
     }
 
@@ -70,14 +70,15 @@ public class ValidatorUtilTest {
         //load the resource file
         Path sourceRoot = RES_DIR.resolve("project-based-tests");
         bLangPackage = OpenApiValidatorUtil.compileModule(sourceRoot, OpenApiValidatorUtil.getModuleName("record"));
-        System.out.println(BJsonSchemaUtil.validateBallerinaType(api.getComponents().getSchemas().get("User"),
-                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)));
         Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(api.getComponents().getSchemas().get("User"),
-                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)).get(1))instanceof MissingFieldInJsonSchema);
+                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)).get(1))instanceof
+                MissingFieldInJsonSchema);
         Assert.assertEquals((BJsonSchemaUtil.validateBallerinaType(api.getComponents().getSchemas().get("User"),
-                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)).get(1).getFieldName()),"username");
+                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)).get(1).getFieldName()),
+                "username");
         Assert.assertEquals((BJsonSchemaUtil.validateBallerinaType(api.getComponents().getSchemas().get("User"),
-                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)).get(2).getFieldName()),"phone2");
+                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)).get(2).getFieldName()),
+                "phone2");
 
     }
 
@@ -93,11 +94,14 @@ public class ValidatorUtilTest {
         Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(api.getComponents().getSchemas().get("User"),
                 bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)))instanceof List);
         Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(api.getComponents().getSchemas().get("User"),
-                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2))).get(3)instanceof MissingFieldInBallerinaType);
+                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2))).get(3)instanceof
+                MissingFieldInBallerinaType);
         Assert.assertEquals((BJsonSchemaUtil.validateBallerinaType(api.getComponents().getSchemas().get("User"),
-                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)).get(3).getFieldName()),"username1");
+                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)).get(3).getFieldName()),
+                "username1");
         Assert.assertEquals((BJsonSchemaUtil.validateBallerinaType(api.getComponents().getSchemas().get("User"),
-                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)).get(4).getFieldName()),"phone");
+                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)).get(4).getFieldName()),
+                "phone");
 
     }
 
@@ -111,9 +115,11 @@ public class ValidatorUtilTest {
         bLangPackage = OpenApiValidatorUtil.compileModule(sourceRoot, OpenApiValidatorUtil.getModuleName("record"));
 
         Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(api.getComponents().getSchemas().get("User"),
-                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2))).get(0)instanceof TypeMismatch);
+                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2))).get(0)instanceof
+                TypeMismatch);
         Assert.assertEquals((BJsonSchemaUtil.validateBallerinaType(api.getComponents().getSchemas().get("User"),
-                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)).get(0).getFieldName()),"id");
+                bLangPackage.getServices().get(0).resourceFunctions.get(0).symbol.params.get(2)).get(0).getFieldName()),
+                "id");
 
     }
 
@@ -128,8 +134,6 @@ public class ValidatorUtilTest {
         bLangPackage = OpenApiValidatorUtil.compileModule(sourceRoot, OpenApiValidatorUtil.getModuleName("record"));
         Assert.assertTrue(BJsonSchemaUtil.validateBallerinaType(api.getComponents().getSchemas().get("Pet"),
                 bLangPackage.getServices().get(1).resourceFunctions.get(0).symbol.params.get(2))instanceof List);
-//        Assert.assertEquals((BJsonSchemaUtil.validateBallerinaType(api.getComponents().getSchemas().get("Pet"),
-//                bLangPackage.getServices().get(1).resourceFunctions.get(0).symbol.params.get(2)).get(0).getFieldName()),"id");
 
     }
 

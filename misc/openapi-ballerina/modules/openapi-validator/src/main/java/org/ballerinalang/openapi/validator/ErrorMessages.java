@@ -88,4 +88,11 @@ class ErrorMessages {
                 " the same operation(s). Make sure to use one field of operation filtering" +
                 " when using the openapi annotation.");
     }
+
+    static String typeMismatching(String fieldName, String paramName, String openapiType, String ballerinType,
+                                  String method, String path) {
+        return String.format("Type mismatching '%s' field in the record type of the parameter '%s' for the method" +
+                        " '%s' of the path '%s'.In OpenAPI contract its type is '%s' and resources type is '%s'. ",
+                fieldName, paramName, method,  path, openapiType, ballerinType);
+    }
 }

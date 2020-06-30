@@ -2,6 +2,11 @@ import ballerina/http;
 
 listener http:Listener ep1 = new(9090, config = {host: "localhost"});
 
+@openapi:ServiceInfo {
+    contract: "/resources/petstore.yaml",
+    excludeTags: [ "user"]
+}
+
 @http:ServiceConfig {
         basePath: "/v2"
 }

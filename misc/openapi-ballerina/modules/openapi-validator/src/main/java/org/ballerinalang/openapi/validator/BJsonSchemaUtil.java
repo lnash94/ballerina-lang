@@ -23,8 +23,6 @@ package org.ballerinalang.openapi.validator;
 
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.parameters.Parameter;
-import org.wso2.ballerinalang.compiler.semantics.model.symbols.BTypeSymbol;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BVarSymbol;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BField;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BRecordType;
@@ -34,14 +32,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This util class for validate the any given schema with BVarSymbol type.
+ */
 public  class BJsonSchemaUtil {
-//    private static OpenAPIComponentSummary openAPIComponentSummary;
-//
-//    BJsonSchemaUtil() {
-//        this.openAPIComponentSummary = OpenAPIValidatorPlugin.getOpenAPIComponentSummary();
-//    }
 
-    public static List<ValidationError> validateBallerinaType(Schema schema, BVarSymbol bVarSymbol) throws OpenApiValidatorException {
+    public static List<ValidationError> validateBallerinaType(Schema schema, BVarSymbol bVarSymbol)
+            throws OpenApiValidatorException {
         List<ValidationError> validationErrors = new ArrayList<>();
         Map<String, Schema> properties = null;
         /** Handle the body parameter with records
@@ -52,8 +49,8 @@ public  class BJsonSchemaUtil {
                 if (schema.getProperties() != null) {
                     properties = schema.getProperties();
                 } else {
-                    String schema_ref = schema.get$ref();
-//                    properties = openAPIComponentSummary.getSchema(OpenAPISummaryUtil.getcomponetName(schema_ref)).getProperties();
+                    String schemaRef = schema.get$ref();
+                    properties = OpenAPISummaryUtil.getOpenAPIComponent(schemaRef).getProperties();
                 }
             }
             if (schema instanceof ObjectSchema) {
@@ -74,32 +71,28 @@ public  class BJsonSchemaUtil {
                                             .getType()))) {
                                 TypeMismatch validationError = new TypeMismatch(
                                         field.name.getValue().toString(),
-                                        convertTypeToEnum(entry.getValue().getType()), convertTypeToEnum(field.getType().getKind().typeName()));
+                                        convertTypeToEnum(entry.getValue().getType()),
+                                        convertTypeToEnum(field.getType().getKind().typeName()));
                                 validationErrors.add(validationError);
 
                             }
                         } else {
-//                         handle the nexted record
-                            if (entry.getValue().get$ref() != null){
+//                         Handle the nested record type
+                            if (entry.getValue().get$ref() != null) {
                                 Schema schema1 = OpenAPISummaryUtil.getOpenAPIComponent(entry.getValue().get$ref());
-//                                Schema schema1 = openAPIComponentSummary.getSchema(OpenAPISummaryUtil.getcomponetName(entry.getValue().get$ref()));
                                 if (field.type instanceof BRecordType) {
-//                                    BType nestedRecord = field.getType();
-//                                    BRecordType nestedRecordType = (BRecordType) nestedRecord;
-                                    List<ValidationError> nestedRecordValdidation = new ArrayList<>();
-                                    nestedRecordValdidation = BJsonSchemaUtil.validateBallerinaType(schema1, field.symbol);
+                                    List<ValidationError> nestedRecordValdidation = BJsonSchemaUtil
+                                            .validateBallerinaType(schema1, field.symbol);
                                     validationErrors.addAll(nestedRecordValdidation);
                                 } else {
-//                                    type mismatch
+//                                    Type mismatch
                                     TypeMismatch validationError = new TypeMismatch(
                                             field.name.getValue().toString(),
-                                            convertTypeToEnum("object"), convertTypeToEnum(field.getType().getKind().typeName()));
+                                            convertTypeToEnum("object"),
+                                            convertTypeToEnum(field.getType().getKind().typeName()));
                                     validationErrors.add(validationError);
                                 }
                             }
-//                                BType nestedRecord = field.getType();
-//                                BRecordType nestedRecordType = (BRecordType) nestedRecord;
-//                        BJsonSchemaUtil.validateBallerinaType(entry.getValue(), field.symbol, "RAO", validationError);
                         }
                     }
                 }
@@ -114,18 +107,13 @@ public  class BJsonSchemaUtil {
                     boolean isExist = false;
                     for (BField field: recordType.fields) {
                         if (field.name.getValue().equals(entry.getKey())) {
-                            isExist=true;
-
-//                            if (!field.getType().getKind().typeName()
-//                                    .equals(BJsonSchemaUtil.convertOpenAPITypeToBallerina(entry.getValue()
-//                                            .getType()))){
-//
-//                                typeMismatch.add(field.name.toString());
-//                            }
+                            isExist = true;
+//Handle the type mismatching in above validation
                         }
                     }
                     if (!isExist) {
-                        MissingFieldInBallerinaType validationError = new MissingFieldInBallerinaType(entry.getKey(), convertTypeToEnum(entry.getValue().getType().toString()));
+                        MissingFieldInBallerinaType validationError = new MissingFieldInBallerinaType(entry.getKey(),
+                                convertTypeToEnum(entry.getValue().getType().toString()));
                         validationErrors.add(validationError);
                     }
                 }
