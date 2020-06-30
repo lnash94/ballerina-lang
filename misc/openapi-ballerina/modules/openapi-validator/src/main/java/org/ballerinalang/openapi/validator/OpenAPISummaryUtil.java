@@ -16,35 +16,16 @@
  *  under the License.
  */
 
-/**
- *
- */
+
 package org.ballerinalang.openapi.validator;
 
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.parser.OpenAPIV3Parser;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
-
+/**
+ * This util for get the openapi component schema for given reference name.
+ */
 public class OpenAPISummaryUtil {
-    private static OpenAPIComponentSummary openAPIComponentSummary;
-    private static String definitionURI;
-
-    public void setDefinitionURI(String definitionURI) {
-        this.definitionURI = definitionURI;
-    }
-
-    public static String getDefinitionURI() {
-        return definitionURI;
-    }
-
 
 //  Get component name reference
     public static String getcomponetName(String ref) {
@@ -60,14 +41,15 @@ public class OpenAPISummaryUtil {
 //        String executionPath = System.getProperty("user.dir");
 //        Path execution = Paths.get(executionPath);
 //        String contractPath = execution.resolve("src/resources").toAbsolutePath().toString();
-        OpenAPI openAPIContract = ValidatorUtil.parseOpenAPIFile(OpenAPIValidatorPlugin.OpenAPIValidatorPlugin());
-        Schema openAPIComponent = openAPIContract.getComponents().getSchemas().get(OpenAPISummaryUtil.getcomponetName(ref));
+        OpenAPI openAPIContract = ValidatorUtil.parseOpenAPIFile(OpenAPIValidatorPlugin.getOpenapiContractURI());
+        Schema openAPIComponent = openAPIContract.getComponents().getSchemas().
+                get(OpenAPISummaryUtil.getcomponetName(ref));
 //        Schema openAPIComponent = OpenAPISummaryUtil.openAPIComponentSummary.getSchema(getcomponetName(ref));
         return openAPIComponent;
     }
-    public static Schema getComponetByName(String Name) throws OpenApiValidatorException {
-        OpenAPI openAPIContract = ValidatorUtil.parseOpenAPIFile(OpenAPISummaryUtil.getDefinitionURI());
-        Schema openAPIComponent = openAPIContract.getComponents().getSchemas().get(Name);
+    public static Schema getComponetByName(String name) throws OpenApiValidatorException {
+        OpenAPI openAPIContract = ValidatorUtil.parseOpenAPIFile(OpenAPIValidatorPlugin.getOpenapiContractURI());
+        Schema openAPIComponent = openAPIContract.getComponents().getSchemas().get(name);
         return openAPIComponent;
     }
 

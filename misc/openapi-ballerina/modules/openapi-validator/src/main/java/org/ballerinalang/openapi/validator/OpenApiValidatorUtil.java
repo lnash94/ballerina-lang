@@ -18,14 +18,11 @@ package org.ballerinalang.openapi.validator;
 import org.ballerinalang.compiler.CompilerPhase;
 import org.ballerinalang.tool.BLauncherCmd;
 import org.ballerinalang.tool.BLauncherException;
-import org.ballerinalang.tool.LauncherUtils;
 import org.wso2.ballerinalang.compiler.Compiler;
 import org.wso2.ballerinalang.compiler.FileSystemProgramDirectory;
 import org.wso2.ballerinalang.compiler.SourceDirectory;
 import org.wso2.ballerinalang.compiler.tree.BLangCompilationUnit;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
-import org.wso2.ballerinalang.compiler.tree.BLangTestablePackage;
-import org.ballerinalang.openapi.validator.ErrorMessages;
 import org.wso2.ballerinalang.compiler.util.CompilerContext;
 import org.wso2.ballerinalang.compiler.util.CompilerOptions;
 
@@ -38,11 +35,8 @@ import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -68,7 +62,6 @@ public class OpenApiValidatorUtil {
      *
      * @param argList        argument list from the console
      * @param helpFlag       flag to get the help page
-     * @param dryRun         run the whole formatting
      * @param sourceRootPath execution path
      */
     public static void execute(List<String> argList, boolean helpFlag, Path sourceRootPath) throws BLauncherException {

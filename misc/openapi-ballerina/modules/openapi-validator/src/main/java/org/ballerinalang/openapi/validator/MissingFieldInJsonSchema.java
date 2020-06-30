@@ -16,35 +16,36 @@
  *  under the License.
  */
 
-/**
- *
- */
+
 package org.ballerinalang.openapi.validator;
 
+/**
+ * This for identify the missing field in json schema against to given bVarSymbol.
+ */
 public class MissingFieldInJsonSchema extends ValidationError {
     String fieldName;
     Constants.Type type;
 
 
-    public MissingFieldInJsonSchema(){
+    public MissingFieldInJsonSchema() {
         fieldName = null;
         type = null;
     }
-    public MissingFieldInJsonSchema(String fieldName, Constants.Type type){
-        this.fieldName =fieldName;
+    public MissingFieldInJsonSchema(String fieldName, Constants.Type type) {
+        this.fieldName = fieldName;
         this.type = type;
     }
 
-    public void setFieldName(String fieldName){
+    public void setFieldName(String fieldName) {
         this.fieldName = fieldName;
     }
-    public void setType(Constants.Type type){
+    public void setType(Constants.Type type) {
         this.type = type;
     }
-    public String getFieldName(){
+    public String getFieldName() {
         return fieldName;
     }
-    public  Constants.Type getType(){
+    public  Constants.Type getType() {
         return type;
     }
 }

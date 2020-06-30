@@ -203,7 +203,6 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
                             this.resourceSummaryList,
                             this.openAPISummaryList, this.openAPIComponentSummary,
                             dLog);
-                    OpenAPIValidatorPlugin();
                 } catch (OpenApiValidatorException e) {
                     dLog.logDiagnostic(Diagnostic.Kind.ERROR, annotation.getPosition(),
                             e.getMessage());
@@ -235,7 +234,7 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
         // Collect endpoints throughout the package.
     }
 
-    static String OpenAPIValidatorPlugin(){
+    static String getOpenapiContractURI() {
         return openapiContractURI;
     }
 }
