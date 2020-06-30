@@ -276,13 +276,10 @@ public class ValidatorUtil {
                                     for (Map.Entry<String, Schema> entry : operationRequestBParamNames.entrySet()) {
                                         if (entry.getValue().getProperties() == null && entry.getValue()
                                                 .get$ref() != null) {
-//                                            List<ValidationError> validationErrors = BJsonSchemaUtil.
-//                                            validateBallerinaType(openAPIComponentSummary.getSchema(
-//                                            getcomponetName(entry.getValue().get$ref())),parameter.getParameter().
-//                                            symbol);
                                             isExist = validateResourceAgainstOpenAPIParams(parameter,
                                                     parameter.getParameter().symbol, openAPIComponentSummary
-                                                            .getSchema(getcomponetName(entry.getValue().get$ref())),
+                                                            .getSchema(OpenAPISummaryUtil.getcomponetName(
+                                                                    entry.getValue().get$ref())),
                                                     dLog, resourceMethod, resourceSummary.getPath(), kind);
                                         } else {
                                             isExist = validateResourceAgainstOpenAPIParams(parameter,
@@ -300,7 +297,8 @@ public class ValidatorUtil {
                                                 .get$ref() != null) {
                                             isExist = validateResourceAgainstOpenAPIParams(parameter,
                                                     parameter.getParameter().symbol, openAPIComponentSummary
-                                                            .getSchema(getcomponetName(entry.getValue().get$ref())),
+                                                            .getSchema(OpenAPISummaryUtil.getcomponetName(
+                                                                    entry.getValue().get$ref())),
                                                     dLog, resourceMethod, resourceSummary.getPath(), kind);
                                         } else {
                                             isExist = validateResourceAgainstOpenAPIParams(parameter,
@@ -308,7 +306,7 @@ public class ValidatorUtil {
                                                     resourceMethod, resourceSummary.getPath(), kind);
                                         }
                                     }
-                                    isExist = true;
+
                                 } else if (openAPIParameter.isTypeAvailableAsRef()) {
                                     if (parameter.getName().equals(openAPIParameter.getName())) {
                                         isExist = true;
@@ -625,7 +623,7 @@ public class ValidatorUtil {
 
                         isExist = validateOpenAPIAgainResourceParams(bodyParameter,
                                 bodyParameter.getParameter().symbol, openAPIComponentSummary
-                                        .getSchema(getcomponetName(entry.getValue().get$ref())),
+                                        .getSchema(OpenAPISummaryUtil.getcomponetName(entry.getValue().get$ref())),
                                 dLog, method, openApiSummary.getPath(), kind);
                     }
                 }
@@ -918,14 +916,4 @@ public class ValidatorUtil {
                 ErrorMessages.unimplementedOpenAPIOperationsForPath(methods,
                         openApiSummary.getPath()));
     }
-
-//    Return openapi component for given reference
-private static String getcomponetName(String ref) {
-    String componentName = null;
-    if (ref != null && ref.startsWith("#")) {
-        String[] splitRef = ref.split("/");
-        componentName = splitRef[splitRef.length - 1];
-    }
-    return componentName;
-}
 }

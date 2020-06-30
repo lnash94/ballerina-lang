@@ -27,7 +27,7 @@ import io.swagger.v3.oas.models.media.Schema;
  */
 public class OpenAPISummaryUtil {
 
-//  Get component name reference
+//  Get component name from reference
     public static String getcomponetName(String ref) {
         String componentName = null;
         if (ref != null && ref.startsWith("#")) {

@@ -33,7 +33,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 /**
- * Unit tests for {}.
+ * Unit tests for BJsonSchemaUtil.
  */
 public class ValidatorUtilTest {
     private static final Path RES_DIR = Paths.get("src/test/resources/").toAbsolutePath();
