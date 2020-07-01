@@ -26,11 +26,6 @@ public class MissingFieldInJsonSchema extends ValidationError {
     String fieldName;
     Constants.Type type;
 
-
-    public MissingFieldInJsonSchema() {
-        fieldName = null;
-        type = null;
-    }
     public MissingFieldInJsonSchema(String fieldName, Constants.Type type) {
         this.fieldName = fieldName;
         this.type = type;

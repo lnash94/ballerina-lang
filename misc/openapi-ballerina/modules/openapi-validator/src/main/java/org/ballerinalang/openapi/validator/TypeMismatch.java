@@ -27,13 +27,6 @@ public class TypeMismatch extends ValidationError {
     Constants.Type typeJsonSchema;
     Constants.Type typeBallerinaType;
 
-
-
-    public TypeMismatch() {
-        fieldName = null;
-        typeJsonSchema = null;
-        typeBallerinaType = null;
-    }
     public TypeMismatch(String fieldName, Constants.Type typeJsonSchema, Constants.Type typeBallerinaType) {
         this.fieldName = fieldName;
         this.typeJsonSchema = typeJsonSchema;

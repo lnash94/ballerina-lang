@@ -6,8 +6,7 @@ package org.ballerinalang.openapi.validator;
 public class ValidationError {
     String fieldName;
     Constants.Type type;
-
-
+    
     public ValidationError() {
         fieldName = null;
         type = null;

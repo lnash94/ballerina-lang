@@ -25,11 +25,6 @@ public class MissingFieldInBallerinaType extends ValidationError {
     String fieldName;
     Constants.Type type;
 
-
-    public MissingFieldInBallerinaType() {
-        fieldName = null;
-        type = null;
-    }
     public MissingFieldInBallerinaType(String fieldName, Constants.Type type) {
         this.fieldName = fieldName;
         this.type = type;
