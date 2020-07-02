@@ -811,38 +811,14 @@ public class ValidatorUtil {
         return resourceSummaries;
     }
 
-    private static String convertOpenAPITypeToBallerina(String type) {
-        String convertedType;
-        switch (type) {
-            case "integer":
-                convertedType = "int";
-                break;
-            case "string":
-                convertedType = "string";
-                break;
-            case "boolean":
-                convertedType = "boolean";
-                break;
-            case "array":
-                convertedType = "[]";
-                break;
-            case "object":
-                convertedType = "record";
-                break;
-            case "number":
-                convertedType = "decimal";
-                break;
-            default:
-                convertedType = "";
-        }
-
-        return convertedType;
-    }
     private static String convertEnumTypetoString(Constants.Type type) {
         String convertedType;
         switch (type) {
             case INT:
                 convertedType = "int";
+                break;
+            case INTEGER:
+                convertedType = "integer";
                 break;
             case STRING:
                 convertedType = "string";
@@ -854,6 +830,9 @@ public class ValidatorUtil {
                 convertedType = "array";
                 break;
             case OBJECT:
+                convertedType = "object";
+                break;
+            case RECORD:
                 convertedType = "record";
                 break;
             case DECIMAL:
