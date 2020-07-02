@@ -29,7 +29,6 @@ import org.ballerinalang.model.tree.ServiceNode;
 import org.ballerinalang.util.diagnostic.Diagnostic;
 import org.ballerinalang.util.diagnostic.DiagnosticLog;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BVarSymbol;
-import org.wso2.ballerinalang.compiler.semantics.model.types.BField;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BRecordType;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BType;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangExpression;
@@ -49,7 +48,7 @@ import java.util.Map;
 /**
  * Validator plugin utility class to hold the base functionality.
  */
-class ValidatorUtil {
+public class ValidatorUtil {
     /**
      * Parse and get the {@link OpenAPI} for the given OpenAPI contract.
      *
@@ -223,24 +222,14 @@ class ValidatorUtil {
         }
     }
 
-    /**
-     * Validate ballerina resource against OpenAPI paths.
-     *
-     * @param tags                    lists of tags to enable validation on
-     * @param operations              list of operations enable validation on
-     * @param kind                    Diagnostic.Kind value for enabaling the avoid validate fail
-     * @param resourceSummaryList     list of resource summaries
-     * @param openAPISummaryList      list of openAPI path summaries
-     * @param openAPIComponentSummary component summaries
-     * @param dLog                    diagnostic logger
-     */
     public static void validateResourcesAgainstOpenApi(List<String> tags, List<String> operations,
                                                 Diagnostic.Kind kind,
                                                 List<String> excludeTags,
                                                 List<String> excludeOperations,
                                                 List<ResourceSummary> resourceSummaryList,
                                                 List<OpenAPIPathSummary> openAPISummaryList,
-                                                OpenAPIComponentSummary openAPIComponentSummary, DiagnosticLog dLog) {
+                                                OpenAPIComponentSummary openAPIComponentSummary, DiagnosticLog dLog)
+            throws OpenApiValidatorException {
         boolean tagFilteringEnabled = tags.size() > 0;
         boolean operationFilteringEnabled = operations.size() > 0;
         boolean excludeTagsFilteringEnabled = excludeTags.size() > 0;
@@ -256,11 +245,9 @@ class ValidatorUtil {
                 }
                 dLog.logDiagnostic(kind, resourceSummary.getPathPosition(),
                         ErrorMessages.undocumentedResourcePath(resourceSummary.getPath()));
-
             } else {
                 List<String> unmatchedMethods = new ArrayList<>();
-                if (!operationFilteringEnabled && !tagFilteringEnabled && !excludeTagsFilteringEnabled
-                && !excludeOperationFilterEnable) {
+                if (!operationFilteringEnabled && !tagFilteringEnabled) {
                     for (String resourceMethod : resourceSummary.getMethods()) {
                         boolean noMatch = true;
                         for (String method : openAPIPathSummary.getAvailableOperations()) {
@@ -277,12 +264,49 @@ class ValidatorUtil {
                         List<OpenAPIParameter> operationParamNames = openAPIPathSummary
                                 .getParamNamesForOperation(resourceMethod);
                         List<ResourceParameter> resourceParamNames = resourceSummary.getParamNames();
+                        Map<String, Schema> operationRequestBParamNames = openAPIPathSummary
+                                .getRequestBodyForOperation(resourceMethod);
+//                        when resource parameters empty and body parameters exist.
                         for (ResourceParameter parameter : resourceParamNames) {
                             boolean isExist = false;
+
+//                           If request body not empty handle the validate of request body parameters
+                            if (!operationRequestBParamNames.isEmpty() && operationParamNames.isEmpty()) {
+                                if (parameter.getName().equals(resourceSummary.getBody())) {
+                                    for (Map.Entry<String, Schema> entry : operationRequestBParamNames.entrySet()) {
+                                        if (entry.getValue().getProperties() == null && entry.getValue()
+                                                .get$ref() != null) {
+                                            isExist = validateResourceAgainstOpenAPIParams(parameter,
+                                                    parameter.getParameter().symbol, openAPIComponentSummary
+                                                            .getSchema(OpenAPISummaryUtil.getcomponetName(
+                                                                    entry.getValue().get$ref())),
+                                                    dLog, resourceMethod, resourceSummary.getPath(), kind);
+                                        } else {
+                                            isExist = validateResourceAgainstOpenAPIParams(parameter,
+                                                    parameter.getParameter().symbol, entry.getValue() , dLog,
+                                                    resourceMethod, resourceSummary.getPath(), kind);
+                                        }
+                                    }
+                                }
+                            }
                             for (OpenAPIParameter openAPIParameter : operationParamNames) {
                                 if (parameter.getName().equals(resourceSummary.getBody())) {
                                     // TODO: Process request body.
-                                    isExist = true;
+                                    for (Map.Entry<String, Schema> entry : operationRequestBParamNames.entrySet()) {
+                                        if (entry.getValue().getProperties() == null && entry.getValue()
+                                                .get$ref() != null) {
+                                            isExist = validateResourceAgainstOpenAPIParams(parameter,
+                                                    parameter.getParameter().symbol, openAPIComponentSummary
+                                                            .getSchema(OpenAPISummaryUtil.getcomponetName(
+                                                                    entry.getValue().get$ref())),
+                                                    dLog, resourceMethod, resourceSummary.getPath(), kind);
+                                        } else {
+                                            isExist = validateResourceAgainstOpenAPIParams(parameter,
+                                                    parameter.getParameter().symbol, entry.getValue() , dLog,
+                                                    resourceMethod, resourceSummary.getPath(), kind);
+                                        }
+                                    }
+
                                 } else if (openAPIParameter.isTypeAvailableAsRef()) {
                                     if (parameter.getName().equals(openAPIParameter.getName())) {
                                         isExist = true;
@@ -328,6 +352,8 @@ class ValidatorUtil {
      * @param serviceNode             ballerina service node
      * @param tags                    list of tags to enable validation on
      * @param operations              list of operations to enable validation on
+     * @param excludeTags             list of tags to disable validation on
+     * @param excludeOperations       list of operations to disable validation on
      * @param resourceSummaryList     list of resource summaries
      * @param openAPISummaryList      list of openAPI path summaries
      * @param openAPIComponentSummary openAPI component summary
@@ -341,7 +367,7 @@ class ValidatorUtil {
                                                 List<ResourceSummary> resourceSummaryList,
                                                 List<OpenAPIPathSummary> openAPISummaryList,
                                                 OpenAPIComponentSummary openAPIComponentSummary,
-                                                DiagnosticLog dLog) {
+                                                DiagnosticLog dLog) throws OpenApiValidatorException {
         boolean tagFilteringEnabled = tags.size() > 0;
         boolean operationFilteringEnabled = operations.size() > 0;
         boolean excludeTagsFilteringEnabled = excludeTags.size() > 0;
@@ -503,7 +529,8 @@ class ValidatorUtil {
                             validateUnmatchedMethods(unmatchedMethods, serviceNode, kind, openApiSummary, dLog);
 
                         }
-
+                        // If Exclude operation filtering available proceed.
+                        // Else proceed to check tag filtering.
                     } else  {
 
                         for (String method : openApiSummary.getAvailableOperations()) {
@@ -519,6 +546,7 @@ class ValidatorUtil {
                                             openApiSummary.getPath()));
 
                         }
+
                     }
                 }
             }
@@ -555,7 +583,8 @@ class ValidatorUtil {
                                                     List<ResourceSummary> resourceSummaries, String method,
                                                     OpenAPIPathSummary openApiSummary, DiagnosticLog dLog,
                                                     OpenAPIComponentSummary openApiComponentSummary,
-                                                    ServiceNode serviceNode, Diagnostic.Kind kind) {
+                                                    ServiceNode serviceNode, Diagnostic.Kind kind) throws
+            OpenApiValidatorException {
         boolean noMatch = true;
         for (String resourceMethod : allAvailableResourceMethods) {
             if (resourceMethod.equals(method)) {
@@ -577,12 +606,33 @@ class ValidatorUtil {
                                                   List<ResourceSummary> resourceSummaries,
                                                   String method, ServiceNode serviceNode,
                                                   OpenAPIComponentSummary openAPIComponentSummary,
-                                                  DiagnosticLog dLog, Diagnostic.Kind kind) {
+                                                  DiagnosticLog dLog, Diagnostic.Kind kind) throws
+            OpenApiValidatorException {
         List<OpenAPIParameter> operationParamNames = openApiSummary
                 .getParamNamesForOperation(method);
         ResourceSummary resourceSummaryForMethod = getResourceSummaryByMethod(resourceSummaries, method);
         if (resourceSummaryForMethod != null) {
             List<ResourceParameter> resourceParamNames = resourceSummaryForMethod.getParamNames();
+//            handle the request body parameters
+            Map<String, Schema> openApiRequestBodyParamNames = openApiSummary.getRequestBodyForOperation(method);
+            for (Map.Entry<String, Schema> entry : openApiRequestBodyParamNames.entrySet()) {
+                boolean isExist = false;
+                for (ResourceParameter bodyParameter : resourceParamNames) {
+                    if (OpenAPISummaryUtil.getcomponetName(entry.getValue().get$ref()).
+                            equals(bodyParameter.getType())) {
+
+                        isExist = validateOpenAPIAgainResourceParams(bodyParameter,
+                                bodyParameter.getParameter().symbol, openAPIComponentSummary
+                                        .getSchema(OpenAPISummaryUtil.getcomponetName(entry.getValue().get$ref())),
+                                dLog, method, openApiSummary.getPath(), kind);
+                    }
+                }
+                if (!isExist) {
+                    dLog.logDiagnostic(kind, getServiceNamePosition(serviceNode),
+                            ErrorMessages.unimplementedParameterForOperation(OpenAPISummaryUtil.getcomponetName
+                                            (entry.getValue().get$ref()), method, resourceSummaryForMethod.getPath()));
+                }
+            }
             for (OpenAPIParameter openAPIParameter : operationParamNames) {
                 boolean isExist = false;
                 ResourceParameter nonExistingResourceParameter = null;
@@ -631,35 +681,36 @@ class ValidatorUtil {
     private static boolean validateResourceAgainstOpenAPIParams(ResourceParameter resourceParameter,
                                                                 BVarSymbol resourceParameterType, Schema openAPIParam,
                                                                 DiagnosticLog dLog, String method, String path,
-                                                                Diagnostic.Kind kind) {
+                                                                Diagnostic.Kind kind) throws OpenApiValidatorException {
         BType resourceParamType = resourceParameterType.getType();
-
         if (resourceParamType.getKind().typeName().equals("record")
                 && resourceParamType instanceof BRecordType
                 && openAPIParam instanceof ObjectSchema) {
-            // Check the existence of the fields.
-            Map<String, Schema> properties = ((ObjectSchema) openAPIParam).getProperties();
-            BRecordType recordType = (BRecordType) resourceParamType;
-            for (BField field : recordType.fields.values()) {
-                boolean isExist = false;
-                for (Map.Entry<String, Schema> entry : properties.entrySet()) {
-                    if (entry.getKey().equals(field.name.getValue())
-                            && field.getType().getKind().typeName()
-                            .equals(ValidatorUtil.convertOpenAPITypeToBallerina(entry.getValue().getType()))) {
-                        isExist = true;
-                        if (ValidatorUtil.convertOpenAPITypeToBallerina(entry.getValue().getType()).equals("record")) {
-                            isExist = validateResourceAgainstOpenAPIParams(resourceParameter,
-                                    field.symbol, entry.getValue(), dLog, method, path, kind);
-                        }
+
+            List<ValidationError> validationErrors = BJsonSchemaUtil.validateBallerinaType(openAPIParam,
+                    resourceParameterType);
+            if (!validationErrors.isEmpty()) {
+//                String massage= "[";
+                for (ValidationError validationError: validationErrors) {
+                    if (validationError instanceof MissingFieldInJsonSchema) {
+                        dLog.logDiagnostic(kind, resourceParameter.getParameter().getPosition(),
+                                ErrorMessages.undocumentedFieldInRecordParam(validationError.getFieldName(),
+                                        resourceParameter.getName(), method, path));
+//                        massage += validationError.getFieldName();
+                    }
+                    if (validationError instanceof TypeMismatch) {
+                        dLog.logDiagnostic(kind, resourceParameter.getParameter().getPosition(),
+                                ErrorMessages.typeMismatching(validationError.getFieldName(),
+                                        resourceParameter.getName(), convertEnumTypetoString(((TypeMismatch)
+                                                validationError).getTypeJsonSchema()),
+                                        convertEnumTypetoString(((TypeMismatch) validationError).
+                                                getTypeBallerinaType()), method, path));
                     }
                 }
-
-                if (!isExist) {
-                    dLog.logDiagnostic(kind, field.pos,
-                            ErrorMessages.undocumentedFieldInRecordParam(field.name.getValue(),
-                                    resourceParameter.getName(), method, path));
-
-                }
+//                massage +="]";
+//                dLog.logDiagnostic(kind, resourceParameter.getParameter().getPosition(),
+//                        ErrorMessages.undocumentedFieldInRecordParam(massage,
+//                                resourceParameter.getName(), method, path));
             }
             return true;
         } else if (resourceParamType.getKind().typeName().equals("[]")
@@ -686,33 +737,21 @@ class ValidatorUtil {
                                                               BVarSymbol resourceParameterType,
                                                               Schema openAPIParam,
                                                               DiagnosticLog dLog, String operation, String path,
-                                                              Diagnostic.Kind kind) {
+                                                              Diagnostic.Kind kind) throws OpenApiValidatorException {
         BType resourceParamType = resourceParameterType.getType();
         if (resourceParamType.getKind().typeName().equals("record")
                 && resourceParamType instanceof BRecordType
                 && openAPIParam instanceof ObjectSchema) {
-            // Check the existence of the fields.
-            Map<String, Schema> properties = ((ObjectSchema) openAPIParam).getProperties();
-            BRecordType recordType = (BRecordType) resourceParamType;
-            for (Map.Entry<String, Schema> entry : properties.entrySet()) {
-                boolean isExist = false;
-                for (BField field : recordType.fields.values()) {
-                    if (entry.getKey().equals(field.name.getValue())
-                            && field.getType().getKind().typeName()
-                            .equals(ValidatorUtil.convertOpenAPITypeToBallerina(entry.getValue().getType()))) {
-                        isExist = true;
-                        if (ValidatorUtil.convertOpenAPITypeToBallerina(entry.getValue().getType()).equals("record")) {
-                            isExist = validateOpenAPIAgainResourceParams(resourceParam, field.symbol, entry.getValue(),
-                                    dLog, operation, path, kind);
-                        }
+
+            List<ValidationError> validationErrors = BJsonSchemaUtil.validateBallerinaType(openAPIParam,
+                    resourceParameterType);
+            if (!validationErrors.isEmpty()) {
+                for (ValidationError validationError: validationErrors) {
+                    if (validationError instanceof MissingFieldInBallerinaType) {
+                        dLog.logDiagnostic(kind, resourceParam.getParameter().getPosition(),
+                                ErrorMessages.unimplementedFieldInOperation(validationError.getFieldName(),
+                                        resourceParam.getName(), operation, path));
                     }
-                }
-
-                if (!isExist) {
-                    dLog.logDiagnostic(kind, resourceParam.getParameter().getPosition(),
-                            ErrorMessages.unimplementedFieldInOperation(entry.getKey(), resourceParam.getName(),
-                                    operation, path));
-
                 }
             }
             return true;
@@ -799,11 +838,38 @@ class ValidatorUtil {
 
         return convertedType;
     }
+    private static String convertEnumTypetoString(Constants.Type type) {
+        String convertedType;
+        switch (type) {
+            case INT:
+                convertedType = "int";
+                break;
+            case STRING:
+                convertedType = "string";
+                break;
+            case BOOLEAN:
+                convertedType = "boolean";
+                break;
+            case ARRAY:
+                convertedType = "array";
+                break;
+            case OBJECT:
+                convertedType = "record";
+                break;
+            case DECIMAL:
+                convertedType = "decimal";
+                break;
+            default:
+                convertedType = "";
+        }
+
+        return convertedType;
+    }
 
     private static Diagnostic.DiagnosticPosition getServiceNamePosition(ServiceNode serviceNode) {
         return serviceNode.getName().getPosition();
     }
-// For tag filter
+
     private static void tagsFilter (ServiceNode serviceNode,
                                     OpenAPIPathSummary openApiSummary,
                                     List<String> tags,
@@ -850,5 +916,4 @@ class ValidatorUtil {
                 ErrorMessages.unimplementedOpenAPIOperationsForPath(methods,
                         openApiSummary.getPath()));
     }
-
 }

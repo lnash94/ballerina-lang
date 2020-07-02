@@ -15,17 +15,31 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
+
 package org.ballerinalang.openapi.validator;
 
 /**
- * OpenAPI Validator plugin exception.
+ * This for identify the missing fields in bVarsymbol against the given json schema.
  */
-public class OpenApiValidatorException extends Exception {
-    OpenApiValidatorException(String message, Throwable e) {
-        super(message, e);
+public class MissingFieldInBallerinaType extends ValidationError {
+    String fieldName;
+    Constants.Type type;
+
+    public MissingFieldInBallerinaType(String fieldName, Constants.Type type) {
+        this.fieldName = fieldName;
+        this.type = type;
     }
 
-    OpenApiValidatorException(String message) {
-        super(message);
+    public void setFieldName(String fieldName) {
+        this.fieldName = fieldName;
+    }
+    public void setType(Constants.Type type) {
+        this.type = type;
+    }
+    public String getFieldName() {
+        return fieldName;
+    }
+    public  Constants.Type getType() {
+        return type;
     }
 }
