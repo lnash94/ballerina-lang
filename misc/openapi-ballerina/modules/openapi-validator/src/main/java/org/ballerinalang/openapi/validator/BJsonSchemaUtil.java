@@ -120,13 +120,15 @@ public  class BJsonSchemaUtil {
         }
 
         return validationErrors;
-
     }
 
     private static Constants.Type convertTypeToEnum(String type) {
         Constants.Type convertedType;
         switch (type) {
             case "integer":
+                convertedType = Constants.Type.INTEGER;
+                break;
+            case "int":
                 convertedType = Constants.Type.INT;
                 break;
             case "string":
@@ -139,7 +141,10 @@ public  class BJsonSchemaUtil {
                 convertedType = Constants.Type.ARRAY;
                 break;
             case "object":
-                convertedType = Constants.Type.RECODR;
+                convertedType = Constants.Type.OBJECT;
+                break;
+            case "record":
+                convertedType = Constants.Type.RECORD;
                 break;
             case "number":
                 convertedType = Constants.Type.DECIMAL;
