@@ -690,13 +690,11 @@ public class ValidatorUtil {
             List<ValidationError> validationErrors = BJsonSchemaUtil.validateBallerinaType(openAPIParam,
                     resourceParameterType);
             if (!validationErrors.isEmpty()) {
-//                String massage= "[";
                 for (ValidationError validationError: validationErrors) {
                     if (validationError instanceof MissingFieldInJsonSchema) {
                         dLog.logDiagnostic(kind, resourceParameter.getParameter().getPosition(),
                                 ErrorMessages.undocumentedFieldInRecordParam(validationError.getFieldName(),
                                         resourceParameter.getName(), method, path));
-//                        massage += validationError.getFieldName();
                     }
                     if (validationError instanceof TypeMismatch) {
                         dLog.logDiagnostic(kind, resourceParameter.getParameter().getPosition(),
@@ -707,10 +705,6 @@ public class ValidatorUtil {
                                                 getTypeBallerinaType()), method, path));
                     }
                 }
-//                massage +="]";
-//                dLog.logDiagnostic(kind, resourceParameter.getParameter().getPosition(),
-//                        ErrorMessages.undocumentedFieldInRecordParam(massage,
-//                                resourceParameter.getName(), method, path));
             }
             return true;
         } else if (resourceParamType.getKind().typeName().equals("[]")
@@ -844,6 +838,9 @@ public class ValidatorUtil {
             case INT:
                 convertedType = "int";
                 break;
+            case INTEGER:
+                convertedType = "integer";
+                break;
             case STRING:
                 convertedType = "string";
                 break;
@@ -854,6 +851,9 @@ public class ValidatorUtil {
                 convertedType = "array";
                 break;
             case OBJECT:
+                convertedType = "object";
+                break;
+            case RECORD:
                 convertedType = "record";
                 break;
             case DECIMAL:

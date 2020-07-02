@@ -60,7 +60,7 @@ public  class BJsonSchemaUtil {
             BType resourceType = bVarSymbol.getType();
             BRecordType recordType = (BRecordType) resourceType;
 
-            for (BField field : recordType.fields) {
+            for (BField field : recordType.fields.values()) {
                 boolean isExist = false;
                 for (Map.Entry<String, Schema> entry : properties.entrySet()) {
                     if (entry.getKey().equals(field.name.getValue())) {
@@ -105,7 +105,7 @@ public  class BJsonSchemaUtil {
 //            Find missing fields in BallerinaType
             for (Map.Entry<String, Schema> entry : properties.entrySet()) {
                     boolean isExist = false;
-                    for (BField field: recordType.fields) {
+                    for (BField field: recordType.fields.values()) {
                         if (field.name.getValue().equals(entry.getKey())) {
                             isExist = true;
 //Handle the type mismatching in above validation
@@ -127,7 +127,7 @@ public  class BJsonSchemaUtil {
         Constants.Type convertedType;
         switch (type) {
             case "integer":
-                convertedType = Constants.Type.INT;
+                convertedType = Constants.Type.INTEGER;
                 break;
             case "string":
                 convertedType = Constants.Type.STRING;
@@ -139,10 +139,16 @@ public  class BJsonSchemaUtil {
                 convertedType = Constants.Type.ARRAY;
                 break;
             case "object":
-                convertedType = Constants.Type.RECODR;
+                convertedType = Constants.Type.OBJECT;
+                break;
+            case "record":
+                convertedType = Constants.Type.RECORD;
                 break;
             case "number":
                 convertedType = Constants.Type.DECIMAL;
+                break;
+            case "int":
+                convertedType = Constants.Type.INT;
                 break;
             default:
                 convertedType = Constants.Type.ANYDATA;

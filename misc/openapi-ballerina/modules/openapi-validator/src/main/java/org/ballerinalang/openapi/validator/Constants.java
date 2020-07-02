@@ -46,6 +46,6 @@ public class Constants {
      * Enum Type for handle the validation error types.
      */
     public enum Type {
-        STRING, INT, RECODR, OBJECT, ARRAY, BOOLEAN, DECIMAL, ANYDATA
+        STRING, INT, RECORD, OBJECT, ARRAY, BOOLEAN, DECIMAL, ANYDATA, INTEGER
     }
 }
