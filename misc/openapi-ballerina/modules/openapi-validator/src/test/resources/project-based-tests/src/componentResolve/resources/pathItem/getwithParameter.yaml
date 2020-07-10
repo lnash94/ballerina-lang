@@ -1,0 +1,23 @@
+openapi: 3.0.0
+info:
+  title: refComponent
+  description: refComponent
+  version: 1.0.0
+servers:
+  - url: 'https'
+paths:
+  /user/{userId}:
+    get:
+      summary: Search user
+      operationId: getUser
+      responses:
+      parameters:
+        - name: username
+          in: path
+          schema:
+            $ref: '#/components/schemas/User'
+
+components:
+  schemas:
+    User:
+      type: string
