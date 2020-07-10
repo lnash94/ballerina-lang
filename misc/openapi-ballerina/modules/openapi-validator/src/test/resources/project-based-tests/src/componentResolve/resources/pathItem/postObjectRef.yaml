@@ -1,0 +1,36 @@
+openapi: 3.0.0
+info:
+  title: refComponent
+  description: refComponent
+  version: 1.0.0
+servers:
+  - url: 'https'
+paths:
+  /user:
+    post:
+      summary: Add user
+      operationId: addUser
+      responses:
+      parameters:
+        - name: username
+          in: path
+          schema:
+            type: string
+
+        - name: dateOfBirth
+          in: path
+          schema:
+            $ref: '#/components/schemas/Tag'
+
+components:
+  schemas:
+    Tag:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        name:
+          type: "string"
+      xml:
+        name: "Tag"
