@@ -36,6 +36,9 @@ import org.wso2.ballerinalang.compiler.tree.expressions.BLangListConstructorExpr
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangLiteral;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangSimpleVarRef;
+import org.wso2.ballerinalang.compiler.tree.types.BLangType;
+import org.wso2.ballerinalang.compiler.tree.types.BLangUnionTypeNode;
+import org.wso2.ballerinalang.compiler.tree.types.BLangUserDefinedType;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -618,9 +621,25 @@ public class ValidatorUtil {
             for (Map.Entry<String, Schema> entry : openApiRequestBodyParamNames.entrySet()) {
                 boolean isExist = false;
                 for (ResourceParameter bodyParameter : resourceParamNames) {
+                    if (bodyParameter.getParameter().getTypeNode() != null) {
+                        if (bodyParameter.getParameter().getTypeNode() instanceof BLangUnionTypeNode) {
+                            BLangUnionTypeNode memberTypeNodes =
+                                    (BLangUnionTypeNode) bodyParameter.getParameter().getTypeNode();
+                            for (BLangType bRecordType : memberTypeNodes.memberTypeNodes) {
+                                if (bRecordType.type instanceof BRecordType) {
+                                    BRecordType memberTypeNode = (BRecordType) bRecordType.type;
+//                                    oneOf type handle every multiple reference
+//                                    isExist = validateOpenAPIAgainResourceParams(bodyParameter,
+//                                            memberTypeNode, openAPIComponentSummary
+//                                                    .getSchema(OpenAPISummaryUtil.getcomponetName(entry.getValue().get$ref())),
+//                                            dLog, method, openApiSummary.getPath(), kind);
+                                }
+
+                            }
+                        }
+                    }
                     if (OpenAPISummaryUtil.getcomponetName(entry.getValue().get$ref()).
                             equals(bodyParameter.getType())) {
-
                         isExist = validateOpenAPIAgainResourceParams(bodyParameter,
                                 bodyParameter.getParameter().symbol, openAPIComponentSummary
                                         .getSchema(OpenAPISummaryUtil.getcomponetName(entry.getValue().get$ref())),

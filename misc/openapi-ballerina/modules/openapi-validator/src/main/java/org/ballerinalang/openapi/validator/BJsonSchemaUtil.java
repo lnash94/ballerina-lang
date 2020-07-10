@@ -16,14 +16,13 @@
  *  under the License.
  */
 
-/**
- *
- */
 package org.ballerinalang.openapi.validator;
 
+import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BVarSymbol;
+import org.wso2.ballerinalang.compiler.semantics.model.types.BArrayType;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BField;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BRecordType;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BType;
@@ -56,9 +55,20 @@ public  class BJsonSchemaUtil {
             if (schema instanceof ObjectSchema) {
                 properties = ((ObjectSchema) schema).getProperties();
             }
-
-            BType resourceType = bVarSymbol.getType();
-            BRecordType recordType = (BRecordType) resourceType;
+            BType resourceType; 
+            BRecordType recordType = null;
+            
+//          check the array type whether the array
+            if (bVarSymbol.type instanceof BArrayType) {
+                if (((BArrayType) bVarSymbol.type).eType instanceof BRecordType) {
+                    resourceType = ((BArrayType) bVarSymbol.type).eType;
+                    recordType = (BRecordType) resourceType;
+                }
+            } else {
+                resourceType = bVarSymbol.getType();
+                recordType = (BRecordType) resourceType;
+            }          
+            
 
             for (BField field : recordType.fields) {
                 boolean isExist = false;
@@ -69,26 +79,78 @@ public  class BJsonSchemaUtil {
                             if (!field.getType().getKind().typeName()
                                     .equals(BJsonSchemaUtil.convertOpenAPITypeToBallerina(entry.getValue()
                                             .getType()))) {
+
                                 TypeMismatch validationError = new TypeMismatch(
                                         field.name.getValue().toString(),
                                         convertTypeToEnum(entry.getValue().getType()),
                                         convertTypeToEnum(field.getType().getKind().typeName()));
+
                                 validationErrors.add(validationError);
 
+                            } else {
+//                                Handle array type mismatching.
+                                if (field.getType().getKind().typeName().equals("[]")){
+                                    BArrayType bArrayType = (BArrayType) field.type;
+                                    ArraySchema arraySchema = (ArraySchema) entry.getValue();
+                                    BArrayType traversNestedArray = bArrayType;
+                                    ArraySchema traversSchemaNestedArray = arraySchema;
+//                               Handle nested array type
+                                    if ((bArrayType.eType instanceof BArrayType) &&
+                                            ( arraySchema.getItems() instanceof ArraySchema)) {
+                                        traversNestedArray = (BArrayType) bArrayType.eType;
+                                        traversSchemaNestedArray = (ArraySchema) arraySchema.getItems();
+
+                                        while ((traversNestedArray.eType instanceof BArrayType) &&
+                                                ( traversSchemaNestedArray.getItems() instanceof ArraySchema)) {
+
+                                                traversSchemaNestedArray = (ArraySchema) traversSchemaNestedArray.getItems();
+                                                traversNestedArray = (BArrayType) traversNestedArray.eType;
+
+                                        }
+                                    }
+//                                    Handle record type array
+                                    if ((traversNestedArray.eType instanceof BRecordType) && traversSchemaNestedArray.
+                                            getItems().get$ref()!= null){
+                                        if (!traversNestedArray.eType.tsymbol.name.toString().equals(
+                                                OpenAPISummaryUtil.getcomponetName(traversSchemaNestedArray.getItems()
+                                                        .get$ref()))) {
+//                                            typemismatch
+                                        } else {
+                                            Schema schema2 =
+                                                    OpenAPISummaryUtil.getOpenAPIComponent(traversSchemaNestedArray.getItems().get$ref());
+                                            BVarSymbol bVarSymbol2 = field.symbol;
+                                            List<ValidationError> nestedRecordValidation = BJsonSchemaUtil
+                                                    .validateBallerinaType(schema2, bVarSymbol2);
+                                            validationErrors.addAll(nestedRecordValidation);
+                                        }
+
+                                    }
+
+                                    if (!traversNestedArray.eType.tsymbol.toString().equals(BJsonSchemaUtil
+                                            .convertOpenAPITypeToBallerina(traversSchemaNestedArray.getItems().getType()))) {
+
+                                        TypeMismatch validationError = new TypeMismatch(
+                                                field.name.getValue().toString(),
+                                                convertTypeToEnum(arraySchema.getItems().getType()),
+                                                convertTypeToEnum(bArrayType.eType.tsymbol.toString()));
+                                        validationErrors.add(validationError);
+
+                                    }
+                                }
                             }
                         } else {
 //                         Handle the nested record type
                             if (entry.getValue().get$ref() != null) {
                                 Schema schema1 = OpenAPISummaryUtil.getOpenAPIComponent(entry.getValue().get$ref());
                                 if (field.type instanceof BRecordType) {
-                                    List<ValidationError> nestedRecordValdidation = BJsonSchemaUtil
+                                    List<ValidationError> nestedRecordValidation = BJsonSchemaUtil
                                             .validateBallerinaType(schema1, field.symbol);
-                                    validationErrors.addAll(nestedRecordValdidation);
+                                    validationErrors.addAll(nestedRecordValidation);
                                 } else {
 //                                    Type mismatch
                                     TypeMismatch validationError = new TypeMismatch(
                                             field.name.getValue().toString(),
-                                            convertTypeToEnum("object"),
+                                            convertTypeToEnum("record"),
                                             convertTypeToEnum(field.getType().getKind().typeName()));
                                     validationErrors.add(validationError);
                                 }
@@ -138,6 +200,7 @@ public  class BJsonSchemaUtil {
                 convertedType = Constants.Type.BOOLEAN;
                 break;
             case "array":
+            case "[]":
                 convertedType = Constants.Type.ARRAY;
                 break;
             case "object":

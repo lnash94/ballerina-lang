@@ -44,7 +44,6 @@ public class OpenAPISummaryUtil {
         OpenAPI openAPIContract = ValidatorUtil.parseOpenAPIFile(OpenAPIValidatorPlugin.getOpenapiContractURI());
         Schema openAPIComponent = openAPIContract.getComponents().getSchemas().
                 get(OpenAPISummaryUtil.getcomponetName(ref));
-//        Schema openAPIComponent = OpenAPISummaryUtil.openAPIComponentSummary.getSchema(getcomponetName(ref));
         return openAPIComponent;
     }
     public static Schema getComponetByName(String name) throws OpenApiValidatorException {

@@ -33,7 +33,8 @@ under the License.
             <package name="org.ballerinalang.openapi.validator.*"/>
         </packages>
         <classes>
-            <class name="org.ballerinalang.openapi.validator.tests.ValidatorUtilTest" />
+            <class name="org.ballerinalang.openapi.validator.tests.InvalidValidatorUtilTests" />
+            <class name="org.ballerinalang.openapi.validator.tests.ValidValidatorUtilTests" />
             <class name="org.ballerinalang.openapi.validator.tests.OpenApiComponentByRefTest" />
         </classes>
     </test>
