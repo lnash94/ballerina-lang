@@ -94,7 +94,6 @@ public class ResolveComponentUtilTest {
     public void testGetMultipleMIMEResponses() throws OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("pathItem/getOneResponseWithMultipleMIME.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        System.out.println(ResolveComponentUtil.resolveOpeApiContract(api));
         Collection<ApiResponse> responses =
                 (Collection<ApiResponse>) ResolveComponentUtil.resolveOpeApiContract(api).getPaths().get("/multipleResponses")
                         .getGet().getResponses().values();
@@ -145,6 +144,16 @@ public class ResolveComponentUtilTest {
         Assert.assertEquals(ResolveComponentUtil.resolveOpeApiContract(api).getPaths().get("/user")
                 .getPost().getParameters().get(1).getSchema().getType().toString(), "object");
     }
+
+    @Test(description = "Test0 - Test component with reference")
+    public void testComponents() throws OpenApiValidatorException {
+        Path contractPath = RES_DIR.resolve("components/components.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        System.out.println(ResolveComponentUtil.resolveOpeApiContract(api));
+
+    }
+
+
 
 
 

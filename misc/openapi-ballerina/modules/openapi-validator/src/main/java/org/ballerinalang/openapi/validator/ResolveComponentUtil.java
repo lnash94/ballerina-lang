@@ -18,6 +18,7 @@
 
 package org.ballerinalang.openapi.validator;
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -41,9 +42,22 @@ import java.util.Map;
 public class ResolveComponentUtil {
 
     public static OpenAPI resolveOpeApiContract(OpenAPI openAPI) {
+
+//        Components Handling
+        Components components = openAPI.getComponents();
+        if (components != null) {
+            Map<String, Schema> schemas = components.getSchemas();
+            for (Map.Entry<String, Schema> schema: schemas.entrySet()) {
+                if (schema.getValue().get$ref() != null) {
+//                    nesteded
+                }
+            }
+        }
+
+//        Path items handling
         io.swagger.v3.oas.models.Paths paths = openAPI.getPaths();
-//        Path items handling 
-        for (Map.Entry pathItem: paths.entrySet()) {
+        if (paths != null) {
+            for (Map.Entry pathItem: paths.entrySet()) {
 //            if (pathItem.getValue() instanceof PathItem) {
                 PathItem operation = (PathItem) pathItem.getValue();
 //                if (((PathItem) pathItem).get$ref()!=null) {
@@ -130,13 +144,12 @@ public class ResolveComponentUtil {
                                         openAPI.getComponents().getSchemas()
                                                 .get(getcomponetName(parameter.getSchema().get$ref()));
                                 parameter.setSchema(schema);
-//                                System.out.println(openAPI);
                             }
                         }
                     }
-//                    return openAPI;
                 }
             }
+        }
 
 //        }
         System.out.println(openAPI);
