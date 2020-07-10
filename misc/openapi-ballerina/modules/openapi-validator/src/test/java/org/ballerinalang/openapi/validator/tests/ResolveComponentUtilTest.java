@@ -120,6 +120,14 @@ public class ResolveComponentUtilTest {
 
     }
 
+    @Test(description = "Test06 - Test path Item get method with oneOf type response")
+    public void testGetAnyofResponse() throws OpenApiValidatorException {
+        Path contractPath = RES_DIR.resolve("pathItem/getAnyOfResponses.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        System.out.println(ResolveComponentUtil.resolveOpeApiContract(api));
+
+    }
+
     @Test(description = "Test0 -  path Item post method single field")
     public void testResolveComponentType() throws OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("pathItem/post.yaml");

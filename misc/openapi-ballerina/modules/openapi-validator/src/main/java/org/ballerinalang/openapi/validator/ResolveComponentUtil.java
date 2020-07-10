@@ -28,9 +28,12 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import org.ballerinalang.model.elements.MarkdownDocAttachment;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 /**
  * This util class for resolve the any given schema with reference.
@@ -57,21 +60,40 @@ public class ResolveComponentUtil {
                                 Content content = apiResponse.getContent();
 //                                Handle reference in media  type
                                 for (Map.Entry<String, MediaType> mediaTypeEntry : content.entrySet()) {
-//                                        Handle mediaType has oneOf type references
                                     if (mediaTypeEntry.getValue().getSchema() instanceof ComposedSchema) {
                                         ComposedSchema composedSchema =
                                                 ((ComposedSchema) mediaTypeEntry.getValue().getSchema());
+//                                        Handle mediaType has oneOf type references
                                         if ((composedSchema.getOneOf()!= null) && (!composedSchema.getOneOf().isEmpty())) {
-                                            for (Schema schema: composedSchema.getOneOf()) {
-                                                if (schema.get$ref()!=null) {
+                                            List<Schema> newSchemas = new ArrayList<>();
+                                            ListIterator<Schema> composedIter =
+                                                    composedSchema.getOneOf().listIterator();
+                                            while (composedIter.hasNext()) {
+                                                Schema iterSchema = composedIter.next();
+                                                if (iterSchema.get$ref() != null) {
                                                     Schema oneOfSchema = openAPI.getComponents().getSchemas()
-                                                            .get(getcomponetName(schema.get$ref()));
-                                                    composedSchema.getOneOf().remove(0);
-//                                                    add to another list and add it to this.
-                                                    composedSchema.getOneOf().add(oneOfSchema);
+                                                            .get(getcomponetName(iterSchema.get$ref()));
+                                                    composedIter.set(oneOfSchema);
                                                 }
                                             }
+                                            composedSchema.getOneOf().addAll(newSchemas);
                                         }
+//                                        Handle mediaType has anyOf references
+                                        if ((composedSchema.getAnyOf()!= null) && (!composedSchema.getAnyOf().isEmpty())) {
+                                            List<Schema> newSchemas = new ArrayList<>();
+                                            ListIterator<Schema> composedIter =
+                                                    composedSchema.getAnyOf().listIterator();
+                                            while (composedIter.hasNext()) {
+                                                Schema iterSchema = composedIter.next();
+                                                if (iterSchema.get$ref() != null) {
+                                                    Schema anyOfSchema = openAPI.getComponents().getSchemas()
+                                                            .get(getcomponetName(iterSchema.get$ref()));
+                                                    composedIter.set(anyOfSchema);
+                                                }
+                                            }
+                                            composedSchema.getAnyOf().addAll(newSchemas);
+                                        }
+//                                       mediaType hasn't  allOf references yet
                                     }
                                     if (mediaTypeEntry.getValue().getSchema().get$ref()!=null) {
                                         Schema mediaSchema =
@@ -80,9 +102,6 @@ public class ResolveComponentUtil {
                                                                 .get$ref()));
                                         mediaTypeEntry.getValue().setSchema(mediaSchema);
                                     }
-
-
-
                                 }
                             }
                         }
