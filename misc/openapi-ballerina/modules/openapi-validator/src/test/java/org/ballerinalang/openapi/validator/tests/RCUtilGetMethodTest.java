@@ -35,7 +35,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Unit tests for ResoloveComponentUtil.
+ * Unit tests for ResoloveComponentUtil with GET method.
  */
 public class RCUtilGetMethodTest {
     private static final Path RES_DIR = Paths.get("src/test/resources/project-based-tests/src/componentResolve" +
@@ -63,6 +63,30 @@ public class RCUtilGetMethodTest {
         ApiResponse apiResponse = responses.iterator().next();
         MediaType mediaType = apiResponse.getContent().values().iterator().next();
         Assert.assertEquals(mediaType.getSchema().getType(), "object");
+    }
+
+    @Test(description = "Test07 - Test path Item GET method without path parameter and with response")
+    public void testreferenceParameters() throws OpenApiValidatorException {
+        Path contractPath = RES_DIR.resolve("getParameterswithRef.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        responses =
+                (Collection<ApiResponse>) ResolveComponentUtil.resolveOpeApiContract(api).getPaths().get("/references")
+                        .getGet().getResponses().values();
+        ApiResponse apiResponse = responses.iterator().next();
+        MediaType mediaType = apiResponse.getContent().values().iterator().next();
+        Assert.assertEquals(mediaType.getSchema().getType(), "object");
+    }
+
+    @Test(description = "Test07 - Test path Item GET method without path parameter and with response")
+    public void testreferenceResponses() throws OpenApiValidatorException {
+        Path contractPath = RES_DIR.resolve("getRefResponses.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        responses =
+                (Collection<ApiResponse>) ResolveComponentUtil.resolveOpeApiContract(api).getPaths().get("/user")
+                        .getGet().getResponses().values();
+//        ApiResponse apiResponse = responses.iterator().next();
+//        MediaType mediaType = apiResponse.getContent().values().iterator().next();
+//        Assert.assertEquals(mediaType.getSchema().getType(), "object");
     }
 
     @Test(description = "Test08 - Test path Item GET method without path parameter and with multiple response")
