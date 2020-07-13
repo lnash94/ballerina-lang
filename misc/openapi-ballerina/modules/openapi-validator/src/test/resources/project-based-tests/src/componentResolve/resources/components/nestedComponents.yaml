@@ -29,7 +29,6 @@ components:
           type: string
         tag:
           type: string
-#          $ref: "#/definitions/Tag"
     Tag:
       type: object
       properties:

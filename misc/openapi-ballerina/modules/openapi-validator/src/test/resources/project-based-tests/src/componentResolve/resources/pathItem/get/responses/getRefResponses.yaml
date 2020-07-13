@@ -6,7 +6,7 @@ info:
 servers:
   - url: 'https'
 paths:
-  /multipleResponses:
+  /reusableResponses:
     get:
       summary: Search user
       operationId: getUser

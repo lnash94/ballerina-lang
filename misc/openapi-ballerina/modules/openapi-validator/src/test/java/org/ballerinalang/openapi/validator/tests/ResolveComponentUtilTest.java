@@ -73,7 +73,7 @@ public class ResolveComponentUtilTest {
 
     }
 
-    @Test(description = "Test03 - test nested component")
+    @Test(description = "Test03 - test nested component with function")
     public void testResolveNestedComponent() throws OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("resolveNestedComponent.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
@@ -141,21 +141,6 @@ public class ResolveComponentUtilTest {
 
     }
     @Test(description = "Test08 component section name out comes")
-    public void testParameterSection() throws OpenApiValidatorException {
-        Path contractPath = RES_DIR.resolve("parameterBlockComponents.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-//        OpenAPI openAPI = ResolveComponentUtil.resolveOpeApiContract(api);
-//        ResolveComponentUtil.getSchemaByName("#/components/parameters/offsetParam", api);
-    }
-
-    @Test(description = "Test09 component section name out comes")
-    public void testreSolveParameterSection() throws OpenApiValidatorException {
-        Path contractPath = RES_DIR.resolve("parameterBlockComponents.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        OpenAPI openAPI = ResolveComponentUtil.resolveOpeApiContract(api);
-//        ResolveComponentUtil.getSchemaByName("#/components/parameters/offsetParam", api);
-    }
-    @Test(description = "Test09 component section name out comes")
     public void testResponseSection() throws OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("responseBlockComponents.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());

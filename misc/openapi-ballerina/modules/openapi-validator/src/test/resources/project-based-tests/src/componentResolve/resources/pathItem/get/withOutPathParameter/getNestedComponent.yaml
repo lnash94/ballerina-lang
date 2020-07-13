@@ -6,7 +6,7 @@ info:
 servers:
   - url: 'https'
 paths:
-  /user:
+  /nestedComponents:
     get:
       summary: Search user
       operationId: getUser
