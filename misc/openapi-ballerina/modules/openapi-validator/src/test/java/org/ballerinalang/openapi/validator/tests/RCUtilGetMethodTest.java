@@ -42,9 +42,10 @@ public class RCUtilGetMethodTest {
             "/resources/pathItem/get/")
             .toAbsolutePath();
     private OpenAPI api;
+    private OpenAPI newOpenApi;
     Collection<ApiResponse> responses;
 
-    @Test(description = "Test06 - Test path Item GET method with path parameter")
+    @Test(description = "Test01 - Test path Item GET method with path parameter")
     public void testPathItemGetwithParameter() throws OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("getwithParameter.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
@@ -53,20 +54,9 @@ public class RCUtilGetMethodTest {
                 .getGet().getParameters().get(0).getSchema().getType().toString(), "string");
     }
 
-    @Test(description = "Test07 - Test path Item GET method without path parameter and with response")
-    public void testPathItemGetwithoutParameter() throws OpenApiValidatorException {
-        Path contractPath = RES_DIR.resolve("getwithoutPathParam.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        responses =
-                (Collection<ApiResponse>) ResolveComponentUtil.resolveOpeApiContract(api).getPaths().get("/user")
-                        .getGet().getResponses().values();
-        ApiResponse apiResponse = responses.iterator().next();
-        MediaType mediaType = apiResponse.getContent().values().iterator().next();
-        Assert.assertEquals(mediaType.getSchema().getType(), "object");
-    }
-
-    @Test(description = "Test07 - Test path Item GET method without path parameter and with response")
-    public void testreferenceParameters() throws OpenApiValidatorException {
+// recheck
+    @Test(description = "Test03 - Test path Item GET method without path parameter and with response")
+    public void testReferenceParameters() throws OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("getParameterswithRef.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
         responses =
@@ -77,21 +67,9 @@ public class RCUtilGetMethodTest {
         Assert.assertEquals(mediaType.getSchema().getType(), "object");
     }
 
-    @Test(description = "Test07 - Test path Item GET method without path parameter and with response")
-    public void testreferenceResponses() throws OpenApiValidatorException {
-        Path contractPath = RES_DIR.resolve("getRefResponses.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        responses =
-                (Collection<ApiResponse>) ResolveComponentUtil.resolveOpeApiContract(api).getPaths().get("/user")
-                        .getGet().getResponses().values();
-//        ApiResponse apiResponse = responses.iterator().next();
-//        MediaType mediaType = apiResponse.getContent().values().iterator().next();
-//        Assert.assertEquals(mediaType.getSchema().getType(), "object");
-    }
-
-    @Test(description = "Test08 - Test path Item GET method without path parameter and with multiple response")
+    @Test(description = "Test04 - Test path Item GET method without path parameter and with multiple response")
     public void testPathItemGetwithoutPathParamAndMultipleResponse() throws OpenApiValidatorException {
-        Path contractPath = RES_DIR.resolve("getMultipleResponses.yaml");
+        Path contractPath = RES_DIR.resolve("responses/getMultipleResponses.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
         responses =
                 (Collection<ApiResponse>) ResolveComponentUtil.resolveOpeApiContract(api).getPaths().get("/multipleResponses")
@@ -110,9 +88,9 @@ public class RCUtilGetMethodTest {
 
     }
 
-    @Test(description = "Test09 - Test path Item GET method without path parameter and with multiple mime response")
+    @Test(description = "Test5 - Test path Item GET method without path parameter and with multiple mime response")
     public void testGetMultipleMIMEResponses() throws OpenApiValidatorException {
-        Path contractPath = RES_DIR.resolve("getOneResponseWithMultipleMIME.yaml");
+        Path contractPath = RES_DIR.resolve("responses/getOneResponseWithMultipleMIME.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
         responses =
                 (Collection<ApiResponse>) ResolveComponentUtil.resolveOpeApiContract(api).getPaths().get("/multipleMIMEResponses")
@@ -127,9 +105,9 @@ public class RCUtilGetMethodTest {
 
     }
 
-    @Test(description = "Test10 - Test path Item GET method with oneOf type response")
+    @Test(description = "Test6 - Test path Item GET method with oneOf type response")
     public void testGetOneofResponse() throws OpenApiValidatorException {
-        Path contractPath = RES_DIR.resolve("getOneOfResponses.yaml");
+        Path contractPath = RES_DIR.resolve("responses/getOneOfResponses.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
         responses =
                 (Collection<ApiResponse>) ResolveComponentUtil.resolveOpeApiContract(api).getPaths().get("/oneOfResponse")
@@ -145,9 +123,9 @@ public class RCUtilGetMethodTest {
         Assert.assertEquals(properties.get("id").getType(), "integer");
     }
 
-    @Test(description = "Test11 - Test path Item GET method with anyOf type response")
+    @Test(description = "Test7 - Test path Item GET method with anyOf type response")
     public void testGetAnyofResponse() throws OpenApiValidatorException {
-        Path contractPath = RES_DIR.resolve("getAnyOfResponses.yaml");
+        Path contractPath = RES_DIR.resolve("responses/getAnyOfResponses.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
         responses =
                 (Collection<ApiResponse>) ResolveComponentUtil.resolveOpeApiContract(api).getPaths().get("/anyOfResponse")
@@ -163,12 +141,34 @@ public class RCUtilGetMethodTest {
         Assert.assertEquals(properties.get("id").getType(), "integer");
     }
 
-    @Test(description = "Test12 - tests with nested components with response")
+//recheck
+    @Test(description = "Test08 - Test path Item GET method without path parameter and with response")
+    public void testReferenceResponses() throws OpenApiValidatorException {
+        Path contractPath = RES_DIR.resolve("responses/getRefResponses.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+
+    }
+
+    // recheck
+    @Test(description = "Test8 - tests with nested components with response")
     public void testGETNestedcomponet() throws OpenApiValidatorException {
-        Path contractPath = RES_DIR.resolve("getwithoutPathParamNestedComponent.yaml");
+        Path contractPath = RES_DIR.resolve("withOutPathParameter/getNestedComponent.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
         OpenAPI openAPI = ResolveComponentUtil.resolveOpeApiContract(api);
 
     }
+
+    @Test(description = "Test02 - Test path Item GET method without path parameter and with response")
+    public void testPathItemGetwithoutParameter() throws OpenApiValidatorException {
+        Path contractPath = RES_DIR.resolve("withOutPathParameter/getwithoutPathParam.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        responses =
+                (Collection<ApiResponse>) ResolveComponentUtil.resolveOpeApiContract(api).getPaths().get("/user")
+                        .getGet().getResponses().values();
+        ApiResponse apiResponse = responses.iterator().next();
+        MediaType mediaType = apiResponse.getContent().values().iterator().next();
+        Assert.assertEquals(mediaType.getSchema().getType(), "object");
+    }
+
 
 }

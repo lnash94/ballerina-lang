@@ -1,0 +1,63 @@
+openapi: 3.0.0
+info:
+  title: refComponent
+  description: refComponent
+  version: 1.0.0
+servers:
+  - url: 'https'
+paths:
+
+components:
+  schemas:
+    ResponseComponent:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        shipDate:
+          type: string
+#          $ref: "#/components/parameters/ShipDate"
+        category:
+          $ref: "#/definitions/Category"
+      xml:
+        name: "Order"
+    Category:
+      type: object
+      properties:
+        name:
+          type: string
+        tag:
+          type: string
+    Tag:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+        msg:
+          type: string
+
+  responses:
+    404NotFound:       # Can be referenced as '#/components/responses/404NotFound'
+      description: The specified resource was not found.
+    ImageResponse:     # Can be referenced as '#/components/responses/ImageResponse'
+      description: An image.
+      content:
+        image/*:
+          schema:
+            type: string
+            format: binary
+    GenericError:      # Can be referenced as '#/components/responses/GenericError'
+      description: An error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

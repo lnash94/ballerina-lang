@@ -18,6 +18,7 @@
 
 package org.ballerinalang.openapi.validator;
 
+import io.swagger.models.apideclaration.Api;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
@@ -47,56 +48,60 @@ public class ResolveComponentUtil {
 //        Components Handling
         Components components = openAPI.getComponents();
         if (components != null) {
+//            Handle component schemas
             Map<String, Schema> schemas = components.getSchemas();
-            for (Map.Entry<String, Schema> schema: schemas.entrySet()) {
-                if (schema.getValue().get$ref() != null) {
+            if (schemas != null) {
+                for (Map.Entry<String, Schema> schema: schemas.entrySet()) {
+                    if (schema.getValue().get$ref() != null) {
 //                    with default reference
-                    Schema refSchema = openAPI.getComponents().getSchemas()
-                            .get(getcomponetName(schema.getValue().get$ref()));
-                    schemas.put(schema.getKey(), refSchema);
-                }
+                        Schema refSchema = openAPI.getComponents().getSchemas()
+                                .get(getcomponetName(schema.getValue().get$ref()));
+                        schemas.put(schema.getKey(), refSchema);
+                    }
 //                with properties
-                Map<String, Schema> properties = schema.getValue().getProperties();
-                if (properties != null) {
-                    for (Map.Entry<String, Schema> propSchema: properties.entrySet()) {
-                        String ref = propSchema.getValue().get$ref();
-                        if ( ref != null) {
-                            Schema schema1 = openAPI.getComponents().getSchemas().get(getcomponetName(ref));
-                            Schema schema2 = ResolveComponentUtil.resolveNestedComponent(schema1, openAPI);
-                            propSchema.setValue(schema2);
+                    Map<String, Schema> properties = schema.getValue().getProperties();
+                    if (properties != null) {
+                        for (Map.Entry<String, Schema> propSchema: properties.entrySet()) {
+                            String ref = propSchema.getValue().get$ref();
+                            if ( ref != null) {
+                                Schema schema1 = openAPI.getComponents().getSchemas().get(getcomponetName(ref));
+                                Schema schema2 = ResolveComponentUtil.resolveNestedComponent(schema1, openAPI);
+                                propSchema.setValue(schema2);
+                            }
+                            continue;
                         }
-                        continue;
-
-
-//                        if (propSchema.getValue().get$ref() != null) {
-//                            Schema refProSchema = openAPI.getComponents().getSchemas()
-//                                    .get(getcomponetName(propSchema.getValue().get$ref()));
-//                            if (refProSchema.get$ref() != null) {
-//                                Schema schema1 = openAPI.getComponents().getSchemas()
-//                                        .get(getcomponetName(refProSchema.get$ref()));
-//                                schemas.put(propSchema.getKey(), schema1);
-//                            } else if (refProSchema.getProperties() != null) {
-//                                Map<String, Schema> mapSchemas1 = refProSchema.getProperties();
-//                                for (Map.Entry<String, Schema>  mapSchema: mapSchemas1.entrySet()) {
-//
-//                                }
-//                                schemas.put(propSchema.getKey(), refProSchema);
-//                            }
-//
-//                        }
-//                        if ((propSchema.getValue().get$ref() == null) && (propSchema.getValue().getProperties() != null)) {
-//                            Map<String, Schema> nestedRefSchemas = propSchema.getValue().getProperties();
-//                            for (Map.Entry<String, Schema> nestedRef: nestedRefSchemas.entrySet()) {
-//                                if (nestedRef.getValue().get$ref() != null) {
-//                                    Schema nestedRefSchema = openAPI.getComponents().getSchemas()
-//                                            .get(getcomponetName(nestedRef.getValue().get$ref()));
-//                                    nestedRefSchemas.put(nestedRef.getKey(), nestedRefSchema);
-//                                }
-//                            }
-//                        }
                     }
                 }
             }
+//            Handle reusable parameters
+            Map<String, Parameter> parameters = components.getParameters();
+            if (parameters != null) {
+                for (Map.Entry<String, Parameter> parameter: parameters.entrySet()) {
+                    if (parameter.getValue().get$ref() != null) {
+                        Schema schemaParam =
+                                openAPI.getComponents().getSchemas()
+                                        .get(getcomponetName(parameter.getValue().get$ref()));
+                        Schema schemaParam2 = resolveNestedComponent(schemaParam, openAPI);
+                        parameter.getValue().setSchema(schemaParam2);
+                        parameter.getValue().set$ref(null);
+                    }
+                }
+            }
+//            Handle reusable responses
+            Map<String, ApiResponse> responses = components.getResponses();
+            if (responses != null) {
+                for (Map.Entry<String, ApiResponse> responseEntry: responses.entrySet()) {
+                    if(responseEntry.getValue().get$ref() != null) {
+                        ApiResponse apiResponse = components.getResponses().get(getcomponetName(responseEntry
+                                .getValue().get$ref()));
+                        responseEntry.setValue(apiResponse);
+                    }
+                }
+                Map<String, ApiResponse> responses2 = openAPI.getComponents().getResponses();
+                handleResponses(openAPI, responses2.values());
+            }
+//            Handle reusable requestBody
+
         }
 
 //        Path items handling
@@ -113,64 +118,13 @@ public class ResolveComponentUtil {
                     List<Parameter> parameters =  operation.getGet().getParameters();
                     Collection<ApiResponse> responses = null;
                     final ApiResponses responses1 = operation.getGet().getResponses();
+//                    Handle responses with reference
                     if (responses1 != null) {
                         responses = operation.getGet().getResponses().values();
-                    }
-//                    Handle responses with reference
-                    if ((responses != null)&&(!responses.isEmpty())) {
-                        for ( ApiResponse apiResponse: responses) {
-                            if (!apiResponse.getContent().isEmpty()) {
-                                Content content = apiResponse.getContent();
-//                                Handle reference in media  type
-                                for (Map.Entry<String, MediaType> mediaTypeEntry : content.entrySet()) {
-                                    if (mediaTypeEntry.getValue().getSchema() instanceof ComposedSchema) {
-                                        ComposedSchema composedSchema =
-                                                ((ComposedSchema) mediaTypeEntry.getValue().getSchema());
-//                                        Handle mediaType has oneOf type references
-                                        if ((composedSchema.getOneOf()!= null) && (!composedSchema.getOneOf().isEmpty())) {
-                                            List<Schema> newSchemas = new ArrayList<>();
-                                            ListIterator<Schema> composedIter =
-                                                    composedSchema.getOneOf().listIterator();
-                                            while (composedIter.hasNext()) {
-                                                Schema iterSchema = composedIter.next();
-                                                if (iterSchema.get$ref() != null) {
-                                                    Schema oneOfSchema = openAPI.getComponents().getSchemas()
-                                                            .get(getcomponetName(iterSchema.get$ref()));
-                                                    composedIter.set(oneOfSchema);
-                                                }
-                                            }
-                                            composedSchema.getOneOf().addAll(newSchemas);
-                                        }
-//                                        Handle mediaType has anyOf references
-                                        if ((composedSchema.getAnyOf()!= null) && (!composedSchema.getAnyOf().isEmpty())) {
-                                            List<Schema> newSchemas = new ArrayList<>();
-                                            ListIterator<Schema> composedIter =
-                                                    composedSchema.getAnyOf().listIterator();
-                                            while (composedIter.hasNext()) {
-                                                Schema iterSchema = composedIter.next();
-                                                if (iterSchema.get$ref() != null) {
-                                                    Schema anyOfSchema = openAPI.getComponents().getSchemas()
-                                                            .get(getcomponetName(iterSchema.get$ref()));
-                                                    composedIter.set(anyOfSchema);
-                                                }
-                                            }
-                                            composedSchema.getAnyOf().addAll(newSchemas);
-                                        }
-//                                       mediaType hasn't  allOf references yet
-                                    }
-                                    if (mediaTypeEntry.getValue().getSchema().get$ref()!=null) {
-                                        Schema mediaSchema =
-                                                openAPI.getComponents().getSchemas()
-                                                        .get(getcomponetName(mediaTypeEntry.getValue().getSchema()
-                                                                .get$ref()));
-                                        mediaTypeEntry.getValue().setSchema(mediaSchema);
-                                    }
-                                }
-                            }
-                        }
+                        handleResponses(openAPI, responses);
                     }
 //                    Handle parameters with Response
-                    if ((parameters != null)&&(!parameters.isEmpty())) {
+                    if ((parameters != null) && (!parameters.isEmpty())) {
                         for (Parameter parameter: parameters) {
                             if ((parameter.getSchema().getType() == null) && parameter.getSchema().get$ref() != null) {
                                 Schema schema =
@@ -186,7 +140,15 @@ public class ResolveComponentUtil {
 //                Handle POST method
                 if ( operation.getPost() != null) {
                     List<Parameter> parameters =  operation.getPost().getParameters();
-                    if (!parameters.isEmpty()) {
+                    Collection<ApiResponse> responses = null;
+                    final ApiResponses responses1 = operation.getPost().getResponses();
+//                    Handle responses with reference
+                    if (responses1 != null) {
+                        responses = operation.getPost().getResponses().values();
+                        handleResponses(openAPI, responses);
+                    }
+
+                    if ((parameters != null) && (!parameters.isEmpty())) {
                         for (Parameter parameter: parameters) {
                             if ((parameter.getSchema().getType() == null) && parameter.getSchema().get$ref() != null) {
                                 Schema schema =
@@ -205,7 +167,65 @@ public class ResolveComponentUtil {
         return openAPI;
     }
 
-    //  Get component name from reference
+// Resolve reference in responses
+    private static void handleResponses(OpenAPI openAPI, Collection<ApiResponse> responses) {
+
+        //                    Handle responses with reference
+        if ((responses != null) && (!responses.isEmpty())) {
+            for (ApiResponse apiResponse : responses) {
+                if ((apiResponse.getContent() != null) && (!apiResponse.getContent().isEmpty())) {
+                    Content content = apiResponse.getContent();
+//                                Handle reference in media  type
+                    for (Map.Entry<String, MediaType> mediaTypeEntry : content.entrySet()) {
+                        if (mediaTypeEntry.getValue().getSchema() instanceof ComposedSchema) {
+                            ComposedSchema composedSchema =
+                                    ((ComposedSchema) mediaTypeEntry.getValue().getSchema());
+//                                        Handle mediaType has oneOf type references
+                            if ((composedSchema.getOneOf() != null) && (!composedSchema.getOneOf().isEmpty())) {
+                                List<Schema> newSchemas = new ArrayList<>();
+                                ListIterator<Schema> composedIter =
+                                        composedSchema.getOneOf().listIterator();
+                                while (composedIter.hasNext()) {
+                                    Schema iterSchema = composedIter.next();
+                                    if (iterSchema.get$ref() != null) {
+                                        Schema oneOfSchema = openAPI.getComponents().getSchemas()
+                                                .get(getcomponetName(iterSchema.get$ref()));
+                                        composedIter.set(oneOfSchema);
+                                    }
+                                }
+                                composedSchema.getOneOf().addAll(newSchemas);
+                            }
+//                                        Handle mediaType has anyOf references
+                            if ((composedSchema.getAnyOf() != null) && (!composedSchema.getAnyOf().isEmpty())) {
+                                List<Schema> newSchemas = new ArrayList<>();
+                                ListIterator<Schema> composedIter =
+                                        composedSchema.getAnyOf().listIterator();
+                                while (composedIter.hasNext()) {
+                                    Schema iterSchema = composedIter.next();
+                                    if (iterSchema.get$ref() != null) {
+                                        Schema anyOfSchema = openAPI.getComponents().getSchemas()
+                                                .get(getcomponetName(iterSchema.get$ref()));
+                                        composedIter.set(anyOfSchema);
+                                    }
+                                }
+                                composedSchema.getAnyOf().addAll(newSchemas);
+                            }
+//                                       mediaType hasn't  allOf references yet
+                        }
+                        if (mediaTypeEntry.getValue().getSchema().get$ref() != null) {
+                            Schema mediaSchema =
+                                    openAPI.getComponents().getSchemas()
+                                            .get(getcomponetName(mediaTypeEntry.getValue().getSchema()
+                                                    .get$ref()));
+                            mediaTypeEntry.getValue().setSchema(mediaSchema);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+//     Get component name from reference
     public static String getcomponetName(String ref) {
         String componentName = null;
         if (ref != null && ref.startsWith("#")) {
@@ -214,7 +234,17 @@ public class ResolveComponentUtil {
         }
         return componentName;
     }
+//    Get component section name
+    public static String getComponentScetion(String ref) {
+        String sectionName = null;
+        if (ref != null && ref.startsWith("#")) {
+            String[] splitRef = ref.split("/");
+            sectionName = splitRef[splitRef.length - 2];
+        }
+        return sectionName;
+    }
 
+//  Resolve reference in components
     public static  Schema resolveNestedComponent(Schema schema, OpenAPI openAPI) {
         Map<String, Schema> properties = schema.getProperties();
         if (schema.get$ref() != null) {

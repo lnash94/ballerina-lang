@@ -42,7 +42,7 @@ import java.util.Map;
  */
 public class ResolveComponentUtilTest {
     private static final Path RES_DIR = Paths.get("src/test/resources/project-based-tests/src/componentResolve" +
-            "/resources/")
+            "/resources/components/")
             .toAbsolutePath();
     private OpenAPI api;
     Components components;
@@ -50,7 +50,7 @@ public class ResolveComponentUtilTest {
 
     @Test(description = "Test01 - Test component with reference")
     public void testComponents() throws OpenApiValidatorException {
-        Path contractPath = RES_DIR.resolve("components/components.yaml");
+        Path contractPath = RES_DIR.resolve("components.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
         components = ResolveComponentUtil.resolveOpeApiContract(api).getComponents();
 
@@ -62,7 +62,7 @@ public class ResolveComponentUtilTest {
 
     @Test(description = "Test02 - Test component with nested reference")
     public void testNestedComponents() throws OpenApiValidatorException {
-        Path contractPath = RES_DIR.resolve("components/nestedComponents.yaml");
+        Path contractPath = RES_DIR.resolve("nestedComponents.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
         components = ResolveComponentUtil.resolveOpeApiContract(api).getComponents();
 
@@ -75,7 +75,7 @@ public class ResolveComponentUtilTest {
 
     @Test(description = "Test03 - test nested component")
     public void testResolveNestedComponent() throws OpenApiValidatorException {
-        Path contractPath = RES_DIR.resolve("components/resolveNestedComponent.yaml");
+        Path contractPath = RES_DIR.resolve("resolveNestedComponent.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
         Schema schema1 = api.getComponents().getSchemas().get("NestedComponent");
         Schema schema2 = ResolveComponentUtil.resolveNestedComponent(schema1, api);
@@ -88,7 +88,7 @@ public class ResolveComponentUtilTest {
     }
     @Test(description = "Test04 - test 4 nested component")
     public void testResolve4NestedComponent() throws OpenApiValidatorException {
-        Path contractPath = RES_DIR.resolve("components/resolveFourNestedComponents.yaml");
+        Path contractPath = RES_DIR.resolve("resolveFourNestedComponents.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
         Schema schema1 = api.getComponents().getSchemas().get("FourNestedComponent");
         Schema schema2 = ResolveComponentUtil.resolveNestedComponent(schema1, api);
@@ -105,7 +105,7 @@ public class ResolveComponentUtilTest {
 
     @Test(description = "Test05 - test 4 nested component with resolveOpenapiContract function")
     public void testNestedComponent() throws OpenApiValidatorException {
-        Path contractPath = RES_DIR.resolve("components/fourNestedComponent.yaml");
+        Path contractPath = RES_DIR.resolve("fourNestedComponent.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
         OpenAPI openAPI = ResolveComponentUtil.resolveOpeApiContract(api);
         Schema component = openAPI.getComponents().getSchemas().get("FourNestedComponent");
@@ -119,11 +119,49 @@ public class ResolveComponentUtilTest {
         Assert.assertEquals(threeNextNestedProperties.get("month").getType(),"string");
 
     }
-
-    @Test(description = "Test06 - tests with component has parameters")
-    public void testComponentParameter () {
-
+    @Test(description = "Test06 component section name")
+    public void testGetComponentScetion () {
+//    OpenAPI version 3.0
+        Assert.assertEquals(ResolveComponentUtil.getComponentScetion("#/components/schemas/Error"), "schemas");
+        Assert.assertEquals(ResolveComponentUtil.getComponentScetion("#/components/parameters/Error"), "parameters");
+        Assert.assertEquals(ResolveComponentUtil.getComponentScetion("#/components/responses/Error"), "responses");
+//    OpenApi version 2.0
+        Assert.assertEquals(ResolveComponentUtil.getComponentScetion("#/definitions/Error"), "definitions");
+        Assert.assertEquals(ResolveComponentUtil.getComponentScetion("#/parameters/Error"), "parameters");
+        Assert.assertEquals(ResolveComponentUtil.getComponentScetion("#/responses/Error"), "responses");
     }
 
+    @Test(description = "Test07 - tests with component has parameters")
+    public void testComponentParameter () throws OpenApiValidatorException {
+//        Path contractPath = RES_DIR.resolve("componentsWithParameter.yaml");
+        Path contractPath = RES_DIR.resolve("parameterBlockComponents.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        OpenAPI openAPI = ResolveComponentUtil.resolveOpeApiContract(api);
+//        Schema component = openAPI.getComponents().getSchemas().get("FourNestedComponent");
+
+    }
+    @Test(description = "Test08 component section name out comes")
+    public void testParameterSection() throws OpenApiValidatorException {
+        Path contractPath = RES_DIR.resolve("parameterBlockComponents.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+//        OpenAPI openAPI = ResolveComponentUtil.resolveOpeApiContract(api);
+//        ResolveComponentUtil.getSchemaByName("#/components/parameters/offsetParam", api);
+    }
+
+    @Test(description = "Test09 component section name out comes")
+    public void testreSolveParameterSection() throws OpenApiValidatorException {
+        Path contractPath = RES_DIR.resolve("parameterBlockComponents.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        OpenAPI openAPI = ResolveComponentUtil.resolveOpeApiContract(api);
+//        ResolveComponentUtil.getSchemaByName("#/components/parameters/offsetParam", api);
+    }
+    @Test(description = "Test09 component section name out comes")
+    public void testResponseSection() throws OpenApiValidatorException {
+        Path contractPath = RES_DIR.resolve("responseBlockComponents.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+//        OpenAPI openAPI = ResolveComponentUtil.resolveOpeApiContract(api);
+//        ResolveComponentUtil.getSchemaByName("#/components/responses/ImageResponse", api);
+//        ResolveComponentUtil.getSchemaByName("#/components/responses/GenericError", api);
+    }
 
 }
