@@ -1,0 +1,51 @@
+openapi: 3.0.0
+info:
+  title: refComponent
+  description: refComponent
+  version: 1.0.0
+servers:
+  - url: 'https'
+paths:
+  /multipleResponses:
+    post:
+      summary: Search user
+      operationId: getUser
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: BAD
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Date'
+      parameters:
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+      # Both properties are required
+      required:
+        - id
+        - name
+    Date:
+      type: object
+      properties:
+        day:
+          type: integer
+          format: int64
+        month:
+          type: string
+        year:
+          type: integer
+          format: int64

@@ -34,46 +34,117 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Unit tests for ResoloveComponentUtil.
+ * Unit tests for ResoloveComponentUtil with POST method.
  */
 public class RCUtilPostMethodTest {
     private static final Path RES_DIR = Paths.get("src/test/resources/project-based-tests/src/componentResolve" +
-            "/resources/")
+            "/resources/pathItem/post/")
             .toAbsolutePath();
     private OpenAPI api;
     Components components;
     Collection<ApiResponse> responses;
 
-    @Test(description = "Test12 -  path Item POST method single field")
+    @Test(description = "Test01 -  path Item POST method single field")
     public void testResolveComponentType() throws OpenApiValidatorException {
-        Path contractPath = RES_DIR.resolve("pathItem/post/post.yaml");
+        Path contractPath = RES_DIR.resolve("post.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
 
         Assert.assertEquals(ResolveComponentUtil.resolveOpeApiContract(api).getPaths().get("/user")
                 .getPost().getParameters().get(1).getSchema().getType().toString(), "string");
     }
 
-    @Test(description = "Test13 - path Item POST method object type reference")
+    @Test(description = "Test02 - path Item POST method object type reference")
     public void testPathItemPostMultipleFields() throws OpenApiValidatorException {
-        Path contractPath = RES_DIR.resolve("pathItem/post/postObjectRef.yaml");
+        Path contractPath = RES_DIR.resolve("postObjectRef.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
 
         Assert.assertEquals(ResolveComponentUtil.resolveOpeApiContract(api).getPaths().get("/user")
                 .getPost().getParameters().get(1).getSchema().getType().toString(), "object");
     }
 
-    @Test(description = "Test07 - Test path Item GET method without path parameter and with response")
+    @Test(description = "Test03 - Test path Item GET method without path parameter and with response")
     public void testPostWithResponse() throws OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("postWithResponse.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
         responses =
-                (Collection<ApiResponse>) ResolveComponentUtil.resolveOpeApiContract(api).getPaths().get("/user")
-                        .getGet().getResponses().values();
+                (Collection<ApiResponse>) ResolveComponentUtil.resolveOpeApiContract(api).getPaths().get("/postWithResponse")
+                        .getPost().getResponses().values();
         ApiResponse apiResponse = responses.iterator().next();
         MediaType mediaType = apiResponse.getContent().values().iterator().next();
         Assert.assertEquals(mediaType.getSchema().getType(), "object");
     }
+    @Test(description = "Test04 - Test path Item POST method with multiple response")
+    public void testPathItemGetwithoutPathParamAndMultipleResponse() throws OpenApiValidatorException {
+        Path contractPath = RES_DIR.resolve("postMultipleResponses.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        responses =
+                (Collection<ApiResponse>) ResolveComponentUtil.resolveOpeApiContract(api).getPaths().get("/multipleResponses")
+                        .getPost().getResponses().values();
 
+        Iterator<ApiResponse> apiResponseIterator = responses.iterator();
 
+        ApiResponse apiResponse1 = apiResponseIterator.next();
+        ApiResponse apiResponse2 = apiResponseIterator.next();
+
+        MediaType mediaType1 = apiResponse1.getContent().values().iterator().next();
+        MediaType mediaType2 = apiResponse2.getContent().values().iterator().next();
+
+        Assert.assertEquals(mediaType1.getSchema().getType(), "object");
+        Assert.assertEquals(mediaType2.getSchema().getType(), "object");
+
+    }
+
+    @Test(description = "Test05 - Test path Item POST method without path parameter and with multiple mime response")
+    public void testGetMultipleMIMEResponses() throws OpenApiValidatorException {
+        Path contractPath = RES_DIR.resolve("postOneResponseWithMultipleMIME.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        responses =
+                (Collection<ApiResponse>) ResolveComponentUtil.resolveOpeApiContract(api).getPaths().get("/multipleMIMEResponses")
+                        .getPost().getResponses().values();
+
+        Iterator<ApiResponse> apiResponseIterator = responses.iterator();
+
+        ApiResponse apiResponse1 = apiResponseIterator.next();
+        MediaType mediaType1 = apiResponse1.getContent().values().iterator().next();
+//        check next one also
+        Assert.assertEquals(mediaType1.getSchema().getType(), "object");
+
+    }
+
+    @Test(description = "Test06 - Test path Item POST method with oneOf type response")
+    public void testGetOneofResponse() throws OpenApiValidatorException {
+        Path contractPath = RES_DIR.resolve("postOneOfResponses.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        responses =
+                (Collection<ApiResponse>) ResolveComponentUtil.resolveOpeApiContract(api).getPaths().get("/oneOfResponse")
+                        .getPost().getResponses().values();
+
+        Iterator<ApiResponse> apiResponseIterator = responses.iterator();
+
+        ApiResponse apiResponse1 = apiResponseIterator.next();
+        MediaType mediaType1 = apiResponse1.getContent().values().iterator().next();
+        ComposedSchema composedSchema = ((ComposedSchema) mediaType1.getSchema());
+        Map<String, Schema> properties = composedSchema.getOneOf().get(0).getProperties();
+
+        Assert.assertEquals(properties.get("id").getType(), "integer");
+    }
+
+    @Test(description = "Test07 - Test path Item POST method with anyOf type response")
+    public void testGetAnyofResponse() throws OpenApiValidatorException {
+        Path contractPath = RES_DIR.resolve("postAnyOfResponses.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        responses =
+                (Collection<ApiResponse>) ResolveComponentUtil.resolveOpeApiContract(api).getPaths().get("/anyOfResponse")
+                        .getPost().getResponses().values();
+
+        Iterator<ApiResponse> apiResponseIterator = responses.iterator();
+
+        ApiResponse apiResponse1 = apiResponseIterator.next();
+        MediaType mediaType1 = apiResponse1.getContent().values().iterator().next();
+        ComposedSchema composedSchema = ((ComposedSchema) mediaType1.getSchema());
+        Map<String, Schema> properties = composedSchema.getAnyOf().get(0).getProperties();
+
+        Assert.assertEquals(properties.get("id").getType(), "integer");
+    }
 
 }
