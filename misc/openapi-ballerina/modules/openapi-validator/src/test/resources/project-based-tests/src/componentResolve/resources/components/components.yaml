@@ -36,16 +36,6 @@ components:
           default: false
       xml:
         name: "Order"
-    Category:
-      $ref: "#/definitions/Tag"
-    Tag:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int32
-        name:
-          type: string
 
 
 

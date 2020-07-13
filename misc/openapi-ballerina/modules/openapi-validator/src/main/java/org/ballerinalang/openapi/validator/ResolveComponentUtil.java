@@ -27,6 +27,7 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import org.ballerinalang.model.elements.MarkdownDocAttachment;
 
 import java.util.ArrayList;
@@ -49,7 +50,51 @@ public class ResolveComponentUtil {
             Map<String, Schema> schemas = components.getSchemas();
             for (Map.Entry<String, Schema> schema: schemas.entrySet()) {
                 if (schema.getValue().get$ref() != null) {
-//                    nesteded
+//                    with default reference
+                    Schema refSchema = openAPI.getComponents().getSchemas()
+                            .get(getcomponetName(schema.getValue().get$ref()));
+                    schemas.put(schema.getKey(), refSchema);
+                }
+//                with properties
+                Map<String, Schema> properties = schema.getValue().getProperties();
+                if (properties != null) {
+                    for (Map.Entry<String, Schema> propSchema: properties.entrySet()) {
+                        String ref = propSchema.getValue().get$ref();
+                        if ( ref != null) {
+                            Schema schema1 = openAPI.getComponents().getSchemas().get(getcomponetName(ref));
+                            Schema schema2 = ResolveComponentUtil.resolveNestedComponent(schema1, openAPI);
+                            propSchema.setValue(schema2);
+                        }
+                        continue;
+
+
+//                        if (propSchema.getValue().get$ref() != null) {
+//                            Schema refProSchema = openAPI.getComponents().getSchemas()
+//                                    .get(getcomponetName(propSchema.getValue().get$ref()));
+//                            if (refProSchema.get$ref() != null) {
+//                                Schema schema1 = openAPI.getComponents().getSchemas()
+//                                        .get(getcomponetName(refProSchema.get$ref()));
+//                                schemas.put(propSchema.getKey(), schema1);
+//                            } else if (refProSchema.getProperties() != null) {
+//                                Map<String, Schema> mapSchemas1 = refProSchema.getProperties();
+//                                for (Map.Entry<String, Schema>  mapSchema: mapSchemas1.entrySet()) {
+//
+//                                }
+//                                schemas.put(propSchema.getKey(), refProSchema);
+//                            }
+//
+//                        }
+//                        if ((propSchema.getValue().get$ref() == null) && (propSchema.getValue().getProperties() != null)) {
+//                            Map<String, Schema> nestedRefSchemas = propSchema.getValue().getProperties();
+//                            for (Map.Entry<String, Schema> nestedRef: nestedRefSchemas.entrySet()) {
+//                                if (nestedRef.getValue().get$ref() != null) {
+//                                    Schema nestedRefSchema = openAPI.getComponents().getSchemas()
+//                                            .get(getcomponetName(nestedRef.getValue().get$ref()));
+//                                    nestedRefSchemas.put(nestedRef.getKey(), nestedRefSchema);
+//                                }
+//                            }
+//                        }
+                    }
                 }
             }
         }
@@ -66,7 +111,11 @@ public class ResolveComponentUtil {
 //                Handle GET method
                 if (operation.getGet()!= null) {
                     List<Parameter> parameters =  operation.getGet().getParameters();
-                    Collection<ApiResponse> responses = operation.getGet().getResponses().values();
+                    Collection<ApiResponse> responses = null;
+                    final ApiResponses responses1 = operation.getGet().getResponses();
+                    if (responses1 != null) {
+                        responses = operation.getGet().getResponses().values();
+                    }
 //                    Handle responses with reference
                     if ((responses != null)&&(!responses.isEmpty())) {
                         for ( ApiResponse apiResponse: responses) {
@@ -164,6 +213,52 @@ public class ResolveComponentUtil {
             componentName = splitRef[splitRef.length - 1];
         }
         return componentName;
+    }
+
+    public static  Schema resolveNestedComponent(Schema schema, OpenAPI openAPI) {
+        Map<String, Schema> properties = schema.getProperties();
+        if (schema.get$ref() != null) {
+            Schema schema1 = openAPI.getComponents().getSchemas().get(ResolveComponentUtil.
+                    getcomponetName(schema.get$ref()));
+            schema = ResolveComponentUtil.resolveNestedComponent(schema1, openAPI);
+
+        }else if (schema.getProperties() != null) {
+            for (Map.Entry<String, Schema> propSchema: properties.entrySet()) {
+                if (propSchema.getValue().get$ref() != null) {
+                    Schema schema2 = openAPI.getComponents().getSchemas()
+                            .get(getcomponetName(propSchema.getValue().get$ref()));
+                    propSchema.setValue(schema2);
+                    String schema1Ref = schema2.get$ref();
+                    if (schema1Ref != null) {
+                        Schema schema3 = resolveNestedComponent(schema2, openAPI);
+                        propSchema.setValue(schema3);
+                    }
+                }
+                Map<String, Schema> propSchemaProperties = propSchema.getValue().getProperties();
+                if (propSchemaProperties != null) {
+                    for (Map.Entry<String, Schema> mapPropSchema: propSchemaProperties.entrySet()) {
+                        String mapPropSchemaRef = mapPropSchema.getValue().get$ref();
+                        if (mapPropSchemaRef != null) {
+                            Schema schema4 = openAPI.getComponents().getSchemas()
+                                    .get(getcomponetName(mapPropSchemaRef));
+                            Schema schema5 = resolveNestedComponent(schema4, openAPI);
+                            mapPropSchema.setValue(schema5);
+                        }
+                        Map<String, Schema> mapPropSchemaProperties = mapPropSchema.getValue().getProperties();
+                        if ( mapPropSchemaProperties != null) {
+                            for (Map.Entry<String, Schema> schemaEntry: mapPropSchemaProperties.entrySet()) {
+                                Schema schema6 = resolveNestedComponent(schemaEntry.getValue(), openAPI);
+                                schemaEntry.setValue(schema6);
+                            }
+
+                        }
+                        continue;
+                    }
+                }
+                continue;
+            }
+        }
+        return schema;
     }
 
 

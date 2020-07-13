@@ -1,0 +1,43 @@
+openapi: 3.0.0
+info:
+  title: refComponent
+  description: refComponent
+  version: 1.0.0
+servers:
+  - url: 'https'
+paths:
+  /user:
+    get:
+      summary: Search user
+      operationId: getUser
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+      parameters:
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        dateOfBirth:
+          $ref: '#/components/schemas/DOB'
+    DOB:
+      type: object
+      properties:
+        date:
+          type: string
+        month:
+          type: string
+        year:
+          $ref: '#/components/schemas/Year'
+    Year:
+      type: string

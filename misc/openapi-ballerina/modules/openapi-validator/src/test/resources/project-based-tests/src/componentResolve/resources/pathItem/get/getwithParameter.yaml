@@ -11,8 +11,9 @@ paths:
       summary: Search user
       operationId: getUser
       responses:
+
       parameters:
-        - name: username
+        - name: userId
           in: path
           schema:
             $ref: '#/components/schemas/User'
