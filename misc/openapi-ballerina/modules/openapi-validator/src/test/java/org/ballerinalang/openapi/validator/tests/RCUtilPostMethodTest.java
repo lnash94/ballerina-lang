@@ -115,6 +115,7 @@ public class RCUtilPostMethodTest {
     public void testGetOneofResponse() throws OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("postOneOfResponses.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        System.out.println(api);
         responses =
                 (Collection<ApiResponse>) ResolveComponentUtil.resolveOpeApiContract(api).getPaths().get("/oneOfResponse")
                         .getPost().getResponses().values();
