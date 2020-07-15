@@ -48,8 +48,8 @@ public  class BJsonSchemaUtil {
                 if (schema.getProperties() != null) {
                     properties = schema.getProperties();
                 } else {
-                    String schemaRef = schema.get$ref();
-                    properties = OpenAPISummaryUtil.getOpenAPIComponent(schemaRef).getProperties();
+//                    String schemaRef = schema.get$ref();
+//                    properties = OpenAPISummaryUtil.getOpenAPIComponent(schemaRef).getProperties();
                 }
             }
             if (schema instanceof ObjectSchema) {
@@ -87,6 +87,22 @@ public  class BJsonSchemaUtil {
 
                                 validationErrors.add(validationError);
 
+                            } else if (entry.getValue() instanceof ObjectSchema ) {
+//                         Handle the nested record type
+                                Schema schema1 = entry.getValue();
+                                if (field.type instanceof BRecordType) {
+                                    List<ValidationError> nestedRecordValidation = BJsonSchemaUtil
+                                            .validateBallerinaType(schema1, field.symbol);
+                                    validationErrors.addAll(nestedRecordValidation);
+                                } else {
+//                                    Type mismatch
+                                    TypeMismatch validationError = new TypeMismatch(
+                                            field.name.getValue().toString(),
+                                                convertTypeToEnum("record"),
+                                                convertTypeToEnum(field.getType().getKind().typeName()));
+                                        validationErrors.add(validationError);
+                                }
+
                             } else {
 //                                Handle array type mismatching.
                                 if (field.getType().getKind().typeName().equals("[]")){
@@ -105,28 +121,21 @@ public  class BJsonSchemaUtil {
 
                                                 traversSchemaNestedArray = (ArraySchema) traversSchemaNestedArray.getItems();
                                                 traversNestedArray = (BArrayType) traversNestedArray.eType;
-
                                         }
                                     }
 //                                    Handle record type array
+
                                     if ((traversNestedArray.eType instanceof BRecordType) && traversSchemaNestedArray.
-                                            getItems().get$ref()!= null){
-                                        if (!traversNestedArray.eType.tsymbol.name.toString().equals(
-                                                OpenAPISummaryUtil.getcomponetName(traversSchemaNestedArray.getItems()
-                                                        .get$ref()))) {
-//                                            typemismatch
-                                        } else {
-                                            Schema schema2 =
-                                                    OpenAPISummaryUtil.getOpenAPIComponent(traversSchemaNestedArray.getItems().get$ref());
+                                            getItems() != null){
+                                        if ((traversNestedArray.eType.tsymbol.type instanceof BRecordType) &&
+                                                traversSchemaNestedArray.getItems() instanceof ObjectSchema) {
+                                            Schema schema2 = traversSchemaNestedArray.getItems();
                                             BVarSymbol bVarSymbol2 = field.symbol;
                                             List<ValidationError> nestedRecordValidation = BJsonSchemaUtil
                                                     .validateBallerinaType(schema2, bVarSymbol2);
                                             validationErrors.addAll(nestedRecordValidation);
                                         }
-
-                                    }
-
-                                    if (!traversNestedArray.eType.tsymbol.toString().equals(BJsonSchemaUtil
+                                    } else if (!traversNestedArray.eType.tsymbol.toString().equals(BJsonSchemaUtil
                                             .convertOpenAPITypeToBallerina(traversSchemaNestedArray.getItems().getType()))) {
 
                                         TypeMismatch validationError = new TypeMismatch(
@@ -134,27 +143,11 @@ public  class BJsonSchemaUtil {
                                                 convertTypeToEnum(arraySchema.getItems().getType()),
                                                 convertTypeToEnum(bArrayType.eType.tsymbol.toString()));
                                         validationErrors.add(validationError);
-
                                     }
                                 }
                             }
                         } else {
-//                         Handle the nested record type
-                            if (entry.getValue().get$ref() != null) {
-                                Schema schema1 = OpenAPISummaryUtil.getOpenAPIComponent(entry.getValue().get$ref());
-                                if (field.type instanceof BRecordType) {
-                                    List<ValidationError> nestedRecordValidation = BJsonSchemaUtil
-                                            .validateBallerinaType(schema1, field.symbol);
-                                    validationErrors.addAll(nestedRecordValidation);
-                                } else {
-//                                    Type mismatch
-                                    TypeMismatch validationError = new TypeMismatch(
-                                            field.name.getValue().toString(),
-                                            convertTypeToEnum("record"),
-                                            convertTypeToEnum(field.getType().getKind().typeName()));
-                                    validationErrors.add(validationError);
-                                }
-                            }
+//                            this for by chance type= null in entry
                         }
                     }
                 }
@@ -166,19 +159,19 @@ public  class BJsonSchemaUtil {
             }
 //            Find missing fields in BallerinaType
             for (Map.Entry<String, Schema> entry : properties.entrySet()) {
-                    boolean isExist = false;
-                    for (BField field: recordType.fields) {
-                        if (field.name.getValue().equals(entry.getKey())) {
-                            isExist = true;
-//Handle the type mismatching in above validation
-                        }
-                    }
-                    if (!isExist) {
-                        MissingFieldInBallerinaType validationError = new MissingFieldInBallerinaType(entry.getKey(),
-                                convertTypeToEnum(entry.getValue().getType().toString()));
-                        validationErrors.add(validationError);
-                    }
+                boolean isExist = false;
+                for (BField field: recordType.fields) {
+                    if (field.name.getValue().equals(entry.getKey())) {
+                        isExist = true;
+//                      Handle the type mismatching in above validation
+                      }
                 }
+                if (!isExist) {
+                    MissingFieldInBallerinaType validationError = new MissingFieldInBallerinaType(entry.getKey(),
+                            convertTypeToEnum(entry.getValue().getType().toString()));
+                    validationErrors.add(validationError);
+                }
+            }
         }
 
         return validationErrors;

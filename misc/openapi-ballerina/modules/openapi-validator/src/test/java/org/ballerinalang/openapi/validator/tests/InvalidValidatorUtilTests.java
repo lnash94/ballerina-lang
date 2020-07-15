@@ -22,7 +22,9 @@ import org.ballerinalang.openapi.validator.Constants;
 import org.ballerinalang.openapi.validator.MissingFieldInBallerinaType;
 import org.ballerinalang.openapi.validator.MissingFieldInJsonSchema;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
+import org.ballerinalang.openapi.validator.ResolveComponentUtil;
 import org.ballerinalang.openapi.validator.TypeMismatch;
+import org.ballerinalang.openapi.validator.ValidationError;
 import org.ballerinalang.openapi.validator.ValidatorUtil;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -32,17 +34,21 @@ import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Unit tests for BJsonSchemaUtil.
+ * Unit tests for BJsonSchemaUtil Invalid tests.
  */
 public class InvalidValidatorUtilTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/project-based-tests/src/record/resources/")
             .toAbsolutePath();
     private OpenAPI api;
+    private OpenAPI newApi;
     private BLangPackage bLangPackage;
     private Schema extractSchema;
     private BVarSymbol extractBVarSymbol;
+    private List<ValidationError> validationErrors = new ArrayList<>();
 
     @Test(description = "Test missing field in ballerinaType")
     public void testMissingFieldInJsonSchema() throws UnsupportedEncodingException, OpenApiValidatorException {
@@ -51,11 +57,10 @@ public class InvalidValidatorUtilTests {
         bLangPackage = ValidatorTest.getBlangPackage("invalidTests/missingFieldInJsonSchema.bal");
         extractSchema = ValidatorTest.getComponet(api, "MissingFieldInJsonSchema");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
+        validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
 
-        Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).get(0)instanceof
-                MissingFieldInJsonSchema);
-        Assert.assertEquals((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).get(0)
-                        .getFieldName(),"phone2");
+        Assert.assertTrue(validationErrors.get(0)instanceof MissingFieldInJsonSchema);
+        Assert.assertEquals(validationErrors.get(0).getFieldName(),"phone2");
 
     }
 
@@ -66,11 +71,10 @@ public class InvalidValidatorUtilTests {
         bLangPackage = ValidatorTest.getBlangPackage("invalidTests/missingFieldInBallerinaType.bal");
         extractSchema = ValidatorTest.getComponet(api, "MissingFieldInBallerinaType");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
+        validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
 
-        Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).get(1)instanceof
-                MissingFieldInBallerinaType);
-        Assert.assertEquals((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).get(1)
-                        .getFieldName(),"middleName");
+        Assert.assertTrue(validationErrors.get(1) instanceof MissingFieldInBallerinaType);
+        Assert.assertEquals(validationErrors.get(1).getFieldName(),"middleName");
     }
 
     @Test(description = "Test type mismatch")
@@ -80,15 +84,12 @@ public class InvalidValidatorUtilTests {
         bLangPackage = ValidatorTest.getBlangPackage("invalidTests/typeMisMatch.bal");
         extractSchema = ValidatorTest.getComponet(api, "TypeMisMatch");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
+        validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
 
-        Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).get(0)instanceof
-                TypeMismatch);
-        Assert.assertEquals((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).get(0)
-                        .getFieldName(),"id");
-        Assert.assertEquals(((TypeMismatch) (BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol))
-                        .get(0)).getTypeJsonSchema(),Constants.Type.INTEGER);
-        Assert.assertEquals(((TypeMismatch) (BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol))
-                        .get(0)).getTypeBallerinaType(),Constants.Type.STRING);
+        Assert.assertTrue((validationErrors).get(0) instanceof TypeMismatch);
+        Assert.assertEquals((validationErrors).get(0).getFieldName(),"id");
+        Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeJsonSchema(),Constants.Type.INTEGER);
+        Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeBallerinaType(),Constants.Type.STRING);
     }
 
     @Test(description = "Test type mismatch with array. Same field name has ballerina type as array and json type as " +
@@ -99,15 +100,12 @@ public class InvalidValidatorUtilTests {
         bLangPackage = ValidatorTest.getBlangPackage("invalidTests/typeMisMatchArray.bal");
         extractSchema = ValidatorTest.getComponet(api, "TypeMisMatchArray");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
+        validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
 
-        Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).get(0)instanceof
-                TypeMismatch);
-        Assert.assertEquals((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).get(0)
-                        .getFieldName(),"phone");
-        Assert.assertEquals(((TypeMismatch) (BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol))
-                        .get(0)).getTypeJsonSchema(),Constants.Type.STRING);
-        Assert.assertEquals(((TypeMismatch) (BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol))
-                        .get(0)).getTypeBallerinaType(),Constants.Type.ARRAY);
+        Assert.assertTrue((validationErrors).get(0) instanceof TypeMismatch);
+        Assert.assertEquals((validationErrors).get(0).getFieldName(),"phone");
+        Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeJsonSchema(),Constants.Type.STRING);
+        Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeBallerinaType(),Constants.Type.ARRAY);
     }
 
     @Test(description = "Test type mismatch with array. Same field name has ballerina type as string array and json " +
@@ -118,15 +116,12 @@ public class InvalidValidatorUtilTests {
         bLangPackage = ValidatorTest.getBlangPackage("invalidTests/typeMisMatchArrayType.bal");
         extractSchema = ValidatorTest.getComponet(api, "TypeMisMatchArrayType");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
+        validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
 
-        Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).get(0)instanceof
-                TypeMismatch);
-        Assert.assertEquals((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol))
-                        .get(0).getFieldName(), "phone");
-        Assert.assertEquals(((TypeMismatch) (BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol))
-                        .get(0)).getTypeJsonSchema(), Constants.Type.INTEGER);
-        Assert.assertEquals(((TypeMismatch) (BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol))
-                        .get(0)).getTypeBallerinaType(), Constants.Type.STRING);
+        Assert.assertTrue((validationErrors).get(0) instanceof TypeMismatch);
+        Assert.assertEquals((validationErrors).get(0).getFieldName(), "phone");
+        Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeJsonSchema(), Constants.Type.INTEGER);
+        Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeBallerinaType(), Constants.Type.STRING);
     }
 
     @Test(description = "test Nested array type")
@@ -136,11 +131,10 @@ public class InvalidValidatorUtilTests {
         bLangPackage = ValidatorTest.getBlangPackage("invalidTests/typeMisMatchNestedArrayType.bal");
         extractSchema = ValidatorTest.getComponet(api, "TypeMisMatchNestedArray");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
+        validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
 
-        Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).get(0)
-                instanceof TypeMismatch);
-        Assert.assertEquals((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).get(0)
-                .getFieldName(), "phone");
+        Assert.assertTrue((validationErrors).get(0) instanceof TypeMismatch);
+        Assert.assertEquals((validationErrors).get(0).getFieldName(), "phone");
     }
 
     @Test(description = "Test record field with array type of another record")
@@ -150,11 +144,58 @@ public class InvalidValidatorUtilTests {
         bLangPackage = ValidatorTest.getBlangPackage("invalidTests/recordTypeArray.bal");
         extractSchema = ValidatorTest.getComponet(api, "RecordTypeArray");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
+        validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
 
-        Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).get(0)
-                instanceof TypeMismatch);
+        Assert.assertTrue((validationErrors).get(0) instanceof TypeMismatch);
 
     }
+
+    @Test(description = "Test for nested record")
+    public void testNestedRecord() throws OpenApiValidatorException, UnsupportedEncodingException {
+        Path contractPath = RES_DIR.resolve("invalidTests/nestedRecord.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        newApi = ResolveComponentUtil.resolveOpeApiContract(api);
+        bLangPackage = ValidatorTest.getBlangPackage("invalidTests/nestedRecord.bal");
+        extractSchema = ValidatorTest.getComponet(newApi, "NestedRecord");
+        extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
+        validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
+
+        Assert.assertEquals(validationErrors.get(0).getFieldName(), "id");
+        Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeJsonSchema(), Constants.Type.INT);
+        Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeBallerinaType(), Constants.Type.STRING);
+
+    }
+
+    @Test(description = "Test for nested 4 record")
+    public void testNested4Record() throws OpenApiValidatorException, UnsupportedEncodingException {
+        Path contractPath = RES_DIR.resolve("invalidTests/nested4Record.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        newApi = ResolveComponentUtil.resolveOpeApiContract(api);
+        bLangPackage = ValidatorTest.getBlangPackage("invalidTests/nested4Record.bal");
+        extractSchema = ValidatorTest.getComponet(newApi, "FourNestedComponent");
+        extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
+        validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
+
+        Assert.assertEquals(validationErrors.get(0).getFieldName(), "month");
+        Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeJsonSchema(), Constants.Type.STRING );
+        Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeBallerinaType(), Constants.Type.INT);
+
+    }
+
+    @Test(description = "test nested record has field with inline record ")
+    public void testInlineRecordinNested() throws OpenApiValidatorException, UnsupportedEncodingException {
+        Path contractPath = RES_DIR.resolve("invalidTests/nested4Recordinline.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        bLangPackage = ValidatorTest.getBlangPackage("invalidTests/inlineRecord.bal");
+        extractSchema = ValidatorTest.getComponet(api, "AllOfTest");
+        extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
+        validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
+
+//        Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).get(0)instanceof
+//                TypeMismatch);
+    }
+
+
 
     @Test(description = "Test allOf type")
     public void testAllOfType() throws OpenApiValidatorException, UnsupportedEncodingException {
@@ -163,6 +204,7 @@ public class InvalidValidatorUtilTests {
         bLangPackage = ValidatorTest.getBlangPackage("invalidTests/allOfType.bal");
         extractSchema = ValidatorTest.getComponet(api, "AllOfTest");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
+        validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
 
 //        Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).get(0)instanceof
 //                TypeMismatch);
@@ -177,6 +219,7 @@ public class InvalidValidatorUtilTests {
         bLangPackage = ValidatorTest.getBlangPackage("invalidTests/oneOf.bal");
         extractSchema = ValidatorTest.getComponet(api, "AllOfTest");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
+        validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
 
 //        Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).get(0)instanceof
 //                TypeMismatch);
@@ -191,19 +234,13 @@ public class InvalidValidatorUtilTests {
         bLangPackage = ValidatorTest.getBlangPackage("invalidTests/inlineRecord.bal");
         extractSchema = ValidatorTest.getComponet(api, "AllOfTest");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
+        validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
 
 //        Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).get(0)instanceof
 //                TypeMismatch);
     }
 
-    @Test(description = "Test for nested record")
-    public void testNestedRecord() throws OpenApiValidatorException, UnsupportedEncodingException {
-        Path contractPath = RES_DIR.resolve("invalidTests/nestedRecord.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("invalidTests/nestedRecord.bal");
-        extractSchema = ValidatorTest.getComponet(api, "NestedRecord");
-        extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
 
-    }
+
 
 }

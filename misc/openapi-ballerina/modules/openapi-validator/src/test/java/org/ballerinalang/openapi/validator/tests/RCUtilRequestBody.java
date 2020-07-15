@@ -66,4 +66,22 @@ public class RCUtilRequestBody {
         components = ResolveComponentUtil.resolveOpeApiContract(api).getComponents();
         System.out.println(api);
     }
+    @Test(description = "Test03 - Test reusable request body")
+    public void testOneOfRB() throws OpenApiValidatorException {
+
+        Path contractPath = RES_DIR.resolve("postOneOfRequestBody.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+//        components = ResolveComponentUtil.resolveOpeApiContract(api).getComponents();
+        System.out.println(api);
+    }
+
+    @Test(description = "Test03 - Test reusable request body")
+    public void testOneOfRBArray() throws OpenApiValidatorException {
+
+        Path contractPath = RES_DIR.resolve("postOneOfRBArray.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+//        components = ResolveComponentUtil.resolveOpeApiContract(api).getComponents();
+        System.out.println(api);
+    }
+
 }

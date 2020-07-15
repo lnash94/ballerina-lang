@@ -109,6 +109,7 @@ public class RCUtilGetMethodTest {
     public void testGetOneofResponse() throws OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("responses/getOneOfResponses.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        System.out.println(api);
         responses =
                 (Collection<ApiResponse>) ResolveComponentUtil.resolveOpeApiContract(api).getPaths().get("/oneOfResponse")
                         .getGet().getResponses().values();

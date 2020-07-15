@@ -22,6 +22,7 @@ import io.swagger.models.apideclaration.Api;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
@@ -67,6 +68,11 @@ public class ResolveComponentUtil {
                                 Schema schema1 = openAPI.getComponents().getSchemas().get(getcomponetName(ref));
                                 Schema schema2 = ResolveComponentUtil.resolveNestedComponent(schema1, openAPI);
                                 propSchema.setValue(schema2);
+                            } else if (propSchema.getValue() instanceof ArraySchema) {
+                                Schema schema3 = ResolveComponentUtil.resolveNestedComponent(propSchema.getValue(),
+                                        openAPI);
+                                propSchema.setValue(schema3);
+//                                ((ArraySchema) propSchema.getValue()).setItems(schema3);
                             }
                             continue;
                         }
@@ -163,7 +169,7 @@ public class ResolveComponentUtil {
         }
 
 //        }
-        System.out.println(openAPI);
+//        System.out.println(openAPI);
         return openAPI;
     }
 
@@ -246,13 +252,21 @@ public class ResolveComponentUtil {
 
 //  Resolve reference in components
     public static  Schema resolveNestedComponent(Schema schema, OpenAPI openAPI) {
-        Map<String, Schema> properties = schema.getProperties();
-        if (schema.get$ref() != null) {
+
+        if (schema instanceof ArraySchema) {
+            if (((ArraySchema) schema).getItems().get$ref() != null) {
+                Schema schema3 = openAPI.getComponents().getSchemas().get(ResolveComponentUtil.
+                        getcomponetName(((ArraySchema) schema).getItems().get$ref()));
+                Schema schema4 = ResolveComponentUtil.resolveNestedComponent(schema3, openAPI);
+                ((ArraySchema) schema).setItems(schema4);
+            }
+        } else if (schema.get$ref() != null) {
             Schema schema1 = openAPI.getComponents().getSchemas().get(ResolveComponentUtil.
                     getcomponetName(schema.get$ref()));
             schema = ResolveComponentUtil.resolveNestedComponent(schema1, openAPI);
 
-        }else if (schema.getProperties() != null) {
+        } else if (schema.getProperties() != null) {
+            Map<String, Schema> properties = schema.getProperties();
             for (Map.Entry<String, Schema> propSchema: properties.entrySet()) {
                 if (propSchema.getValue().get$ref() != null) {
                     Schema schema2 = openAPI.getComponents().getSchemas()
@@ -280,7 +294,6 @@ public class ResolveComponentUtil {
                                 Schema schema6 = resolveNestedComponent(schemaEntry.getValue(), openAPI);
                                 schemaEntry.setValue(schema6);
                             }
-
                         }
                         continue;
                     }
@@ -290,6 +303,4 @@ public class ResolveComponentUtil {
         }
         return schema;
     }
-
-
 }

@@ -19,7 +19,7 @@ components:
           type: "string"
           format: "date-time"
         category:
-          $ref: "#/definitions/Category"
+          $ref: "#/components/schemas/Category"
       xml:
         name: "Order"
     Category:
@@ -28,7 +28,7 @@ components:
         name:
           type: string
         tag:
-          $ref: "#/definitions/Tag"
+          $ref: "#/components/schemas/Tag"
     Tag:
       type: object
       properties:
@@ -43,7 +43,7 @@ components:
             day:
               type: string
             year:
-              $ref: "#/definitions/Year"
+              $ref: "#/components/schemas/Year"
     Year:
       type: object
       properties:

@@ -23,6 +23,7 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import org.ballerinalang.model.tree.AnnotationAttachmentNode;
 import org.ballerinalang.model.tree.FunctionNode;
 import org.ballerinalang.model.tree.ServiceNode;
@@ -61,6 +62,11 @@ public class ValidatorUtil {
      */
     public static OpenAPI parseOpenAPIFile(String definitionURI) throws OpenApiValidatorException {
         Path contractPath = Paths.get(definitionURI);
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+        parseOptions.setFlatten(true);
+
         if (!Files.exists(contractPath)) {
             throw new OpenApiValidatorException(ErrorMessages.invalidFilePath(definitionURI));
         }
@@ -69,7 +75,7 @@ public class ValidatorUtil {
             throw new OpenApiValidatorException(ErrorMessages.invalidFile());
         }
 
-        OpenAPI api = new OpenAPIV3Parser().read(definitionURI);
+        OpenAPI api = new OpenAPIV3Parser().read(definitionURI, null, parseOptions);
         if (api == null) {
             throw new OpenApiValidatorException(ErrorMessages.parserException(definitionURI));
         }
