@@ -10,16 +10,19 @@ type Dog record {
     *Pet;
      boolean bark;
 };
+type Category record {
+    int id;
+    string name;
+};
+
 type Cat record {
      int id;
      string name;
      string tag;
      string 'type;
+     Category category;
 };
-type Error record {
-     int code;
-     string message;
-};
+
 
 service hello on new http:Listener(9090) {
 

@@ -16,6 +16,7 @@
 package org.ballerinalang.openapi.validator.tests;
 
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import org.ballerinalang.openapi.validator.BJsonSchemaUtil;
 import org.ballerinalang.openapi.validator.Constants;
@@ -29,7 +30,9 @@ import org.ballerinalang.openapi.validator.ValidatorUtil;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BVarSymbol;
+import org.wso2.ballerinalang.compiler.semantics.model.types.BUnionType;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
+import org.wso2.ballerinalang.compiler.tree.types.BLangUnionTypeNode;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
@@ -135,6 +138,7 @@ public class InvalidValidatorUtilTests {
 
         Assert.assertTrue((validationErrors).get(0) instanceof TypeMismatch);
         Assert.assertEquals((validationErrors).get(0).getFieldName(), "phone");
+        System.out.println(((TypeMismatch) (validationErrors).get(0)).getTypeJsonSchema());
     }
 
     @Test(description = "Test record field with array type of another record")
@@ -195,7 +199,40 @@ public class InvalidValidatorUtilTests {
 //                TypeMismatch);
     }
 
+    @Test(description = "Test oneOf type")
+    public void testOneOfType() throws OpenApiValidatorException, UnsupportedEncodingException {
+        Path contractPath = RES_DIR.resolve("invalidTests/oneOf.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        bLangPackage = ValidatorTest.getBlangPackage("invalidTests/oneOf.bal");
+        ComposedSchema extractSchema =
+                (ComposedSchema) api.getPaths().get("/oneOfRequestBody").getPost().getRequestBody().getContent().get("application/json").getSchema();
+//        System.out.println(extractSchema);
+        extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
+//        System.out.println(extractBVarSymbol.);
+        ValidatorUtil.validateOneOfParamters(extractSchema.getOneOf(),
+                ((BLangUnionTypeNode) bLangPackage.getServices().get(0).resourceFunctions.get(0).requiredParams.get(2).typeNode)
+                .getMemberTypeNodes());
+//        System.out.println(extractSchema);
 
+    }
+
+
+    @Test(description = "Test oneOf type with primitive data type")
+    public void testOneOfTypewithPrimitiveData() throws OpenApiValidatorException, UnsupportedEncodingException {
+        Path contractPath = RES_DIR.resolve("invalidTests/oneOf.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        bLangPackage = ValidatorTest.getBlangPackage("invalidTests/oneOf.bal");
+        ComposedSchema extractSchema =
+                (ComposedSchema) api.getPaths().get("/oneOfRequestBody").getPost().getRequestBody().getContent().get("application/json").getSchema();
+//        System.out.println(extractSchema);
+        extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
+//        System.out.println(extractBVarSymbol.);
+        ValidatorUtil.validateOneOfParamters(extractSchema.getOneOf(),
+                ((BLangUnionTypeNode) bLangPackage.getServices().get(0).resourceFunctions.get(0).requiredParams.get(2).typeNode)
+                        .getMemberTypeNodes());
+//        System.out.println(extractSchema);
+
+    }
 
     @Test(description = "Test allOf type")
     public void testAllOfType() throws OpenApiValidatorException, UnsupportedEncodingException {
@@ -206,25 +243,6 @@ public class InvalidValidatorUtilTests {
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
         validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
 
-//        Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).get(0)instanceof
-//                TypeMismatch);
-//        Assert.assertEquals((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol))
-//                .get(0).getFieldName(), "phone");
-    }
-
-    @Test(description = "Test oneOf type")
-    public void testOneOfType() throws OpenApiValidatorException, UnsupportedEncodingException {
-        Path contractPath = RES_DIR.resolve("invalidTests/oneOf.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("invalidTests/oneOf.bal");
-        extractSchema = ValidatorTest.getComponet(api, "AllOfTest");
-        extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
-
-//        Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).get(0)instanceof
-//                TypeMismatch);
-//        Assert.assertEquals((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol))
-//                .get(0).getFieldName(), "phone");
     }
 
     @Test(description = "Inline record ")

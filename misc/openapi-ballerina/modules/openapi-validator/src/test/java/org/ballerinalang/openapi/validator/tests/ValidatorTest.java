@@ -54,6 +54,9 @@ public class ValidatorTest {
         return bLangPackage.getServices().get(0).resourceFunctions.get(0).requiredParams.get(2).symbol;
     }
 
+    public static Schema getSchema(OpenAPI api, String path) {
+        return  api.getPaths().get(path).getGet().getParameters().get(0).getSchema();
+    }
 //    public static RequestBody getRequestBody(OpenAPI api) {
 //        Content content = api.getPaths().get(0).getOptions().getRequestBody().getContent();
 //        return// ;

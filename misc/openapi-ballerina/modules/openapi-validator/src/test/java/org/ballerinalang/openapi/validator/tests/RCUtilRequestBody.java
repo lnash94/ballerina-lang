@@ -83,5 +83,11 @@ public class RCUtilRequestBody {
 //        components = ResolveComponentUtil.resolveOpeApiContract(api).getComponents();
         System.out.println(api);
     }
-
+    @Test(description = "Test03 - Test  request body with example with reference")
+    public void testRBwithRefExample() throws OpenApiValidatorException {
+        Path contractPath = RES_DIR.resolve("postRBwithExampleref.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+//        components = ResolveComponentUtil.resolveOpeApiContract(api).getComponents();
+        System.out.println(api);
+    }
 }
