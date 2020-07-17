@@ -2,7 +2,7 @@ import ballerina/http;
 
 
 type Tag record {
-    int id;
+    string id;
     string name;
 };
 type RecordTypeArray record {

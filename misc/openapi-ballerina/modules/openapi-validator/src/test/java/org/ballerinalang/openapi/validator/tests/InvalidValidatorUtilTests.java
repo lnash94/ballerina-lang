@@ -151,7 +151,9 @@ public class InvalidValidatorUtilTests {
         validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
 
         Assert.assertTrue((validationErrors).get(0) instanceof TypeMismatch);
-
+        Assert.assertEquals(validationErrors.get(0).getFieldName(), "id");
+        Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeJsonSchema(), Constants.Type.INTEGER);
+        Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeBallerinaType(), Constants.Type.STRING);
     }
 
     @Test(description = "Test for nested record")
@@ -165,7 +167,7 @@ public class InvalidValidatorUtilTests {
         validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
 
         Assert.assertEquals(validationErrors.get(0).getFieldName(), "id");
-        Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeJsonSchema(), Constants.Type.INT);
+        Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeJsonSchema(), Constants.Type.INTEGER);
         Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeBallerinaType(), Constants.Type.STRING);
 
     }
@@ -185,7 +187,7 @@ public class InvalidValidatorUtilTests {
         Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeBallerinaType(), Constants.Type.INT);
 
     }
-
+//      need to implement
     @Test(description = "test nested record has field with inline record ")
     public void testInlineRecordinNested() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("invalidTests/nested4Recordinline.yaml");
@@ -199,7 +201,21 @@ public class InvalidValidatorUtilTests {
 //                TypeMismatch);
     }
 
-    @Test(description = "Test oneOf type")
+    @Test(description = "Test oneOf type with primitive data type")
+    public void testOneOfTypewithPrimitiveData() throws OpenApiValidatorException, UnsupportedEncodingException {
+        Path contractPath = RES_DIR.resolve("invalidTests/primitive/oneOfPrimitive.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        bLangPackage = ValidatorTest.getBlangPackage("invalidTests/primitive/oneOf.bal");
+        ComposedSchema extractSchema =
+                (ComposedSchema) api.getPaths().get("/oneOfRequestBody").getPost().getRequestBody().getContent().get("application/json").getSchema();
+        extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
+        ValidatorUtil.validateOneOfParamters(extractSchema.getOneOf(),
+                ((BLangUnionTypeNode) bLangPackage.getServices().get(0).resourceFunctions.get(0).requiredParams.get(2).typeNode)
+                        .getMemberTypeNodes());
+
+    }
+
+    @Test(description = "Test oneOf with record type")
     public void testOneOfType() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("invalidTests/oneOf.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
@@ -216,23 +232,6 @@ public class InvalidValidatorUtilTests {
 
     }
 
-
-    @Test(description = "Test oneOf type with primitive data type")
-    public void testOneOfTypewithPrimitiveData() throws OpenApiValidatorException, UnsupportedEncodingException {
-        Path contractPath = RES_DIR.resolve("invalidTests/oneOf.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("invalidTests/oneOf.bal");
-        ComposedSchema extractSchema =
-                (ComposedSchema) api.getPaths().get("/oneOfRequestBody").getPost().getRequestBody().getContent().get("application/json").getSchema();
-//        System.out.println(extractSchema);
-        extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-//        System.out.println(extractBVarSymbol.);
-        ValidatorUtil.validateOneOfParamters(extractSchema.getOneOf(),
-                ((BLangUnionTypeNode) bLangPackage.getServices().get(0).resourceFunctions.get(0).requiredParams.get(2).typeNode)
-                        .getMemberTypeNodes());
-//        System.out.println(extractSchema);
-
-    }
 
     @Test(description = "Test allOf type")
     public void testAllOfType() throws OpenApiValidatorException, UnsupportedEncodingException {

@@ -20,6 +20,7 @@ package org.ballerinalang.openapi.validator;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.OpenAPIV3Parser;
@@ -283,6 +284,17 @@ public class ValidatorUtil {
                             if (!operationRequestBParamNames.isEmpty() && operationParamNames.isEmpty()) {
                                 if (parameter.getName().equals(resourceSummary.getBody())) {
                                     for (Map.Entry<String, Schema> entry : operationRequestBParamNames.entrySet()) {
+                                        if ((entry.getValue() instanceof ComposedSchema) &&
+                                                (((ComposedSchema) entry.getValue()).getOneOf() != null)) {
+                                            List<Schema> oneOfList = ((ComposedSchema) entry.getValue()).getOneOf();
+                                            if (parameter.getParameter().typeNode instanceof BLangUnionTypeNode ) {
+                                                List<BLangType> memberTypeNodes =
+                                                        ((BLangUnionTypeNode) parameter.getParameter().typeNode)
+                                                                .getMemberTypeNodes();
+                                                validateOneOfParamters(oneOfList, memberTypeNodes);
+//                                                xxxxxxxxxxxxxinprogresxxxxxxxxxxxxxxx
+                                            }
+                                        }
                                         if (entry.getValue().getProperties() == null && entry.getValue()
                                                 .get$ref() != null) {
                                             isExist = validateResourceAgainstOpenAPIParams(parameter,
@@ -628,6 +640,13 @@ public class ValidatorUtil {
                 boolean isExist = false;
                 for (ResourceParameter bodyParameter : resourceParamNames) {
                     if (bodyParameter.getParameter().getTypeNode() != null) {
+                        if ((bodyParameter.getParameter().type instanceof BRecordType) &&
+                                (entry.getValue() instanceof ObjectSchema)) {
+//                            handle done
+                            isExist = validateOpenAPIAgainResourceParams(bodyParameter,
+                                    bodyParameter.getParameter().symbol, entry.getValue(),
+                                    dLog, method, openApiSummary.getPath(), kind);
+                        }
                         if (bodyParameter.getParameter().getTypeNode() instanceof BLangUnionTypeNode) {
                             BLangUnionTypeNode memberTypeNodes =
                                     (BLangUnionTypeNode) bodyParameter.getParameter().getTypeNode();
@@ -644,13 +663,10 @@ public class ValidatorUtil {
                             }
                         }
                     }
-                    if (OpenAPISummaryUtil.getcomponetName(entry.getValue().get$ref()).
-                            equals(bodyParameter.getType())) {
-                        isExist = validateOpenAPIAgainResourceParams(bodyParameter,
-                                bodyParameter.getParameter().symbol, openAPIComponentSummary
-                                        .getSchema(OpenAPISummaryUtil.getcomponetName(entry.getValue().get$ref())),
-                                dLog, method, openApiSummary.getPath(), kind);
-                    }
+//                    if (OpenAPISummaryUtil.getcomponetName(entry.getValue().get$ref()).
+//                            equals(bodyParameter.getType())) {
+//                        reference name eken but null
+//                    }
                 }
                 if (!isExist) {
                     dLog.logDiagnostic(kind, getServiceNamePosition(serviceNode),
@@ -920,4 +936,38 @@ public class ValidatorUtil {
                 ErrorMessages.unimplementedOpenAPIOperationsForPath(methods,
                         openApiSummary.getPath()));
     }
+
+    public static void validateOneOfParamters(List<Schema> oneOfList, List<BLangType> memberTypeNodes)
+            throws OpenApiValidatorException {
+        Boolean isExit = false;
+        for (Schema schema: oneOfList) {
+            for (BLangType memberNode : memberTypeNodes) {
+                BType memberParamType = memberNode.type;
+                if (memberParamType instanceof BRecordType ) {
+//                    BVarSymbol bVarSymbol =
+//                            (BRecordType) memberNode.;
+                    BVarSymbol bVarSymbol ;
+//                    bVarSymbol = (BVarSymbol) memberNode.type.symbol;
+//                    List<ValidationError> validationErrors = BJsonSchemaUtil.validateBallerinaType(schema, bVarSymbol);
+//                    if (validationErrors.isEmpty()) {
+//                        isExit = true;
+//                        break;
+//                    } else {
+//                        isExit = false;
+//                        check the field names
+//                    }
+                } else if (memberNode.getKind().toString()
+                        .equals(BJsonSchemaUtil.convertOpenAPITypeToBallerina(schema.getType()))) {
+                    isExit = true;
+                }
+            }
+            if(!isExit) {
+//                error msg
+                System.out.println("xxxxtestxxxxx");
+            }
+        }
+    }
 }
+//line 295
+//line 656
+//line 966
