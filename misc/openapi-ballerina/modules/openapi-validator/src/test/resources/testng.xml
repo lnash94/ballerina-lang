@@ -35,9 +35,9 @@ under the License.
         <classes>
             <class name="org.ballerinalang.openapi.validator.tests.InvalidValidatorUtilTests" />
             <class name="org.ballerinalang.openapi.validator.tests.ValidValidatorUtilTests" />
-            <class name="org.ballerinalang.openapi.validator.tests.OpenApiComponentByRefTest" />
-            <class name="org.ballerinalang.openapi.validator.tests.RCUtilGetMethodTest"/>
-            <class name="org.ballerinalang.openapi.validator.tests.RCUtilPostMethodTest"/>
+<!--            <class name="org.ballerinalang.openapi.validator.tests.OpenApiComponentByRefTest" />-->
+<!--            <class name="org.ballerinalang.openapi.validator.tests.RCUtilGetMethodTest"/>-->
+<!--            <class name="org.ballerinalang.openapi.validator.tests.RCUtilPostMethodTest"/>-->
             <class name="org.ballerinalang.openapi.validator.tests.IVPrimitiveUtilTests"/>
         </classes>
     </test>
