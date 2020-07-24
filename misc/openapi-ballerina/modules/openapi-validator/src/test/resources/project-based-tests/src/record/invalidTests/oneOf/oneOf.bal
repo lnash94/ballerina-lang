@@ -10,17 +10,17 @@ type Dog record {
     *Pet;
      boolean bark;
 };
-type Category record {
-    int id;
-    string name;
-};
+//type Category record {
+//    int id;
+//    string name;
+//};
 
 type Cat record {
      string id;
      string name;
      string tag;
      string 'type;
-     Category category;
+     //Category category;
 };
 
 

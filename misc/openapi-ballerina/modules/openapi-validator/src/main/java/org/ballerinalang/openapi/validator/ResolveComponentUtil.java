@@ -18,7 +18,6 @@
 
 package org.ballerinalang.openapi.validator;
 
-import io.swagger.models.apideclaration.Api;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
@@ -30,12 +29,9 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
-import org.ballerinalang.model.elements.MarkdownDocAttachment;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -64,7 +60,7 @@ public class ResolveComponentUtil {
                     if (properties != null) {
                         for (Map.Entry<String, Schema> propSchema: properties.entrySet()) {
                             String ref = propSchema.getValue().get$ref();
-                            if ( ref != null) {
+                            if (ref != null) {
                                 Schema schema1 = openAPI.getComponents().getSchemas().get(getcomponetName(ref));
                                 Schema schema2 = ResolveComponentUtil.resolveNestedComponent(schema1, openAPI);
                                 propSchema.setValue(schema2);
@@ -97,7 +93,7 @@ public class ResolveComponentUtil {
             Map<String, ApiResponse> responses = components.getResponses();
             if (responses != null) {
                 for (Map.Entry<String, ApiResponse> responseEntry: responses.entrySet()) {
-                    if(responseEntry.getValue().get$ref() != null) {
+                    if (responseEntry.getValue().get$ref() != null) {
                         ApiResponse apiResponse = components.getResponses().get(getcomponetName(responseEntry
                                 .getValue().get$ref()));
                         responseEntry.setValue(apiResponse);
@@ -120,7 +116,7 @@ public class ResolveComponentUtil {
 //                    handle reference in
 //                }
 //                Handle GET method
-                if (operation.getGet()!= null) {
+                if (operation.getGet() != null) {
                     List<Parameter> parameters =  operation.getGet().getParameters();
                     Collection<ApiResponse> responses = null;
                     final ApiResponses responses1 = operation.getGet().getResponses();
@@ -144,7 +140,7 @@ public class ResolveComponentUtil {
 
                 }
 //                Handle POST method
-                if ( operation.getPost() != null) {
+                if (operation.getPost() != null) {
                     List<Parameter> parameters =  operation.getPost().getParameters();
                     Collection<ApiResponse> responses = null;
                     final ApiResponses responses1 = operation.getPost().getResponses();
@@ -169,7 +165,6 @@ public class ResolveComponentUtil {
         }
 
 //        }
-//        System.out.println(openAPI);
         return openAPI;
     }
 
@@ -289,7 +284,7 @@ public class ResolveComponentUtil {
                             mapPropSchema.setValue(schema5);
                         }
                         Map<String, Schema> mapPropSchemaProperties = mapPropSchema.getValue().getProperties();
-                        if ( mapPropSchemaProperties != null) {
+                        if (mapPropSchemaProperties != null) {
                             for (Map.Entry<String, Schema> schemaEntry: mapPropSchemaProperties.entrySet()) {
                                 Schema schema6 = resolveNestedComponent(schemaEntry.getValue(), openAPI);
                                 schemaEntry.setValue(schema6);

@@ -40,7 +40,6 @@ import org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangSimpleVarRef;
 import org.wso2.ballerinalang.compiler.tree.types.BLangType;
 import org.wso2.ballerinalang.compiler.tree.types.BLangUnionTypeNode;
-import org.wso2.ballerinalang.compiler.tree.types.BLangUserDefinedType;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -286,22 +285,48 @@ public class ValidatorUtil {
                                     for (Map.Entry<String, Schema> entry : operationRequestBParamNames.entrySet()) {
                                         if ((entry.getValue() instanceof ComposedSchema) &&
                                                 (((ComposedSchema) entry.getValue()).getOneOf() != null)) {
+                                            isExist = true;
                                             List<Schema> oneOfList = ((ComposedSchema) entry.getValue()).getOneOf();
-                                            if (parameter.getParameter().typeNode instanceof BLangUnionTypeNode ) {
-                                                List<BLangType> memberTypeNodes =
-                                                        ((BLangUnionTypeNode) parameter.getParameter().typeNode)
-                                                                .getMemberTypeNodes();
-                                                validateOneOfParamters(oneOfList, memberTypeNodes);
-//                                                xxxxxxxxxxxxxinprogresxxxxxxxxxxxxxxx
+                                            if (parameter.getParameter().typeNode instanceof BLangUnionTypeNode) {
+                                                List<ValidationError> validationErrors =
+                                                        BJsonSchemaUtil.validateBallerinaType(
+                                                                ((ComposedSchema) entry.getValue()),
+                                                                parameter.getParameter().symbol);
+                                                if (!validationErrors.isEmpty()) {
+                                                    for (ValidationError validationError: validationErrors) {
+                                                        if (validationError instanceof OneOfTypeMismatch) {
+                                                            if (!((OneOfTypeMismatch) validationError).getBlockErrors()
+                                                                    .isEmpty()) {
+                                                                for (ValidationError blockErrors :
+                                                                        ((OneOfTypeMismatch) validationError).
+                                                                                getBlockErrors()) {
+//                                                                    validation with type mismatch
+//                                                                    else if check the type is missingField of json
+//                                                                    object
+                                                                    if (blockErrors instanceof TypeMismatch) {
+                                                                        dLog.logDiagnostic(kind,
+                                                                                parameter.getParameter().getPosition(),
+                                                                                ErrorMessages.typeMismatchOneOfRecord
+                                                                                        (validationError.getFieldName(),
+                                                                                        parameter.getName(),
+                                                                                        convertEnumTypetoString(((TypeMismatch) blockErrors).getTypeJsonSchema()),
+                                                                                        convertEnumTypetoString(((TypeMismatch) blockErrors).getTypeBallerinaType()),
+                                                                                        resourceMethod,
+                                                                                        resourceSummary.getPath()));
+                                                                    } else if (blockErrors instanceof MissingFieldInJsonSchema) {
+                                                                        dLog.logDiagnostic(kind,
+                                                                                parameter.getParameter().getPosition(),
+                                                                                ErrorMessages.undocumentedFieldInRecordParam(blockErrors.getFieldName(), parameter.getName(), resourceMethod, resourceSummary.getPath()));
+                                                                    }
+                                                                }
+
+                                                            }
+//                                                            System.out.println(validationError.getFieldName());
+                                                        }
+                                                    }
+
+                                                }
                                             }
-                                        }
-                                        if (entry.getValue().getProperties() == null && entry.getValue()
-                                                .get$ref() != null) {
-                                            isExist = validateResourceAgainstOpenAPIParams(parameter,
-                                                    parameter.getParameter().symbol, openAPIComponentSummary
-                                                            .getSchema(OpenAPISummaryUtil.getcomponetName(
-                                                                    entry.getValue().get$ref())),
-                                                    dLog, resourceMethod, resourceSummary.getPath(), kind);
                                         } else {
                                             isExist = validateResourceAgainstOpenAPIParams(parameter,
                                                     parameter.getParameter().symbol, entry.getValue() , dLog,
@@ -647,19 +672,41 @@ public class ValidatorUtil {
                                     bodyParameter.getParameter().symbol, entry.getValue(),
                                     dLog, method, openApiSummary.getPath(), kind);
                         }
+//                        OneOf type requestBody
                         if (bodyParameter.getParameter().getTypeNode() instanceof BLangUnionTypeNode) {
-                            BLangUnionTypeNode memberTypeNodes =
-                                    (BLangUnionTypeNode) bodyParameter.getParameter().getTypeNode();
-                            for (BLangType bRecordType : memberTypeNodes.memberTypeNodes) {
-                                if (bRecordType.type instanceof BRecordType) {
-                                    BRecordType memberTypeNode = (BRecordType) bRecordType.type;
-//                                    oneOf type handle every multiple reference
-//                                    isExist = validateOpenAPIAgainResourceParams(bodyParameter,
-//                                            memberTypeNode, openAPIComponentSummary
-//                                                    .getSchema(OpenAPISummaryUtil.getcomponetName(entry.getValue().get$ref())),
-//                                            dLog, method, openApiSummary.getPath(), kind);
+                            isExist = true;
+                            List<ValidationError> validationErrors =
+                                    BJsonSchemaUtil.validateBallerinaType(entry.getValue(),
+                                            bodyParameter.getParameter().symbol);
+                            if (!(validationErrors.isEmpty())) {
+                                for (ValidationError validationError : validationErrors) {
+                                    if (validationError instanceof OneOfTypeMismatch) {
+                                        if (!(((OneOfTypeMismatch) validationError).getBlockErrors().isEmpty())) {
+                                            for (ValidationError blockErrors :
+                                                    ((OneOfTypeMismatch) validationError).getBlockErrors()) {
+//                                                check type mismatch
+//                                                else if check type is missing fields in ballerina records
+                                                if (blockErrors instanceof TypeMismatch) {
+                                                    dLog.logDiagnostic(kind, getServiceNamePosition(serviceNode),
+                                                            ErrorMessages.typeMismatchOneOfObject(
+                                                                    blockErrors.getFieldName(),
+                                                                    validationError.getFieldName(),
+                                                                    convertEnumTypetoString(((TypeMismatch) blockErrors)
+                                                                            .getTypeJsonSchema()),
+                                                                    convertEnumTypetoString(((TypeMismatch) blockErrors)
+                                                                            .getTypeBallerinaType()), method,
+                                                                    resourceSummaryForMethod.getPath()));
+                                                } else if (blockErrors instanceof MissingFieldInBallerinaType) {
+                                                    dLog.logDiagnostic(kind, getServiceNamePosition(serviceNode),
+                                                            ErrorMessages.unimplementedFieldInOperation(blockErrors.
+                                                                    getFieldName(),
+                                                                    bodyParameter.getName(), method,
+                                                                    resourceSummaryForMethod.getPath() ));
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
-
                             }
                         }
                     }
@@ -669,6 +716,8 @@ public class ValidatorUtil {
 //                    }
                 }
                 if (!isExist) {
+//                    OpenAPISummaryUtil.getcomponetName (entry.getValue().get$ref()) need to change with default
+//                    value because ref are solved
                     dLog.logDiagnostic(kind, getServiceNamePosition(serviceNode),
                             ErrorMessages.unimplementedParameterForOperation(OpenAPISummaryUtil.getcomponetName
                                             (entry.getValue().get$ref()), method, resourceSummaryForMethod.getPath()));
@@ -935,37 +984,6 @@ public class ValidatorUtil {
         dLog.logDiagnostic(kind, getServiceNamePosition(serviceNode),
                 ErrorMessages.unimplementedOpenAPIOperationsForPath(methods,
                         openApiSummary.getPath()));
-    }
-
-    public static void validateOneOfParamters(List<Schema> oneOfList, List<BLangType> memberTypeNodes)
-            throws OpenApiValidatorException {
-        Boolean isExit = false;
-        for (Schema schema: oneOfList) {
-            for (BLangType memberNode : memberTypeNodes) {
-                BType memberParamType = memberNode.type;
-                if (memberParamType instanceof BRecordType ) {
-//                    BVarSymbol bVarSymbol =
-//                            (BRecordType) memberNode.;
-                    BVarSymbol bVarSymbol ;
-//                    bVarSymbol = (BVarSymbol) memberNode.type.symbol;
-//                    List<ValidationError> validationErrors = BJsonSchemaUtil.validateBallerinaType(schema, bVarSymbol);
-//                    if (validationErrors.isEmpty()) {
-//                        isExit = true;
-//                        break;
-//                    } else {
-//                        isExit = false;
-//                        check the field names
-//                    }
-                } else if (memberNode.getKind().toString()
-                        .equals(BJsonSchemaUtil.convertOpenAPITypeToBallerina(schema.getType()))) {
-                    isExit = true;
-                }
-            }
-            if(!isExit) {
-//                error msg
-                System.out.println("xxxxtestxxxxx");
-            }
-        }
     }
 }
 //line 295

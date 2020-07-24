@@ -16,11 +16,11 @@ type Category record {
 };
 
 type Cat record {
-     string id;
+     int id;
      string name;
      string tag;
      string 'type;
-     Category category;
+
 };
 
 

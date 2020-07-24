@@ -16,14 +16,10 @@
 package org.ballerinalang.openapi.validator.tests;
 
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import org.ballerinalang.openapi.validator.BJsonSchemaUtil;
 import org.ballerinalang.openapi.validator.Constants;
-import org.ballerinalang.openapi.validator.MissingFieldInBallerinaType;
-import org.ballerinalang.openapi.validator.MissingFieldInJsonSchema;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
-import org.ballerinalang.openapi.validator.ResolveComponentUtil;
 import org.ballerinalang.openapi.validator.TypeMismatch;
 import org.ballerinalang.openapi.validator.ValidationError;
 import org.ballerinalang.openapi.validator.ValidatorUtil;
@@ -31,7 +27,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BVarSymbol;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
-import org.wso2.ballerinalang.compiler.tree.types.BLangUnionTypeNode;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
@@ -62,7 +57,7 @@ public class IVPrimitiveUtilTests {
         validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
 
         Assert.assertTrue(validationErrors.get(0) instanceof TypeMismatch);
-        Assert.assertEquals(validationErrors.get(0).getFieldName(),"userId");
+        Assert.assertEquals(validationErrors.get(0).getFieldName(), "userId");
 
     }
 
@@ -76,7 +71,7 @@ public class IVPrimitiveUtilTests {
         validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
 
         Assert.assertTrue(validationErrors.get(0) instanceof TypeMismatch);
-        Assert.assertEquals(validationErrors.get(0).getFieldName(),"userId");
+        Assert.assertEquals(validationErrors.get(0).getFieldName(), "userId");
         Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeJsonSchema(), Constants.Type.STRING);
         Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeBallerinaType(), Constants.Type.INT);
 
@@ -92,7 +87,7 @@ public class IVPrimitiveUtilTests {
         validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
 
         Assert.assertTrue(validationErrors.get(0) instanceof TypeMismatch);
-        Assert.assertEquals(validationErrors.get(0).getFieldName(),"userId");
+        Assert.assertEquals(validationErrors.get(0).getFieldName(), "userId");
         Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeJsonSchema(), Constants.Type.STRING);
         Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeBallerinaType(), Constants.Type.INT);
     }
@@ -107,9 +102,6 @@ public class IVPrimitiveUtilTests {
         validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
 
         Assert.assertTrue(validationErrors.get(0) instanceof TypeMismatch);
-        System.out.println(((TypeMismatch) validationErrors.get(0)).getTypeBallerinaType());
-        System.out.println(((TypeMismatch) validationErrors.get(0)).getTypeJsonSchema());
-
         Assert.assertEquals(validationErrors.get(0).getFieldName(),"id");
         Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeJsonSchema(), Constants.Type.INTEGER);
         Assert.assertEquals(((TypeMismatch) (validationErrors).get(0)).getTypeBallerinaType(), Constants.Type.STRING);
