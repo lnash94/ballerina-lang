@@ -17,9 +17,8 @@ package org.ballerinalang.openapi.validator.tests;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
-import org.ballerinalang.openapi.validator.BJsonSchemaUtil;
+import org.ballerinalang.openapi.validator.BTypeToJsonValidatorUtil;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
-import org.ballerinalang.openapi.validator.TypeMismatch;
 import org.ballerinalang.openapi.validator.ValidationError;
 import org.ballerinalang.openapi.validator.ValidatorUtil;
 import org.testng.Assert;
@@ -53,7 +52,7 @@ public class VPrimitiveUtilTests {
         bLangPackage = ValidatorTest.getBlangPackage("validTests/primitive/integerB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
+        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
 
         Assert.assertTrue(validationErrors.isEmpty());
     }
@@ -65,7 +64,7 @@ public class VPrimitiveUtilTests {
         bLangPackage = ValidatorTest.getBlangPackage("validTests/primitive/stringB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
+        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
 
         Assert.assertTrue(validationErrors.isEmpty());
     }
@@ -77,13 +76,8 @@ public class VPrimitiveUtilTests {
         bLangPackage = ValidatorTest.getBlangPackage("validTests/primitive/booleanB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-        validationErrors = BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
+        validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
 
         Assert.assertTrue(validationErrors.isEmpty());
     }
-
-
-
-
-
 }

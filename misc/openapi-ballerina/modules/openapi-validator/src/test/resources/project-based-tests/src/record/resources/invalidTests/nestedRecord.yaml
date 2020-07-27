@@ -36,7 +36,11 @@ paths:
             format: int32
       responses:
         "200":
-          $ref: '#/components/schemas/NestedRecord'
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NestedRecord'
       requestBody:
 components:
   schemas:

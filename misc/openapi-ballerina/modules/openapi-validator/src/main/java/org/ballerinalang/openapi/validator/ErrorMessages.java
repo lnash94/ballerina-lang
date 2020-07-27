@@ -105,8 +105,9 @@ class ErrorMessages {
 
     static String typeMismatchOneOfRecord(String fieldName, String paramName, String openapiType, String ballerinType,
                                           String method, String path) {
-        return String.format("Type mismatch with '%s' field in the record type of the parameter '%s' for the method" +
-                        " '%s' of the path '%s'.OpenAPI object schema expected '%s' type and resources has '%s' type for field.",
+        return String.format("Type mismatch with '%s' field in the record type of the parameter '%s' " +
+                        "for the method '%s' of the path '%s'.OpenAPI object schema expected '%s' " +
+                        "type and resources has '%s' type for field.",
                 fieldName, paramName, method,  path, openapiType, ballerinType);
     }
 

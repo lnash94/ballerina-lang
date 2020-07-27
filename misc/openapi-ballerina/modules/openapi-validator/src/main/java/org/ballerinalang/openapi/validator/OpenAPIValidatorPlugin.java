@@ -46,7 +46,6 @@ import java.util.List;
  */
 @SupportedAnnotationPackages(value = {"ballerina/openapi"})
 public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
-    private static String openapiContractURI;
     private DiagnosticLog dLog = null;
     private List<ResourceSummary> resourceSummaryList;
     private List<OpenAPIPathSummary> openAPISummaryList;
@@ -59,7 +58,6 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
         this.resourceSummaryList = new ArrayList<>();
         this.openAPISummaryList = new ArrayList<>();
         this.openAPIComponentSummary = new OpenAPIComponentSummary();
-        this.openapiContractURI = "";
     }
 
     @Override
@@ -190,7 +188,6 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
 
             if (contractURI != null) {
                 try {
-                    this.openapiContractURI = contractURI;
                     OpenAPI openAPI = ValidatorUtil.parseOpenAPIFile(contractURI);
                     ValidatorUtil.summarizeResources(this.resourceSummaryList, serviceNode);
                     ValidatorUtil.summarizeOpenAPI(this.openAPISummaryList, openAPI, this.openAPIComponentSummary);
@@ -232,9 +229,5 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
     @Override
     public void process(PackageNode packageNode) {
         // Collect endpoints throughout the package.
-    }
-
-    static String getOpenapiContractURI() {
-        return openapiContractURI;
     }
 }

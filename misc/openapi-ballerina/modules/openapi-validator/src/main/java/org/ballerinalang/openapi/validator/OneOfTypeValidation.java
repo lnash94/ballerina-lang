@@ -23,17 +23,17 @@ import java.util.List;
 /**
  * This for identify the fields that are same names with different data type in given json schema and bVarsymbol.
  */
-public class OneOfTypeMismatch extends ValidationError {
+public class OneOfTypeValidation extends ValidationError {
     String fieldName;
     Constants.Type type;
     List<ValidationError> blockErrors;
 
-    public OneOfTypeMismatch() {
+    public OneOfTypeValidation() {
         fieldName = null;
         type = null;
         blockErrors = null;
     }
-    public OneOfTypeMismatch(String fieldName, Constants.Type type, List<ValidationError> validationErrors) {
+    public OneOfTypeValidation(String fieldName, Constants.Type type, List<ValidationError> validationErrors) {
         this.fieldName = fieldName;
         this.type = type;
         this.blockErrors = validationErrors;

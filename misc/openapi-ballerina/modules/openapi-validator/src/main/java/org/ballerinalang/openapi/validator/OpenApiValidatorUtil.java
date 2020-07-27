@@ -21,20 +21,16 @@ import org.ballerinalang.tool.BLauncherException;
 import org.wso2.ballerinalang.compiler.Compiler;
 import org.wso2.ballerinalang.compiler.FileSystemProgramDirectory;
 import org.wso2.ballerinalang.compiler.SourceDirectory;
-import org.wso2.ballerinalang.compiler.tree.BLangCompilationUnit;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import org.wso2.ballerinalang.compiler.util.CompilerContext;
 import org.wso2.ballerinalang.compiler.util.CompilerOptions;
 
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -59,7 +55,6 @@ public class OpenApiValidatorUtil {
 
     /**
      * Execute formatter.
-     *
      * @param argList        argument list from the console
      * @param helpFlag       flag to get the help page
      * @param sourceRootPath execution path
@@ -93,7 +88,7 @@ public class OpenApiValidatorUtil {
                         return;
                     }
 
-                    BLangCompilationUnit compilationUnit = bLangPackage.getCompilationUnits().get(0);
+//                    BLangCompilationUnit compilationUnit = bLangPackage.getCompilationUnits().get(0);
 
                 } else {
                     moduleName = argList.get(0);
@@ -109,28 +104,6 @@ public class OpenApiValidatorUtil {
             }
         } catch (IOException | NullPointerException e) {
 //            throw LauncherUtils.createLauncherException(Messages.getException());
-        }
-    }
-
-
-    /**
-     * Write content to a file.
-     *
-     * @param filePath - path of the file to add the content
-     * @param content  - content to be added to the file
-     * @throws IOException - throws and IO exception
-     */
-    private static void writeFile(String filePath, String content) throws IOException {
-        OutputStreamWriter fileWriter = null;
-        try {
-            File newFile = new File(filePath);
-            FileOutputStream fileStream = new FileOutputStream(newFile);
-            fileWriter = new OutputStreamWriter(fileStream, StandardCharsets.UTF_8);
-            fileWriter.write(content);
-        } finally {
-            if (fileWriter != null) {
-                fileWriter.close();
-            }
         }
     }
 

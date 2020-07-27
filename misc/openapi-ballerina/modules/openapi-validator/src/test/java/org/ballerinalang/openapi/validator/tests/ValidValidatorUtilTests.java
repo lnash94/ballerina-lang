@@ -18,12 +18,8 @@ package org.ballerinalang.openapi.validator.tests;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
-import org.ballerinalang.openapi.validator.BJsonSchemaUtil;
-import org.ballerinalang.openapi.validator.Constants;
-import org.ballerinalang.openapi.validator.MissingFieldInBallerinaType;
-import org.ballerinalang.openapi.validator.MissingFieldInJsonSchema;
+import org.ballerinalang.openapi.validator.BTypeToJsonValidatorUtil;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
-import org.ballerinalang.openapi.validator.TypeMismatch;
 import org.ballerinalang.openapi.validator.ValidationError;
 import org.ballerinalang.openapi.validator.ValidatorUtil;
 import org.testng.Assert;
@@ -47,7 +43,7 @@ public class ValidValidatorUtilTests {
     private Schema extractSchema;
     private BVarSymbol extractBVarSymbol;
 
-    @Test(description = "Valid test case")
+    @Test(description = "Valid test case for all test case")
     public void  testValidCase() throws OpenApiValidatorException, UnsupportedEncodingException {
 //        Load yaml file
         Path contractPath = RES_DIR.resolve("validTests/valid.yaml");
@@ -57,7 +53,7 @@ public class ValidValidatorUtilTests {
         Schema extractSchema = ValidatorTest.getComponet(api, "Valid");
         BVarSymbol extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
 
-        Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).isEmpty());
+        Assert.assertTrue((BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol)).isEmpty());
     }
 
     @Test(description = "Test type mismatch with array. Same field name has ballerina type as string array and json " +
@@ -69,7 +65,7 @@ public class ValidValidatorUtilTests {
         extractSchema = ValidatorTest.getComponet(api, "ValidTypeMisMatchArray");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
 
-        Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).isEmpty());
+        Assert.assertTrue((BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol)).isEmpty());
     }
 
     @Test(description = "Test Nested array type")
@@ -80,19 +76,18 @@ public class ValidValidatorUtilTests {
         extractSchema = ValidatorTest.getComponet(api, "ValidTypeMisMatchNestedArray");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
 
-        Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).isEmpty());
+        Assert.assertTrue((BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol)).isEmpty());
     }
 
     @Test(description = "Test record field with array type of another record")
     public void testRecordArray() throws OpenApiValidatorException, UnsupportedEncodingException {
-        Path contractPath = RES_DIR.resolve("invalidTests/recordTypeArray.yaml");
+        Path contractPath = RES_DIR.resolve("validTests/recordTypeArray.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("invalidTests/recordTypeArray.bal");
+        bLangPackage = ValidatorTest.getBlangPackage("validTests/recordTypeArray.bal");
         extractSchema = ValidatorTest.getComponet(api, "RecordTypeArray");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
 
-        Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).get(0)
-                instanceof TypeMismatch);
+        Assert.assertTrue((BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol)).isEmpty());
 
     }
 
@@ -102,33 +97,23 @@ public class ValidValidatorUtilTests {
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("validTests/oneOf.bal");
         ComposedSchema extractSchema =
-                (ComposedSchema) api.getPaths().get("/oneOfRequestBody").getPost().getRequestBody().getContent().get("application/json").getSchema();
+                (ComposedSchema) api.getPaths().get("/oneOfRequestBody").getPost().getRequestBody().getContent().
+                        get("application/json").getSchema();
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
         List<ValidationError> validationErrors =
-                BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol);
+                BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
         Assert.assertTrue(validationErrors.isEmpty());
-    }
-
-    @Test(description = "Inline record ")
-    public void testInlineRecord() throws OpenApiValidatorException, UnsupportedEncodingException {
-        Path contractPath = RES_DIR.resolve("invalidTests/inlineRecord.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("invalidTests/inlineRecord.bal");
-        extractSchema = ValidatorTest.getComponet(api, "AllOfTest");
-        extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
-
-//        Assert.assertTrue((BJsonSchemaUtil.validateBallerinaType(extractSchema, extractBVarSymbol)).get(0)instanceof
-//                TypeMismatch);
     }
 
     @Test(description = "Test for nested record")
     public void testNestedRecord() throws OpenApiValidatorException, UnsupportedEncodingException {
-        Path contractPath = RES_DIR.resolve("invalidTests/nestedRecord.yaml");
+        Path contractPath = RES_DIR.resolve("validTests/nestedRecord.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("invalidTests/nestedRecord.bal");
+        bLangPackage = ValidatorTest.getBlangPackage("validTests/nestedRecord.bal");
         extractSchema = ValidatorTest.getComponet(api, "NestedRecord");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
 
+        Assert.assertTrue((BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol)).isEmpty());
     }
 
 }
