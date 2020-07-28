@@ -49,7 +49,7 @@ public class ValidValidatorUtilTests {
         Path contractPath = RES_DIR.resolve("validTests/valid.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
 //        Load BlangPackage for given .bal file
-        bLangPackage = ValidatorTest.getBlangPackage("validTests/validSchema.bal");
+        bLangPackage = ValidatorTest.getBlangPackage("record/validTests/validSchema.bal");
         Schema extractSchema = ValidatorTest.getComponet(api, "Valid");
         BVarSymbol extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
 
@@ -61,7 +61,7 @@ public class ValidValidatorUtilTests {
     public void testTypeMismatchArrayType() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("validTests/validTypeMisMatchArrayType.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("validTests/validTypeMisMatchArrayType.bal");
+        bLangPackage = ValidatorTest.getBlangPackage("record/validTests/validTypeMisMatchArrayType.bal");
         extractSchema = ValidatorTest.getComponet(api, "ValidTypeMisMatchArray");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
 
@@ -72,7 +72,7 @@ public class ValidValidatorUtilTests {
     public void testTypeMisMatchNestedArray() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("validTests/validTypeMisMatchNestedArrayType.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("validTests/validTypeMisMatchNestedArrayType.bal");
+        bLangPackage = ValidatorTest.getBlangPackage("record/validTests/validTypeMisMatchNestedArrayType.bal");
         extractSchema = ValidatorTest.getComponet(api, "ValidTypeMisMatchNestedArray");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
 
@@ -83,7 +83,7 @@ public class ValidValidatorUtilTests {
     public void testRecordArray() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("validTests/recordTypeArray.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("validTests/recordTypeArray.bal");
+        bLangPackage = ValidatorTest.getBlangPackage("record/validTests/recordTypeArray.bal");
         extractSchema = ValidatorTest.getComponet(api, "RecordTypeArray");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
 
@@ -95,7 +95,7 @@ public class ValidValidatorUtilTests {
     public void testOneOfType() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("validTests/oneOf.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("validTests/oneOf.bal");
+        bLangPackage = ValidatorTest.getBlangPackage("record/validTests/oneOf.bal");
         ComposedSchema extractSchema =
                 (ComposedSchema) api.getPaths().get("/oneOfRequestBody").getPost().getRequestBody().getContent().
                         get("application/json").getSchema();
@@ -109,7 +109,7 @@ public class ValidValidatorUtilTests {
     public void testNestedRecord() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("validTests/nestedRecord.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("validTests/nestedRecord.bal");
+        bLangPackage = ValidatorTest.getBlangPackage("record/validTests/nestedRecord.bal");
         extractSchema = ValidatorTest.getComponet(api, "NestedRecord");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
 

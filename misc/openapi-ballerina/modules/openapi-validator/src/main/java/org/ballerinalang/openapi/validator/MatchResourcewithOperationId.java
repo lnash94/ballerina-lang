@@ -27,6 +27,7 @@ import org.wso2.ballerinalang.compiler.tree.expressions.BLangLiteral;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangSimpleVarRef;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -34,21 +35,26 @@ import java.util.Map;
 public class MatchResourcewithOperationId {
 
 
-    public List<ResourceValidationError> checkResouceIsAvailable (OpenAPI openAPI, ServiceNode serviceNode) {
-        List<ResourceValidationError> resourceValidationErrorList = null;
+    public static List<ResourceValidationError> checkResouceIsAvailable(OpenAPI openAPI, ServiceNode serviceNode) {
+        List<ResourceValidationError> resourceValidationErrorList = new ArrayList<>();
         List<ResourceSummary> resourceSummaryList = summarizeResources(serviceNode);
         List<OpenAPIPathSummary> openAPISummaries = summarizeOpenAPI(openAPI);
         Boolean isExit = false;
 //      Check given path with its methods has documented in OpenApi contract
         for (ResourceSummary resourceSummary: resourceSummaryList) {
             String resourcePath = resourceSummary.getPath();
-            List<String> resourcePathMethods = resourceSummary.getMethods();
             for (OpenAPIPathSummary openAPIPathSummary: openAPISummaries) {
                 String servicePath = openAPIPathSummary.getPath();
                 List<String> servicePathOpearations = openAPIPathSummary.getAvailableOperations();
                 if (resourcePath.equals(servicePath)) {
-//                    if ()
+                        isExit = true;
+                        break;
                 }
+            }
+            if(!isExit) {
+                ResourceValidationError resourceValidationError =
+                        new ResourceValidationError(resourceSummary.getPathPosition(), null, resourcePath );
+                resourceValidationErrorList.add(resourceValidationError);
             }
         }
 
@@ -61,7 +67,7 @@ public class MatchResourcewithOperationId {
      * Extract the details to be validated from the resource.
      * @param serviceNode         service node
      */
-    public List<ResourceSummary>  summarizeResources(ServiceNode serviceNode) {
+    public static List<ResourceSummary>  summarizeResources(ServiceNode serviceNode) {
         // Iterate resources available in a service and extract details to be validated.
         List<ResourceSummary> resourceSummaryList = null;
         for (FunctionNode resource : serviceNode.getResources()) {
@@ -147,7 +153,7 @@ public class MatchResourcewithOperationId {
      * Summarize openAPI contract paths to easily access details to validate.
      * @param contract                openAPI contract
      */
-    public List<OpenAPIPathSummary>   summarizeOpenAPI(OpenAPI contract) {
+    public static List<OpenAPIPathSummary>   summarizeOpenAPI(OpenAPI contract) {
         List<OpenAPIPathSummary> openAPISummaries = null;
         io.swagger.v3.oas.models.Paths paths = contract.getPaths();
         for (Map.Entry pathItem : paths.entrySet()) {

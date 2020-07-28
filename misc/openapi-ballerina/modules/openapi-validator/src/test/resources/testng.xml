@@ -39,6 +39,8 @@ under the License.
 <!--            <class name="org.ballerinalang.openapi.validator.tests.RCUtilGetMethodTest"/>-->
 <!--            <class name="org.ballerinalang.openapi.validator.tests.RCUtilPostMethodTest"/>-->
             <class name="org.ballerinalang.openapi.validator.tests.IVPrimitiveUtilTests"/>
+            <class name="org.ballerinalang.openapi.validator.tests.ResourceHandleIVTests"/>
+            <class name="org.ballerinalang.openapi.validator.tests.ResourceHandleVTests"/>
         </classes>
     </test>
 </suite>

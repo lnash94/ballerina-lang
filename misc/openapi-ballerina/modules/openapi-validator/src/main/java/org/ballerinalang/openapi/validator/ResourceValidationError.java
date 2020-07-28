@@ -18,30 +18,30 @@ package org.ballerinalang.openapi.validator;
 import org.ballerinalang.util.diagnostic.Diagnostic;
 
 public class ResourceValidationError {
-    Diagnostic.Kind kind;
+//    Diagnostic.Kind kind;
     Diagnostic.DiagnosticPosition position;
     String resourceName;
     String resourcePath;
 
     public ResourceValidationError() {
-        this.kind = null;
+//        this.kind = null;
         this.position = null;
         this.resourceName = null;
         this.resourcePath = null;
     }
 
-    public ResourceValidationError(Diagnostic.Kind kind, Diagnostic.DiagnosticPosition position, String resourceName,
+    public ResourceValidationError(Diagnostic.DiagnosticPosition position, String resourceName,
                                    String resourcePath) {
-        this.kind = kind;
+//        this.kind = kind;
         this.position = position;
         this.resourceName = resourceName;
         this.resourcePath = resourcePath;
     }
 
-    public Diagnostic.Kind getKind() {
-
-        return kind;
-    }
+//    public Diagnostic.Kind getKind() {
+//
+//        return kind;
+//    }
 
     public Diagnostic.DiagnosticPosition getPosition() {
 

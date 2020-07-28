@@ -20,6 +20,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import org.ballerinalang.openapi.validator.OpenApiValidatorUtil;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BVarSymbol;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
+import org.wso2.ballerinalang.compiler.tree.BLangService;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
@@ -34,7 +35,7 @@ public class ValidatorTest {
 //    Return bLangPackage for given .bal file
     public static BLangPackage getBlangPackage(String fileName) throws UnsupportedEncodingException {
 
-        Path sourceRoot = RES_DIR.resolve("project-based-tests/src/record");
+        Path sourceRoot = RES_DIR.resolve("project-based-tests/src");
         String balfile = sourceRoot.resolve(fileName).toString();
         Path balFpath = Paths.get(balfile);
         Path programDir = balFpath.toAbsolutePath().getParent();
@@ -55,9 +56,9 @@ public class ValidatorTest {
     public static Schema getSchema(OpenAPI api, String path) {
         return  api.getPaths().get(path).getGet().getParameters().get(0).getSchema();
     }
-//    public static RequestBody getRequestBody(OpenAPI api) {
-//        Content content = api.getPaths().get(0).getOptions().getRequestBody().getContent();
-//        return// ;
-//    }
 
+    // get the service node from bLangPackage
+    public static BLangService getServiceNode(BLangPackage bLangPackage) {
+        return bLangPackage.getServices().get(0);
+    }
 }
