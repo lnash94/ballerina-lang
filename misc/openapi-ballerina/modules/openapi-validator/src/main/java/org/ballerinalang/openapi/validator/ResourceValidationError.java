@@ -20,21 +20,21 @@ import org.ballerinalang.util.diagnostic.Diagnostic;
 public class ResourceValidationError {
 //    Diagnostic.Kind kind;
     Diagnostic.DiagnosticPosition position;
-    String resourceName;
+    String resourceMethod;
     String resourcePath;
 
     public ResourceValidationError() {
 //        this.kind = null;
         this.position = null;
-        this.resourceName = null;
+        this.resourceMethod = null;
         this.resourcePath = null;
     }
 
-    public ResourceValidationError(Diagnostic.DiagnosticPosition position, String resourceName,
+    public ResourceValidationError(Diagnostic.DiagnosticPosition position, String resourceMethod,
                                    String resourcePath) {
 //        this.kind = kind;
         this.position = position;
-        this.resourceName = resourceName;
+        this.resourceMethod = resourceMethod;
         this.resourcePath = resourcePath;
     }
 
@@ -48,9 +48,9 @@ public class ResourceValidationError {
         return position;
     }
 
-    public String getResourceName() {
+    public String getresourceMethod() {
 
-        return resourceName;
+        return resourceMethod;
     }
 
     public String getResourcePath() {

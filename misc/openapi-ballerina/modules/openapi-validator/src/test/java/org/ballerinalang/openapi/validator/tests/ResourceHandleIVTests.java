@@ -17,12 +17,15 @@ package org.ballerinalang.openapi.validator.tests;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
+import org.ballerinalang.openapi.validator.MatchResourcewithOperationId;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
+import org.ballerinalang.openapi.validator.OpenapiServiceValidationError;
 import org.ballerinalang.openapi.validator.ResourceValidationError;
 import org.ballerinalang.openapi.validator.ValidatorUtil;
+import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.wso2.ballerinalang.compiler.semantics.model.symbols.BVarSymbol;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
+import org.wso2.ballerinalang.compiler.tree.BLangService;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
@@ -37,15 +40,43 @@ public class ResourceHandleIVTests {
     private OpenAPI api;
     private BLangPackage bLangPackage;
     private Schema extractSchema;
-    private BVarSymbol extractBVarSymbol;
+    private BLangService extractBLangservice;
     private List<ResourceValidationError> validationErrors = new ArrayList<>();
+    private List<OpenapiServiceValidationError> serviceValidationErrors = new ArrayList<>();
 
-    @Test(description = "Test for checking whether resource paths ara documented in openapi contract")
+    @Test(description = "Test for checking whether resource paths are documented in openapi contract")
     public void testResourcePath() throws OpenApiValidatorException, UnsupportedEncodingException {
-        Path contractPath = RES_DIR.resolve("swagger/invalid");
+        Path contractPath = RES_DIR.resolve("swagger/invalid/petstore.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/xx.bal");
+        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstore.bal");
+        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
+        validationErrors = MatchResourcewithOperationId.checkResourceIsAvailable(api, extractBLangservice);
 
+        Assert.assertTrue(validationErrors.get(0) instanceof ResourceValidationError);
+        Assert.assertEquals(validationErrors.get(0).getResourcePath(), "/extraPathPet");
     }
 
+    @Test(description = "Test for checking whether resource paths method are documented in openapi contract")
+    public void testResourceExtraMethod() throws OpenApiValidatorException, UnsupportedEncodingException {
+        Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreExtraMethod.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstoreExtraMethod.bal");
+        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
+        validationErrors = MatchResourcewithOperationId.checkResourceIsAvailable(api, extractBLangservice);
+
+        Assert.assertTrue(validationErrors.get(0) instanceof ResourceValidationError);
+        Assert.assertEquals(validationErrors.get(0).getresourceMethod(), "post");
+    }
+
+    @Test(description = "Test for checking whether resource paths are documented in openapi contract")
+    public void testExtraServicePath() throws OpenApiValidatorException, UnsupportedEncodingException {
+        Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreExtraServicePath.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstoreExtraServicePath.bal");
+        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
+        serviceValidationErrors = MatchResourcewithOperationId.checkServiceAvailable(api, extractBLangservice);
+
+        Assert.assertTrue(serviceValidationErrors.get(0) instanceof OpenapiServiceValidationError);
+        Assert.assertEquals(serviceValidationErrors.get(0).getServicePath(), "/action");
+    }
 }

@@ -21,6 +21,7 @@ import io.swagger.v3.oas.models.PathItem;
 import org.ballerinalang.model.tree.AnnotationAttachmentNode;
 import org.ballerinalang.model.tree.FunctionNode;
 import org.ballerinalang.model.tree.ServiceNode;
+import org.ballerinalang.util.diagnostic.Diagnostic;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangExpression;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangListConstructorExpr;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangLiteral;
@@ -35,32 +36,75 @@ import java.util.Map;
 public class MatchResourcewithOperationId {
 
 
-    public static List<ResourceValidationError> checkResouceIsAvailable(OpenAPI openAPI, ServiceNode serviceNode) {
+    public static List<ResourceValidationError> checkResourceIsAvailable(OpenAPI openAPI, ServiceNode serviceNode) {
         List<ResourceValidationError> resourceValidationErrorList = new ArrayList<>();
-        List<ResourceSummary> resourceSummaryList = summarizeResources(serviceNode);
+        List<ResourcePathSummary> resourcePathSummaries = summarizeResources(serviceNode);
         List<OpenAPIPathSummary> openAPISummaries = summarizeOpenAPI(openAPI);
         Boolean isExit = false;
 //      Check given path with its methods has documented in OpenApi contract
-        for (ResourceSummary resourceSummary: resourceSummaryList) {
-            String resourcePath = resourceSummary.getPath();
-            for (OpenAPIPathSummary openAPIPathSummary: openAPISummaries) {
+        for (ResourcePathSummary resourcePathSummary: resourcePathSummaries) {
+            isExit = false;
+            String resourcePath = resourcePathSummary.getPath();
+            Map<String, ResourceMethod> resourcePathMethods = resourcePathSummary.getMethods();
+            List<String> servicePathOpearations = new ArrayList<>();
+            for (OpenAPIPathSummary openAPIPathSummary : openAPISummaries) {
                 String servicePath = openAPIPathSummary.getPath();
-                List<String> servicePathOpearations = openAPIPathSummary.getAvailableOperations();
+                servicePathOpearations = openAPIPathSummary.getAvailableOperations();
                 if (resourcePath.equals(servicePath)) {
-                        isExit = true;
-                        break;
+                    isExit = true;
+                    if ((!servicePathOpearations.isEmpty()) && (!resourcePathMethods.isEmpty())) {
+                        for (Map.Entry<String, ResourceMethod> entry : resourcePathMethods.entrySet()) {
+                            Boolean isMethodExit = false;
+                            for (String operation : servicePathOpearations) {
+                                if (entry.getKey().equals(operation)) {
+                                    isMethodExit = true;
+                                    break;
+                                }
+                            }
+                            if (!isMethodExit) {
+                                ResourceValidationError resourceValidationError =
+                                        new ResourceValidationError(entry.getValue().getMethodPosition(),
+                                                entry.getKey(), resourcePath);
+                                resourceValidationErrorList.add(resourceValidationError);
+                            }
+                        }
+                    }
+                    break;
                 }
             }
-            if(!isExit) {
+            if (!isExit) {
                 ResourceValidationError resourceValidationError =
-                        new ResourceValidationError(resourceSummary.getPathPosition(), null, resourcePath );
+                        new ResourceValidationError(resourcePathSummary.getPathPosition(), null, resourcePath);
                 resourceValidationErrorList.add(resourceValidationError);
             }
         }
 
-
-
     return resourceValidationErrorList;
+    }
+
+    public static List<OpenapiServiceValidationError> checkServiceAvailable(OpenAPI openAPI, ServiceNode serviceNode) {
+        List<OpenapiServiceValidationError> validationErrors = new ArrayList<>();
+        List<ResourcePathSummary> resourcePathSummaries = summarizeResources(serviceNode);
+        List<OpenAPIPathSummary> openAPISummaries = summarizeOpenAPI(openAPI);
+        Boolean isServiceExit = false;
+//        check the contract paths are available at the resource
+        for (OpenAPIPathSummary openAPIPathSummary: openAPISummaries) {
+            isServiceExit = false;
+            for (ResourcePathSummary resourcePathSummary: resourcePathSummaries) {
+                if (openAPIPathSummary.getPath().equals(resourcePathSummary.getPath())) {
+                    isServiceExit = true;
+                    break;
+                }
+            }
+            if (!isServiceExit) {
+                OpenapiServiceValidationError openapiServiceValidationError =
+                        new OpenapiServiceValidationError(serviceNode.getPosition(),
+                                null, openAPIPathSummary.getPath());
+                validationErrors.add(openapiServiceValidationError);
+            }
+        }
+
+        return validationErrors;
     }
 
     /**
@@ -75,6 +119,7 @@ public class MatchResourcewithOperationId {
 
             // Find the "ResourceConfig" annotation.
             for (AnnotationAttachmentNode ann : resource.getAnnotationAttachments()) {
+
                 if (Constants.HTTP.equals(ann.getPackageAlias().getValue())
                         && Constants.RESOURCE_CONFIG.equals(ann.getAnnotationName().getValue())) {
                     annotation = ann;
@@ -93,6 +138,7 @@ public class MatchResourcewithOperationId {
                     String body = null;
 
                     for (BLangRecordLiteral.RecordField field : recordLiteral.getFields()) {
+
                         BLangExpression keyExpr;
                         BLangExpression valueExpr;
 
@@ -214,7 +260,7 @@ public class MatchResourcewithOperationId {
      * @param contract                openAPI contract
      */
     public static List<OpenAPIPathSummary>   summarizeOpenAPI(OpenAPI contract) {
-        List<OpenAPIPathSummary> openAPISummaries = null;
+        List<OpenAPIPathSummary> openAPISummaries = new ArrayList<>();
         io.swagger.v3.oas.models.Paths paths = contract.getPaths();
         for (Map.Entry pathItem : paths.entrySet()) {
             OpenAPIPathSummary openAPISummary = new OpenAPIPathSummary();
@@ -260,7 +306,6 @@ public class MatchResourcewithOperationId {
             openAPISummaries.add(openAPISummary);
         }
     return openAPISummaries;
-//        openAPIComponentSummary.setComponents(contract.getComponents());
     }
 
     private static void addOpenapiSummary(OpenAPIPathSummary openAPISummary, String get, Operation get2) {
