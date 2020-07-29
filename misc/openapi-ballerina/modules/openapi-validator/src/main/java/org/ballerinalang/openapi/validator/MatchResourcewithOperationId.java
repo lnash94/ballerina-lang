@@ -67,13 +67,12 @@ public class MatchResourcewithOperationId {
      * Extract the details to be validated from the resource.
      * @param serviceNode         service node
      */
-    public static List<ResourceSummary>  summarizeResources(ServiceNode serviceNode) {
+    public static List<ResourcePathSummary>  summarizeResources(ServiceNode serviceNode) {
         // Iterate resources available in a service and extract details to be validated.
-        List<ResourceSummary> resourceSummaryList = null;
+        List<ResourcePathSummary> resourceSummaryList = new ArrayList<>();
         for (FunctionNode resource : serviceNode.getResources()) {
             AnnotationAttachmentNode annotation = null;
-            ResourceSummary resourceSummary = new ResourceSummary();
-            resourceSummary.setResourcePosition(resource.getPosition());
+
             // Find the "ResourceConfig" annotation.
             for (AnnotationAttachmentNode ann : resource.getAnnotationAttachments()) {
                 if (Constants.HTTP.equals(ann.getPackageAlias().getValue())
@@ -85,6 +84,14 @@ public class MatchResourcewithOperationId {
             if (annotation != null) {
                 if (annotation.getExpression() instanceof BLangRecordLiteral) {
                     BLangRecordLiteral recordLiteral = (BLangRecordLiteral) annotation.getExpression();
+
+                    String methodPath = null;
+                    Diagnostic.DiagnosticPosition pathPos = null;
+                    ResourceMethod resourceMethod = new ResourceMethod();
+                    String methodName = null;
+                    Diagnostic.DiagnosticPosition methodPos = null;
+                    String body = null;
+
                     for (BLangRecordLiteral.RecordField field : recordLiteral.getFields()) {
                         BLangExpression keyExpr;
                         BLangExpression valueExpr;
@@ -101,6 +108,8 @@ public class MatchResourcewithOperationId {
                             valueExpr = varNameField;
                         }
 
+
+
                         if (keyExpr instanceof BLangSimpleVarRef) {
                             BLangSimpleVarRef path = (BLangSimpleVarRef) keyExpr;
                             String contractAttr = path.getVariableName().getValue();
@@ -109,19 +118,20 @@ public class MatchResourcewithOperationId {
                                 if (valueExpr instanceof BLangLiteral) {
                                     BLangLiteral value = (BLangLiteral) valueExpr;
                                     if (value.getValue() instanceof String) {
-                                        resourceSummary.setPath((String) value.getValue());
-                                        resourceSummary.setPathPosition(path.getPosition());
+                                        methodPath = (String) value.getValue();
+                                        pathPos = path.getPosition();
                                     }
                                 }
+
                             } else if (contractAttr.equals(Constants.METHODS)) {
                                 if (valueExpr instanceof BLangListConstructorExpr) {
                                     BLangListConstructorExpr methodSet = (BLangListConstructorExpr) valueExpr;
                                     for (BLangExpression methodExpr : methodSet.exprs) {
                                         if (methodExpr instanceof BLangLiteral) {
                                             BLangLiteral method = (BLangLiteral) methodExpr;
-                                            resourceSummary.addMethod(((String) method.value)
-                                                    .toLowerCase(Locale.ENGLISH));
-                                            resourceSummary.setMethodsPosition(path.getPosition());
+                                            methodName = ((String) method.value).toLowerCase(Locale.ENGLISH);
+                                            methodPos = path.getPosition();
+
                                         }
                                     }
                                 }
@@ -129,22 +139,72 @@ public class MatchResourcewithOperationId {
                                 if (valueExpr instanceof BLangLiteral) {
                                     BLangLiteral value = (BLangLiteral) valueExpr;
                                     if (value.getValue() instanceof String) {
-                                        resourceSummary.setBody((String) value.getValue());
+                                        body = (String) value.getValue();
                                     }
                                 }
                             }
                         }
                     }
+                    Boolean isPathExit = false;
+                    if (!resourceSummaryList.isEmpty()) {
+
+                        for (ResourcePathSummary resourcePathSummary1 : resourceSummaryList){
+                            isPathExit = false;
+                            if (methodPath != null) {
+                                if (methodPath.equals(resourcePathSummary1.getPath())) {
+
+                                    if (body != null) {
+                                        resourceMethod.setBody(body);
+                                    }
+                                    // Extract and add the resource parameters
+                                    if (resource.getParameters().size() > 0 ) {
+                                        resourceMethod.setParameters(resource.getParameters());
+                                    }
+                                    if (methodName != null) {
+                                        resourceMethod.setMethod(methodName);
+                                    }
+                                    if (methodPos != null) {
+                                        resourceMethod.setMethodPosition(methodPos);
+                                    }
+                                    if (resource.getPosition() != null) {
+                                        resourceMethod.setResourcePosition(resource.getPosition());
+                                    }
+                                    resourcePathSummary1.addMethod(methodName, resourceMethod);
+                                    isPathExit =true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (!isPathExit) {
+
+                        ResourcePathSummary resourcePathSummary = new ResourcePathSummary();
+
+                        resourcePathSummary.setPath(methodPath);
+                        resourcePathSummary.setPathPosition(pathPos);
+
+                        if (body != null) {
+                            resourceMethod.setBody(body);
+                        }
+                        // Extract and add the resource parameters
+                        if (resource.getParameters().size() > 0 ) {
+                            resourceMethod.setParameters(resource.getParameters());
+                        }
+                        if (methodName != null) {
+                            resourceMethod.setMethod(methodName);
+                        }
+                        if (methodPos != null) {
+                            resourceMethod.setMethodPosition(methodPos);
+                        }
+                        if (resource.getPosition() != null) {
+                            resourceMethod.setResourcePosition(resource.getPosition());
+                        }
+                        resourcePathSummary.addMethod(methodName, resourceMethod);
+                        // Add the resource summary to the resource summary list.
+                        resourceSummaryList.add(resourcePathSummary);
+                    }
                 }
             }
-
-            // Extract and add the resource parameters
-            if (resource.getParameters().size() > 0) {
-                resourceSummary.setParameters(resource.getParameters());
-            }
-
-            // Add the resource summary to the resource summary list.
-            resourceSummaryList.add(resourceSummary);
         }
         return resourceSummaryList;
     }
