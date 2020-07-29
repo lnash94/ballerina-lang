@@ -93,13 +93,35 @@ public class MatchResourcewithOperationId {
             for (ResourcePathSummary resourcePathSummary: resourcePathSummaries) {
                 if (openAPIPathSummary.getPath().equals(resourcePathSummary.getPath())) {
                     isServiceExit = true;
+//                    check whether documented operations are available at resource file
+                    if ((!openAPIPathSummary.getAvailableOperations().isEmpty())) {
+                        for (String operation: openAPIPathSummary.getAvailableOperations()) {
+                            Boolean isOperationExit = false;
+                            if (!(resourcePathSummary.getMethods().isEmpty())) {
+                                for (Map.Entry<String, ResourceMethod> method:
+                                        resourcePathSummary.getMethods().entrySet()) {
+                                    if (operation.equals(method.getKey())) {
+                                        isOperationExit = true;
+                                        break;
+                                    }
+                                }
+                                if (!isOperationExit) {
+                                    OpenapiServiceValidationError openapiServiceValidationError =
+                                            new OpenapiServiceValidationError(serviceNode.getPosition(), operation,
+                                                    openAPIPathSummary.getPath(),
+                                                    openAPIPathSummary.getOperations().get(operation).getTags());
+                                    validationErrors.add(openapiServiceValidationError);
+                                }
+                            }
+                        }
+                    }
                     break;
                 }
             }
             if (!isServiceExit) {
                 OpenapiServiceValidationError openapiServiceValidationError =
                         new OpenapiServiceValidationError(serviceNode.getPosition(),
-                                null, openAPIPathSummary.getPath());
+                                null, openAPIPathSummary.getPath(), null);
                 validationErrors.add(openapiServiceValidationError);
             }
         }

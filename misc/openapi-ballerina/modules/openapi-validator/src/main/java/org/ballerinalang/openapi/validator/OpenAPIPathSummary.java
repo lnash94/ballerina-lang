@@ -122,4 +122,7 @@ class OpenAPIPathSummary {
         }
         return requestBodySchemas;
     }
+    public Map<String, Operation> getOperations() {
+        return this.operations;
+    }
 }

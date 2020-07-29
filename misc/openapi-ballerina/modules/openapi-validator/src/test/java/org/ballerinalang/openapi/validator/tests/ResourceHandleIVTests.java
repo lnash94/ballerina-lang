@@ -68,15 +68,17 @@ public class ResourceHandleIVTests {
         Assert.assertEquals(validationErrors.get(0).getresourceMethod(), "post");
     }
 
-    @Test(description = "Test for checking whether resource paths are documented in openapi contract")
+    @Test(description = "Test for checking whether openapi service operations are documented in ballerina resource")
     public void testExtraServicePath() throws OpenApiValidatorException, UnsupportedEncodingException {
-        Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreExtraServicePath.yaml");
+        Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreExtraServiceOperation.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstoreExtraServicePath.bal");
+        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstoreExtraServiceOperation" +
+                ".bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         serviceValidationErrors = MatchResourcewithOperationId.checkServiceAvailable(api, extractBLangservice);
 
         Assert.assertTrue(serviceValidationErrors.get(0) instanceof OpenapiServiceValidationError);
-        Assert.assertEquals(serviceValidationErrors.get(0).getServicePath(), "/action");
+        Assert.assertEquals(serviceValidationErrors.get(0).getServiceOperation(), "post");
+        Assert.assertEquals(serviceValidationErrors.get(0).getServicePath(), "/pets/{petId}");
     }
 }
