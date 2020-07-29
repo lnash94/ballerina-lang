@@ -17,14 +17,19 @@ package org.ballerinalang.openapi.validator.tests;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
+import org.ballerinalang.openapi.validator.MatchResourcewithOperationId;
 import org.ballerinalang.openapi.validator.OpenApiValidatorUtil;
+import org.ballerinalang.openapi.validator.ResourceMethod;
+import org.ballerinalang.openapi.validator.ResourcePathSummary;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BVarSymbol;
+import org.wso2.ballerinalang.compiler.tree.BLangFunction;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import org.wso2.ballerinalang.compiler.tree.BLangService;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 /**
  *  command and function to handle common input and outputs.
@@ -60,5 +65,14 @@ public class ValidatorTest {
     // get the service node from bLangPackage
     public static BLangService getServiceNode(BLangPackage bLangPackage) {
         return bLangPackage.getServices().get(0);
+    }
+
+    // get the Function Node
+    public static ResourceMethod getFunction(BLangService bLangService, String method) {
+
+        List<ResourcePathSummary> resourcePathSummaryList =
+                MatchResourcewithOperationId.summarizeResources(bLangService);
+        ResourceMethod resourceMethod = resourcePathSummaryList.get(0).getMethods().get(method);
+        return resourceMethod;
     }
 }

@@ -16,15 +16,17 @@
 package org.ballerinalang.openapi.validator.tests;
 
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.Operation;
 import org.ballerinalang.openapi.validator.MatchResourcewithOperationId;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
 import org.ballerinalang.openapi.validator.OpenapiServiceValidationError;
+import org.ballerinalang.openapi.validator.ResourceMethod;
 import org.ballerinalang.openapi.validator.ResourceValidationError;
+import org.ballerinalang.openapi.validator.ValidationError;
+import org.ballerinalang.openapi.validator.ResourceFunctionToOperation;
 import org.ballerinalang.openapi.validator.ValidatorUtil;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.wso2.ballerinalang.compiler.semantics.model.symbols.BVarSymbol;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import org.wso2.ballerinalang.compiler.tree.BLangService;
 
@@ -42,6 +44,9 @@ public class ResourceHandleVTests {
     private BLangService extractBLangservice;
     private List<ResourceValidationError> validationErrors = new ArrayList<>();
     private List<OpenapiServiceValidationError> serviceValidationErrors = new ArrayList<>();
+    private ResourceMethod resourceMethod;
+    private Operation operation;
+    private List<ValidationError> resourceValidationErrors = new ArrayList<>();
 
     @Test(description = "Test for checking whether resource paths are documented in openapi contract")
     public void testResourcePath() throws OpenApiValidatorException, UnsupportedEncodingException {
@@ -71,6 +76,19 @@ public class ResourceHandleVTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         serviceValidationErrors = MatchResourcewithOperationId.checkServiceAvailable(api, extractBLangservice);
         Assert.assertTrue(serviceValidationErrors.isEmpty());
+
+    }
+
+    @Test(description = "Test resource function node with openapi operation ")
+    public void testResourceFunctionNode() throws OpenApiValidatorException, UnsupportedEncodingException {
+        Path contractPath = RES_DIR.resolve("swagger/valid/petstoreFunctionNode.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/valid/petstoreFunctionNode.bal");
+        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
+        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "get");
+        operation = api.getPaths().get("/pets/{petId}").getGet();
+        resourceValidationErrors = ResourceFunctionToOperation.validate(operation, resourceMethod);
+        Assert.assertTrue(resourceValidationErrors.isEmpty());
 
     }
 }

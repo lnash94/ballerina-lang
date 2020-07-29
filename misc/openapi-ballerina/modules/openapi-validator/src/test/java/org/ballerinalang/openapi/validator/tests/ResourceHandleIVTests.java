@@ -16,11 +16,17 @@
 package org.ballerinalang.openapi.validator.tests;
 
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.Schema;
 import org.ballerinalang.openapi.validator.MatchResourcewithOperationId;
+import org.ballerinalang.openapi.validator.MissingFieldInJsonSchema;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
 import org.ballerinalang.openapi.validator.OpenapiServiceValidationError;
+import org.ballerinalang.openapi.validator.ResourceMethod;
 import org.ballerinalang.openapi.validator.ResourceValidationError;
+import org.ballerinalang.openapi.validator.TypeMismatch;
+import org.ballerinalang.openapi.validator.ValidationError;
+import org.ballerinalang.openapi.validator.ResourceFunctionToOperation;
 import org.ballerinalang.openapi.validator.ValidatorUtil;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -43,6 +49,9 @@ public class ResourceHandleIVTests {
     private BLangService extractBLangservice;
     private List<ResourceValidationError> validationErrors = new ArrayList<>();
     private List<OpenapiServiceValidationError> serviceValidationErrors = new ArrayList<>();
+    private ResourceMethod resourceMethod;
+    private Operation operation;
+    private List<ValidationError> resourceValidationErrors = new ArrayList<>();
 
     @Test(description = "Test for checking whether resource paths are documented in openapi contract")
     public void testResourcePath() throws OpenApiValidatorException, UnsupportedEncodingException {
@@ -80,5 +89,46 @@ public class ResourceHandleIVTests {
         Assert.assertTrue(serviceValidationErrors.get(0) instanceof OpenapiServiceValidationError);
         Assert.assertEquals(serviceValidationErrors.get(0).getServiceOperation(), "post");
         Assert.assertEquals(serviceValidationErrors.get(0).getServicePath(), "/pets/{petId}");
+    }
+    @Test(description = "Test resource function node with openapi operation ")
+    public void testResourceFunctionNode() throws OpenApiValidatorException, UnsupportedEncodingException {
+        Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreFunctionNode.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstoreFunctionNode.bal");
+        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
+        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "get");
+        operation = api.getPaths().get("/pets/{petId}").getGet();
+        resourceValidationErrors = ResourceFunctionToOperation.validate(operation, resourceMethod);
+//        Assert.assertTrue(resourceValidationErrors.isEmpty());
+        Assert.assertEquals(resourceValidationErrors.get(0).getFieldName(), "petId");
+
+    }
+
+    @Test(description = "Test resource function node record type parameter with openapi operation ")
+    public void testResourceRecordParameter() throws OpenApiValidatorException, UnsupportedEncodingException {
+        Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreRecordParameter.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstoreRecordParameter.bal");
+        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
+        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
+        operation = api.getPaths().get("/pets/{petId}").getPost();
+        resourceValidationErrors = ResourceFunctionToOperation.validate(operation, resourceMethod);
+        Assert.assertTrue(resourceValidationErrors.get(0) instanceof TypeMismatch);
+        Assert.assertEquals(resourceValidationErrors.get(0).getFieldName(), "name");
+
+    }
+
+    @Test(description = "Test resource function node record type parameter with openapi operation ")
+    public void testResourceRecordParameter01() throws OpenApiValidatorException, UnsupportedEncodingException {
+        Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreRecordParameter01.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstoreRecordParameter01.bal");
+        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
+        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
+        operation = api.getPaths().get("/pets/{petId}").getPost();
+        resourceValidationErrors = ResourceFunctionToOperation.validate(operation, resourceMethod);
+        Assert.assertTrue(resourceValidationErrors.get(0) instanceof MissingFieldInJsonSchema);
+        Assert.assertEquals(resourceValidationErrors.get(0).getFieldName(), "place");
+
     }
 }

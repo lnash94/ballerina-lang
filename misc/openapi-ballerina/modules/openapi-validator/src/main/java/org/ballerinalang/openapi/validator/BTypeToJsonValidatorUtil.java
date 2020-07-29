@@ -475,7 +475,7 @@ public  class BTypeToJsonValidatorUtil {
         return validationErrors;
     }
 
-    private static Constants.Type convertTypeToEnum(String type) {
+    public static Constants.Type convertTypeToEnum(String type) {
         Constants.Type convertedType;
         switch (type) {
             case "integer":

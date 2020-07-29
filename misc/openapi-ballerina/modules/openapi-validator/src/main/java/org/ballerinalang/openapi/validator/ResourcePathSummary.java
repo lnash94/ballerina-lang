@@ -29,14 +29,11 @@ import java.util.Map;
 /**
  * Summarized details of a Ballerina resource to be validated against OpenAPI document.
  */
-class ResourcePathSummary {
+public class ResourcePathSummary {
 //    private Diagnostic.DiagnosticPosition resourcePosition;
     private String path;
     private Diagnostic.DiagnosticPosition pathPosition;
     private Map<String, ResourceMethod> methods;
-//    private String body;
-
-
 
     ResourcePathSummary() {
         this.methods = new HashMap<>();
@@ -52,7 +49,7 @@ class ResourcePathSummary {
         this.path = path;
     }
 
-    Map<String, ResourceMethod> getMethods() {
+    public Map<String, ResourceMethod> getMethods() {
         return methods;
     }
 

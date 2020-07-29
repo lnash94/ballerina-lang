@@ -35,9 +35,11 @@ public class ResourceMethod {
     public void setMethod(String method) {
         this.method = method;
     }
+
     public String getMethod() {
         return this.method;
     }
+
     public void setParameters(List<? extends SimpleVariableNode> parameters) {
         for (int i = 0; i < parameters.size(); i++) {
             if (i > 1) {
