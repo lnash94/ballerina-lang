@@ -35,6 +35,12 @@ import java.util.Map;
 
 public class MatchResourcewithOperationId {
 
+    /**
+     * Checking the available of resource function in openApi contract
+     * @param openAPI           openApi contract object
+     * @param serviceNode       resource service node
+     * @return                  validation Error list with ResourceValidationError type
+     */
 
     public static List<ResourceValidationError> checkResourceIsAvailable(OpenAPI openAPI, ServiceNode serviceNode) {
         List<ResourceValidationError> resourceValidationErrorList = new ArrayList<>();
@@ -82,6 +88,12 @@ public class MatchResourcewithOperationId {
     return resourceValidationErrorList;
     }
 
+    /**
+     * Checking the documented services are available at the resource file
+     * @param openAPI           openApi contract object
+     * @param serviceNode       resource file service
+     * @return                  validation error list type with OpenAPIServiceValidationError
+     */
     public static List<OpenapiServiceValidationError> checkServiceAvailable(OpenAPI openAPI, ServiceNode serviceNode) {
         List<OpenapiServiceValidationError> validationErrors = new ArrayList<>();
         List<ResourcePathSummary> resourcePathSummaries = summarizeResources(serviceNode);

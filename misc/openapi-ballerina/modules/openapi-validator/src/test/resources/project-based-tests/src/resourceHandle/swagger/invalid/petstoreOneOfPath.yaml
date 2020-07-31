@@ -11,7 +11,7 @@ servers:
       host:
         default: openapi
         description: this value is assigned by the service provider
-  - url: https://{subdomain}.swagger.io:{port}/{basePath}
+  - url:
     description: The production API server
     variables:
       subdomain:
@@ -38,21 +38,22 @@ security:
 
 paths:
   /pets:
-    get:
+    post:
       summary: List all pets
       description: Show a list of pets in the system
-      operationId: listPets
-      tags:
-        - pets
-        - list
+      operationId: getPets
       parameters:
-        - name: limit
-          in: query
+        - name: petId
+          in: Path
           description: How many items to return at one time (max 100)
           required: false
-          schema:
-            type: integer
-            format: int32
+          content:
+            text/plain:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Dog'
+                - $ref: '#/components/schemas/Cat'
+
       responses:
         '200':
           description: An paged array of pets
@@ -71,44 +72,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-    post:
-      summary: Create a pet
-      tags:
-        - pets
-      responses:
-        '201':
-          description: Null response
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /pets/{petId}:
-    post:
-      summary: Info for a specific pet
-      operationId: showPetById
-      tags:
-        - pets
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Pet"
-      responses:
-        '200':
-          description: Expected response to a valid request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Pets"
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
 components:
   schemas:
     Pet:
@@ -132,6 +95,17 @@ components:
           properties:
             bark:
               type: boolean
+    Cat:
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        tag:
+          type: string
+        type:
+          type: string
     Pets:
       type: array
       items:

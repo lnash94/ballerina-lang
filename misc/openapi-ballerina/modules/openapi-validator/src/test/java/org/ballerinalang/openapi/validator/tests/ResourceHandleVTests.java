@@ -91,4 +91,17 @@ public class ResourceHandleVTests {
         Assert.assertTrue(resourceValidationErrors.isEmpty());
 
     }
+
+    @Test(description = "Test resource function node with openapi operation ")
+    public void testInlineRecord() throws OpenApiValidatorException, UnsupportedEncodingException {
+        Path contractPath = RES_DIR.resolve("swagger/valid/inline-record.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/valid/inline-record.bal");
+        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
+        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
+        operation = api.getPaths().get("/user").getPost();
+        resourceValidationErrors = ResourceFunctionToOperation.validate(operation, resourceMethod);
+        Assert.assertTrue(resourceValidationErrors.isEmpty());
+
+    }
 }

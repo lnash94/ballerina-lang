@@ -26,7 +26,7 @@ service petstore on ep0, ep1 {
             path:"/pets/{petId}",
             body: "body"
             }
-        resource function showPetById (http:Caller caller, http:Request req, Pet body) returns error? {
+        resource function showPetById (http:Caller caller, http:Request req,  string petId, Pet body) returns error? {
 
         }
 

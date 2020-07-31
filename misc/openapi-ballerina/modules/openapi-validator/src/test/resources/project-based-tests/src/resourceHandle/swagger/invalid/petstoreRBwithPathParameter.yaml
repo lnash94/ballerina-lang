@@ -90,11 +90,21 @@ paths:
       operationId: showPetById
       tags:
         - pets
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          description: The id of the pet to retrieve
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/Pet"
+#          application/xml:
+#            schema:
+#              $ref: "#/components/schemas/Dog"
       responses:
         '200':
           description: Expected response to a valid request

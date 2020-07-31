@@ -43,6 +43,13 @@ import java.util.Set;
  */
 public  class BTypeToJsonValidatorUtil {
 
+    /**
+     * Validate given schema with bVarSymbol
+     * @param schema
+     * @param bVarSymbol
+     * @return
+     * @throws OpenApiValidatorException
+     */
     public static List<ValidationError> validate(Schema schema, BVarSymbol bVarSymbol)
             throws OpenApiValidatorException {
 
@@ -65,7 +72,7 @@ public  class BTypeToJsonValidatorUtil {
                 if (schema instanceof ObjectSchema) {
                     properties = ((ObjectSchema) schema).getProperties();
                 }
-//          check the Item type has array type
+//          Check the Item type has array type
                 BRecordType recordType = null;
                 if (resourceType instanceof BArrayType) {
                     BArrayType bArrayTypeBVarSymbol = (BArrayType) resourceType;
@@ -99,7 +106,6 @@ public  class BTypeToJsonValidatorUtil {
                 ArraySchema traversSchemaNestedArray = arraySchema;
 
 //              Handle nested array type
-
                 if (bArrayType != null) {
                     BType bArrayTypeEtype = bArrayType.eType;
                     Schema arraySchemaItems = arraySchema.getItems();
@@ -122,7 +128,6 @@ public  class BTypeToJsonValidatorUtil {
                         }
                     }
 //                        Handle record type array
-
                     if ((traversNestedArray.eType instanceof BRecordType) &&
                             traversSchemaNestedArray.
                                     getItems() != null) {
@@ -266,7 +271,7 @@ public  class BTypeToJsonValidatorUtil {
                         if (!(memberList.isEmpty())) {
                             List<ValidationError> validationErrorsBa =  new ArrayList<>();
                             for (BType member: memberList) {
-//                            handle record type
+//                            Handle record type
                                 if (member instanceof BRecordType) {
                                     isExitType = true;
                                     if (!(oneOflist.isEmpty())) {
@@ -347,11 +352,20 @@ public  class BTypeToJsonValidatorUtil {
         }
         return validationErrors;
     }
-//      Record validation function
+
+    /**
+     * Validation with BRecordType parameter with Object schema
+     *
+     * @param validationErrors contain the validation errors
+     * @param properties extract properties with object schema
+     * @param recordType recordType
+     * @return ValidationError type List
+     * @throws OpenApiValidatorException
+     */
     private static List<ValidationError> validateRecord(List<ValidationError> validationErrors,
                                                         Map<String, Schema> properties,
                                                         BRecordType recordType) throws OpenApiValidatorException {
-//        BType record against the schema
+//      BType record against the schema
         for (BField field : recordType.fields) {
             boolean isExist = false;
             for (Map.Entry<String, Schema> entry : properties.entrySet()) {
@@ -384,9 +398,8 @@ public  class BTypeToJsonValidatorUtil {
                                         convertTypeToEnum(field.getType().getKind().typeName()));
                                 validationErrors.add(validationError);
                             }
-
                         } else {
-//                                Handle array type mismatching.
+//                          Handle array type mismatching.
                             if (field.getType().getKind().typeName().equals("[]")) {
                                 BArrayType bArrayType = null;
                                 Schema entrySchema = entry.getValue();
@@ -422,7 +435,7 @@ public  class BTypeToJsonValidatorUtil {
                                             }
                                         }
                                     }
-//                                    Handle record type in item array
+//                                  Handle record type in item array
                                     if ((traversNestedArray.eType instanceof BRecordType) &&
                                             traversSchemaNestedArray.
                                                     getItems() != null) {
@@ -463,7 +476,6 @@ public  class BTypeToJsonValidatorUtil {
             for (BField field : recordType.fields) {
                 if (field.name.getValue().equals(entry.getKey())) {
                     isExist = true;
-//          Handle the type mismatching in above validation
                 }
             }
             if (!isExist) {
@@ -474,6 +486,12 @@ public  class BTypeToJsonValidatorUtil {
         }
         return validationErrors;
     }
+
+    /**
+     * Method for convert string type to constant enum type
+     * @param type input type
+     * @return enum type
+     */
 
     public static Constants.Type convertTypeToEnum(String type) {
         Constants.Type convertedType;
@@ -512,6 +530,12 @@ public  class BTypeToJsonValidatorUtil {
         return convertedType;
     }
 
+    /**
+     * Method for convert openApi type to ballerina type
+     * @param type OpenApi parameter types
+     * @return ballerina type
+     */
+
     public static String convertOpenAPITypeToBallerina(String type) {
         String convertedType;
         switch (type) {
@@ -539,7 +563,12 @@ public  class BTypeToJsonValidatorUtil {
 
         return convertedType;
     }
-//  function for return fields of record
+
+    /**
+     * Function for extract the filed names in record
+     * @param bRecordType record type variable
+     * @return string type list with field name
+     */
     public static List<String> getRecordFields(BRecordType bRecordType) {
         List<String> recordFields = new ArrayList<>();
         for (BField field: bRecordType.getFields()) {
@@ -549,6 +578,30 @@ public  class BTypeToJsonValidatorUtil {
                 List<String> nestedRecordFields = getRecordFields(recordField);
                 recordFields.addAll(nestedRecordFields);
 
+            } else if (bType instanceof BArrayType) {
+                BArrayType bArrayType = (BArrayType) bType;
+                if (bArrayType.eType instanceof BRecordType) {
+                    List<String> bArrayRecord = getRecordFields((BRecordType) bArrayType.eType);
+                    recordFields.addAll(bArrayRecord);
+                } else if (bArrayType.eType instanceof BArrayType ) {
+                    BArrayType nestedArray = (BArrayType) bArrayType.eType;
+                    while (nestedArray instanceof BArrayType) {
+                        BType nestedArrayBType = nestedArray.eType;
+                        if ( nestedArrayBType instanceof BArrayType) {
+                            nestedArray = (BArrayType) nestedArrayBType;
+                        } else if (nestedArrayBType instanceof BRecordType) {
+                            List<String> nestedARecord = getRecordFields((BRecordType) nestedArrayBType);
+                            recordFields.addAll(nestedARecord);
+
+                        } else if (nestedArrayBType instanceof BType) {
+                            recordFields.add(field.getName().toString());
+                        }
+                    }
+                }
+                else {
+                    recordFields.add(field.getName().toString());
+                }
+
             } else {
                 if (field.name != null) {
                     recordFields.add(field.name.toString());
@@ -557,7 +610,12 @@ public  class BTypeToJsonValidatorUtil {
         }
         return recordFields;
     }
-//  function for return fields to schema
+
+    /**
+     * Extract parameter names in openApi schema
+     * @param schema input schema
+     * @return string type list with parameter names
+     */
     public static List<String> getSchemaFields(Schema schema) {
         List<String> jsonFeilds = new ArrayList<>();
         Map<String, Schema> properties = schema.getProperties();

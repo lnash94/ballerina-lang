@@ -94,7 +94,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Pet"
+              type: string
+#              $ref: "#/components/schemas/Bear"
+
       responses:
         '200':
           description: Expected response to a valid request
@@ -136,6 +138,8 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/Pet"
+    Bear:
+      type: string
     Error:
       required:
         - code
