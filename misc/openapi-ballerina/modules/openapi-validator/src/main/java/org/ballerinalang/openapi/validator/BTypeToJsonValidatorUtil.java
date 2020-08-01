@@ -618,17 +618,42 @@ public  class BTypeToJsonValidatorUtil {
      */
     public static List<String> getSchemaFields(Schema schema) {
         List<String> jsonFeilds = new ArrayList<>();
-        Map<String, Schema> properties = schema.getProperties();
-        for (Map.Entry<String, Schema> schemaEntry: properties.entrySet()) {
-            Schema entrySchema = schemaEntry.getValue();
-            if (entrySchema instanceof ObjectSchema) {
-                ObjectSchema objectSchema = (ObjectSchema) entrySchema;
-                List<String> nestedObjectSchema = getSchemaFields(objectSchema);
-                jsonFeilds.addAll(nestedObjectSchema);
-            } else {
-                jsonFeilds.add(schemaEntry.getKey());
+        if (schema instanceof ComposedSchema) {
+            ComposedSchema composedSchema = (ComposedSchema) schema;
+            if (composedSchema.getOneOf() != null) {
+                for (Schema schema1 : composedSchema.getOneOf()) {
+                    List<String> oneOfSchema1 = getSchemaFields(schema1);
+                    jsonFeilds.addAll(oneOfSchema1);
+                }
+            }
+
+            if (composedSchema.getAnyOf() != null) {
+                for (Schema schema1 : composedSchema.getOneOf()) {
+                    List<String> anySchema1 = getSchemaFields(schema1);
+                    jsonFeilds.addAll(anySchema1);
+                }
+            }
+            if (composedSchema.getAllOf() != null) {
+                for (Schema schema1 : composedSchema.getOneOf()) {
+                    List<String> allSchema1 = getSchemaFields(schema1);
+                    jsonFeilds.addAll(allSchema1);
+                }
+            }
+
+        } else {
+            Map<String, Schema> properties = schema.getProperties();
+            for (Map.Entry<String, Schema> schemaEntry: properties.entrySet()) {
+                Schema entrySchema = schemaEntry.getValue();
+                if (entrySchema instanceof ObjectSchema) {
+                    ObjectSchema objectSchema = (ObjectSchema) entrySchema;
+                    List<String> nestedObjectSchema = getSchemaFields(objectSchema);
+                    jsonFeilds.addAll(nestedObjectSchema);
+                } else {
+                    jsonFeilds.add(schemaEntry.getKey());
+                }
             }
         }
+
         return jsonFeilds;
     }
 

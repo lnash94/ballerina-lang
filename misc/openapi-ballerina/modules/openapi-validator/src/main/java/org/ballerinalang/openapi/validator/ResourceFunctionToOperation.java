@@ -115,7 +115,7 @@ public class ResourceFunctionToOperation {
     }
 
 //    get the requestBody parameter form operation
-    private static Map<String, Schema> getOperationRequestBody(Operation operation) {
+    public static Map<String, Schema> getOperationRequestBody(Operation operation) {
 
         Map<String, Schema> requestBodySchemas = new HashMap<>();
         Content content = operation.getRequestBody().getContent();

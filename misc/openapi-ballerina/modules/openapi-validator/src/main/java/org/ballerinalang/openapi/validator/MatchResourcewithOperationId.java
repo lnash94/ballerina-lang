@@ -232,24 +232,8 @@ public class MatchResourcewithOperationId {
                             isPathExit = false;
                             if (methodPath != null) {
                                 if (methodPath.equals(resourcePathSummary1.getPath())) {
-
-                                    if (body != null) {
-                                        resourceMethod.setBody(body);
-                                    }
-                                    // Extract and add the resource parameters
-                                    if (resource.getParameters().size() > 0 ) {
-                                        resourceMethod.setParameters(resource.getParameters());
-                                    }
-                                    if (methodName != null) {
-                                        resourceMethod.setMethod(methodName);
-                                    }
-                                    if (methodPos != null) {
-                                        resourceMethod.setMethodPosition(methodPos);
-                                    }
-                                    if (resource.getPosition() != null) {
-                                        resourceMethod.setResourcePosition(resource.getPosition());
-                                    }
-                                    resourcePathSummary1.addMethod(methodName, resourceMethod);
+                                    setValuesResourceMethods(resource, resourceMethod, methodName, methodPos, body,
+                                            resourcePathSummary1);
                                     isPathExit =true;
                                     break;
                                 }
@@ -259,27 +243,10 @@ public class MatchResourcewithOperationId {
                     if (!isPathExit) {
 
                         ResourcePathSummary resourcePathSummary = new ResourcePathSummary();
-
                         resourcePathSummary.setPath(methodPath);
                         resourcePathSummary.setPathPosition(pathPos);
-
-                        if (body != null) {
-                            resourceMethod.setBody(body);
-                        }
-                        // Extract and add the resource parameters
-                        if (resource.getParameters().size() > 0 ) {
-                            resourceMethod.setParameters(resource.getParameters());
-                        }
-                        if (methodName != null) {
-                            resourceMethod.setMethod(methodName);
-                        }
-                        if (methodPos != null) {
-                            resourceMethod.setMethodPosition(methodPos);
-                        }
-                        if (resource.getPosition() != null) {
-                            resourceMethod.setResourcePosition(resource.getPosition());
-                        }
-                        resourcePathSummary.addMethod(methodName, resourceMethod);
+                        setValuesResourceMethods(resource, resourceMethod, methodName, methodPos, body,
+                                resourcePathSummary);
                         // Add the resource summary to the resource summary list.
                         resourceSummaryList.add(resourcePathSummary);
                     }
@@ -287,6 +254,29 @@ public class MatchResourcewithOperationId {
             }
         }
         return resourceSummaryList;
+    }
+
+    private static void setValuesResourceMethods(FunctionNode resource, ResourceMethod resourceMethod,
+                                                 String methodName, Diagnostic.DiagnosticPosition methodPos,
+                                                 String body, ResourcePathSummary resourcePathSummary) {
+
+        if (body != null) {
+            resourceMethod.setBody(body);
+        }
+        // Extract and add the resource parameters
+        if (resource.getParameters().size() > 0) {
+            resourceMethod.setParameters(resource.getParameters());
+        }
+        if (methodName != null) {
+            resourceMethod.setMethod(methodName);
+        }
+        if (methodPos != null) {
+            resourceMethod.setMethodPosition(methodPos);
+        }
+        if (resource.getPosition() != null) {
+            resourceMethod.setResourcePosition(resource.getPosition());
+        }
+        resourcePathSummary.addMethod(methodName, resourceMethod);
     }
 
     /**
