@@ -80,4 +80,16 @@ public class OperationHandleVTests {
         Assert.assertTrue(validationErrors.isEmpty());
 
     }
+    @Test(description = "Operation model has nestedArray type parameters ")
+    public void testNestedArrayType() throws OpenApiValidatorException, UnsupportedEncodingException {
+        Path contractPath = RES_DIR.resolve("swagger/valid/petstoreNestedArrayType.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        bLangPackage = ValidatorTest.getBlangPackage("operationHandle/ballerina/valid/petstoreNestedArrayType.bal");
+        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
+        resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
+        operation = api.getPaths().get("/user").getPost();
+        validationErrors = OperationToResourceFunction.validate(operation, resourceMethod);
+        Assert.assertTrue(validationErrors.isEmpty());
+
+    }
 }

@@ -640,7 +640,21 @@ public  class BTypeToJsonValidatorUtil {
                 }
             }
 
-        } else {
+        } else if (schema instanceof ArraySchema) {
+            ArraySchema arraySchema = (ArraySchema) schema;
+            if (arraySchema.getItems() != null) {
+                while (arraySchema.getItems() instanceof ArraySchema) {
+                    Schema<?> traversArraySchemaType = arraySchema.getItems();
+                    if (traversArraySchemaType instanceof ArraySchema) {
+                        arraySchema =
+                                (ArraySchema) traversArraySchemaType;
+                    } else {
+                        List<String> nestedSchema = getSchemaFields(traversArraySchemaType);
+                        jsonFeilds.addAll(nestedSchema);
+                    }
+                }
+            }
+        }else {
             Map<String, Schema> properties = schema.getProperties();
             for (Map.Entry<String, Schema> schemaEntry: properties.entrySet()) {
                 Schema entrySchema = schemaEntry.getValue();
