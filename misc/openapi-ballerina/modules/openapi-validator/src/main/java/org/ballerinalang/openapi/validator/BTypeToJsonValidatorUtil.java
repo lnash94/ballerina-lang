@@ -22,6 +22,10 @@ import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
+import org.ballerinalang.openapi.validator.error.MissingFieldInBallerinaType;
+import org.ballerinalang.openapi.validator.error.MissingFieldInJsonSchema;
+import org.ballerinalang.openapi.validator.error.OneOfTypeValidation;
+import org.ballerinalang.openapi.validator.error.TypeMismatch;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BVarSymbol;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BAnyType;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BArrayType;
@@ -330,13 +334,21 @@ public  class BTypeToJsonValidatorUtil {
                                 }
                             }
                             if (!(validationErrorsBa.isEmpty())) {
-                                if (validationErrorsBa.stream().
-                                        allMatch(item -> item instanceof MissingFieldInJsonSchema)) {
-                                    OneOfTypeValidation oneOfTypeValidation =
-                                            new OneOfTypeValidation("Ballerina records",
-                                                    Constants.Type.RECORD, validationErrorsBa);
-                                    validationErrors.add(oneOfTypeValidation);
-                                }
+                                OneOfTypeValidation oneOfTypeValidation =
+                                        new OneOfTypeValidation("Ballerina records",
+                                                Constants.Type.RECORD, validationErrorsBa);
+                                validationErrors.add(oneOfTypeValidation);
+//      Scenario-01         (record)   cat - place02, mealType          | (schema) cat - place, mealType
+//      Scenario-02         (record)   cat - place02, mealType, canFly  | (schema) cat - place, mealType
+//      Scenario-03         (record)   cat - place02, mealType          | (schema) cat - place, mealType , mealTime
+
+//                                if (validationErrorsBa.stream().
+//                                        allMatch(item -> item instanceof MissingFieldInJsonSchema)) {
+//                                    OneOfTypeValidation oneOfTypeValidation =
+//                                            new OneOfTypeValidation("Ballerina records",
+//                                                    Constants.Type.RECORD, validationErrorsBa);
+//                                    validationErrors.add(oneOfTypeValidation);
+//                                }
                             }
                         }
                     }
@@ -380,7 +392,7 @@ public  class BTypeToJsonValidatorUtil {
                                     field.name.getValue(),
                                     convertTypeToEnum(entry.getValue().getType()),
                                     convertTypeToEnum(field.getType().getKind().typeName()),
-                                    getRecordName(recordType.name.toString()));
+                                    getRecordName(recordType.toString()));
 
                             validationErrors.add(validationError);
 
@@ -458,7 +470,7 @@ public  class BTypeToJsonValidatorUtil {
                                                 field.name.getValue(),
                                                 convertTypeToEnum(traversSchemaNestedArray.getItems().getType()),
                                                 convertTypeToEnum(traversNestedArray.eType.tsymbol.toString()),
-                                                getRecordName(recordType.name.toString()));
+                                                getRecordName(recordType.toString()));
                                         validationErrors.add(validationError);
                                     }
                                 }
@@ -469,7 +481,7 @@ public  class BTypeToJsonValidatorUtil {
             }
             if (!isExist) {
                 MissingFieldInJsonSchema validationError = new MissingFieldInJsonSchema(field.name.toString(),
-                        convertTypeToEnum(field.getType().getKind().typeName()));
+                        convertTypeToEnum(field.getType().getKind().typeName()), getRecordName(recordType.toString()));
                 validationErrors.add(validationError);
             }
         }
@@ -483,7 +495,7 @@ public  class BTypeToJsonValidatorUtil {
             }
             if (!isExist) {
                 MissingFieldInBallerinaType validationError = new MissingFieldInBallerinaType(entry.getKey(),
-                        convertTypeToEnum(entry.getValue().getType()));
+                        convertTypeToEnum(entry.getValue().getType()), getRecordName(recordType.toString()));
                 validationErrors.add(validationError);
             }
         }

@@ -2,11 +2,11 @@ package org.ballerinalang.openapi.validator.tests;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
-import org.ballerinalang.openapi.validator.OneOfTypeValidation;
+import org.ballerinalang.openapi.validator.error.OneOfTypeValidation;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
 import org.ballerinalang.openapi.validator.OperationToResourceFunction;
 import org.ballerinalang.openapi.validator.ResourceMethod;
-import org.ballerinalang.openapi.validator.TypeMismatch;
+import org.ballerinalang.openapi.validator.error.TypeMismatch;
 import org.ballerinalang.openapi.validator.ValidationError;
 import org.ballerinalang.openapi.validator.ValidatorUtil;
 import org.testng.Assert;

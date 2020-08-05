@@ -16,18 +16,30 @@
  *  under the License.
  */
 
-package org.ballerinalang.openapi.validator;
+package org.ballerinalang.openapi.validator.error;
+
+import org.ballerinalang.openapi.validator.Constants;
+import org.ballerinalang.openapi.validator.ValidationError;
+
+import java.util.List;
 
 /**
- * This for identify the missing fields in bVarsymbol against the given json schema.
+ * This for identify the fields that are same names with different data type in given json schema and bVarsymbol.
  */
-public class MissingFieldInBallerinaType extends ValidationError {
+public class OneOfTypeValidation extends ValidationError {
     String fieldName;
     Constants.Type type;
+    List<ValidationError> blockErrors;
 
-    public MissingFieldInBallerinaType(String fieldName, Constants.Type type) {
+    public OneOfTypeValidation() {
+        fieldName = null;
+        type = null;
+        blockErrors = null;
+    }
+    public OneOfTypeValidation(String fieldName, Constants.Type type, List<ValidationError> validationErrors) {
         this.fieldName = fieldName;
         this.type = type;
+        this.blockErrors = validationErrors;
     }
 
     public void setFieldName(String fieldName) {
@@ -41,5 +53,11 @@ public class MissingFieldInBallerinaType extends ValidationError {
     }
     public  Constants.Type getType() {
         return type;
+    }
+    public void setBlockErrors(List<ValidationError> validationErrors) {
+        this.blockErrors = validationErrors;
+    }
+    public List<ValidationError> getBlockErrors() {
+        return blockErrors;
     }
 }

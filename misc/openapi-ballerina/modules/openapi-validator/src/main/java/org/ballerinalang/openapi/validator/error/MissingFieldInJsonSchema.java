@@ -16,29 +16,30 @@
  *  under the License.
  */
 
-package org.ballerinalang.openapi.validator;
 
-import java.util.List;
+package org.ballerinalang.openapi.validator.error;
+
+import org.ballerinalang.openapi.validator.Constants;
+import org.ballerinalang.openapi.validator.ValidationError;
 
 /**
- * This for identify the fields that are same names with different data type in given json schema and bVarsymbol.
+ * This for identify the missing field in json schema against to given bVarSymbol.
  */
-public class OneOfTypeValidation extends ValidationError {
+public class MissingFieldInJsonSchema extends ValidationError {
     String fieldName;
     Constants.Type type;
-    List<ValidationError> blockErrors;
+    String recordName;
 
-    public OneOfTypeValidation() {
-        fieldName = null;
-        type = null;
-        blockErrors = null;
-    }
-    public OneOfTypeValidation(String fieldName, Constants.Type type, List<ValidationError> validationErrors) {
+    public MissingFieldInJsonSchema(String fieldName, Constants.Type type) {
         this.fieldName = fieldName;
         this.type = type;
-        this.blockErrors = validationErrors;
+        this.recordName = null;
     }
-
+    public MissingFieldInJsonSchema(String fieldName, Constants.Type type, String recordName) {
+        this.fieldName = fieldName;
+        this.type = type;
+        this.recordName = recordName;
+    }
     public void setFieldName(String fieldName) {
         this.fieldName = fieldName;
     }
@@ -51,10 +52,5 @@ public class OneOfTypeValidation extends ValidationError {
     public  Constants.Type getType() {
         return type;
     }
-    public void setBlockErrors(List<ValidationError> validationErrors) {
-        this.blockErrors = validationErrors;
-    }
-    public List<ValidationError> getBlockErrors() {
-        return blockErrors;
-    }
+    public String getRecordName() { return this.recordName; }
 }

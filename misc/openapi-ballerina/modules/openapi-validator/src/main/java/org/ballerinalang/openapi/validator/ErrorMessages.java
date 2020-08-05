@@ -67,7 +67,7 @@ class ErrorMessages {
     }
 
     static String undocumentedFieldInRecordParam(String fieldName, String paramName, String method, String path) {
-        return String.format("The '%s' field in the record type of the parameter '%s' " +
+        return String.format("The '%s' field in the '%s' type record of the parameter " +
                         "is not documented in the OpenAPI contract for the method '%s' of the path '%s'",
                 fieldName, paramName, method, path);
     }

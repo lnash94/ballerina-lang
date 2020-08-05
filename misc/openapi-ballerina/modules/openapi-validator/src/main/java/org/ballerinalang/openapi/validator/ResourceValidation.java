@@ -22,17 +22,31 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import org.ballerinalang.model.tree.ServiceNode;
+import org.ballerinalang.openapi.validator.error.MissingFieldInJsonSchema;
+import org.ballerinalang.openapi.validator.error.OneOfTypeValidation;
+import org.ballerinalang.openapi.validator.error.ResourceValidationError;
+import org.ballerinalang.openapi.validator.error.TypeMismatch;
 import org.ballerinalang.util.diagnostic.Diagnostic;
 import org.ballerinalang.util.diagnostic.DiagnosticLog;
-import org.wso2.ballerinalang.compiler.tree.BLangService;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 public class ResourceValidation {
 
+    /**
+     *
+     * @param openApi
+     * @param serviceNode
+     * @param tags
+     * @param operations
+     * @param excludeTags
+     * @param excludeOperations
+     * @param kind
+     * @param dLog
+     * @throws OpenApiValidatorException
+     */
     public static void validateResource(OpenAPI openApi,
                                         ServiceNode serviceNode,
                                         List<String> tags,
@@ -53,15 +67,12 @@ public class ResourceValidation {
 
         if (!resourceMissingPathMethod.isEmpty()) {
             for (ResourceValidationError resourceValidationError: resourceMissingPathMethod) {
-//                        Handling the Missing path in openApi contract
+//                     Handling the Missing path in openApi contract
                 if (resourceValidationError.getresourceMethod() == null) {
-//                    System.out.println(ErrorMessages.undocumentedResourcePath(resourceValidationError.getResourcePath()));
                     dLog.logDiagnostic(kind, resourceValidationError.getPosition(),
                             ErrorMessages.undocumentedResourcePath(resourceValidationError.getResourcePath()));
                 } else {
 //                    Handle undocumented method in contract
-//                    System.out.println(ErrorMessages.undocumentedResourceMethods(resourceValidationError.getresourceMethod(),
-//                            resourceValidationError.getResourcePath()));
                     dLog.logDiagnostic(kind, resourceValidationError.getPosition(),
                             ErrorMessages.undocumentedResourceMethods(resourceValidationError.getresourceMethod(),
                                     resourceValidationError.getResourcePath()));
@@ -80,7 +91,7 @@ public class ResourceValidation {
                     for (ResourceValidationError resourceValidationError: resourceMissingPathMethod) {
                         if (resourcePathSummary.getPath().equals(resourceValidationError.getResourcePath())) {
                             if ((!resourcePathSummary.getMethods().isEmpty())
-                                    && (resourceValidationError.resourceMethod != null)) {
+                                    && (resourceValidationError.getresourceMethod() != null)) {
                                 Map<String, ResourceMethod> resourceMethods = resourcePathSummary.getMethods();
                                 resourceMethods.entrySet().removeIf(resourceMethod -> resourceMethod.getKey()
                                         .equals(resourceValidationError.getresourceMethod()));
@@ -89,12 +100,10 @@ public class ResourceValidation {
                             }
                         }
                     }
-
                 }
-
             }
         }
-//        Get api operations
+//        Check with open api  contract
         Paths openAPIPathSummary = openApi.getPaths();
         for (ResourcePathSummary resourcePathSummary : resourcePathSummaryList) {
             for (Map.Entry<String, PathItem> openApiPath : openAPIPathSummary.entrySet()) {
@@ -104,138 +113,139 @@ public class ResourceValidation {
                         for (Map.Entry<String, ResourceMethod> method: resourceMethods.entrySet()) {
                             if (method.getKey().equals("get")) {
                                 if (openApiPath.getValue().getGet() != null) {
-                                    List<ValidationError> getErrors =
+                                    List<ValidationError> postErrors =
                                             ResourceFunctionToOperation.validate(openApiPath.getValue().getGet(),
                                                     method.getValue());
-                                    List<ValidationError> postErrors =
-                                            ResourceFunctionToOperation.validate(openApiPath.getValue().getPost(),
-                                                    method.getValue());
-                                    if (!getErrors.isEmpty()) {
-                                        for (ValidationError getErr : getErrors) {
-                                            if (getErr instanceof TypeMismatch) {
-//                                              message
-                                                if (((TypeMismatch) getErr).getRecordName() != null) {
-                                                      dLog.logDiagnostic(kind, method.getValue().getMethodPosition(),
-                                                            ErrorMessages.typeMismatchingRecord(getErr.getFieldName(),
-                                                                    ((TypeMismatch) getErr).getRecordName(),
-                                                                    BTypeToJsonValidatorUtil.convertEnumTypetoString((
-                                                                            (TypeMismatch)getErr).getTypeJsonSchema()),
-                                                                    BTypeToJsonValidatorUtil.convertEnumTypetoString(((
-                                                                            TypeMismatch)getErr).getTypeBallerinaType())
-                                                                    , method.getKey(), resourcePathSummary.getPath()));
-
-                                                } else {
-                                                      dLog.logDiagnostic(kind, method.getValue().getMethodPosition(),
-                                                            ErrorMessages.typeMismatching(getErr.getFieldName(),
-                                                                    BTypeToJsonValidatorUtil.convertEnumTypetoString
-                                                                            (((TypeMismatch) getErr).getTypeJsonSchema()),
-                                                                    BTypeToJsonValidatorUtil.convertEnumTypetoString
-                                                                            (((TypeMismatch) getErr).getTypeBallerinaType())
-                                                                    , method.getKey(), resourcePathSummary.getPath()));
-                                                }
-
-                                            } else if (getErr instanceof MissingFieldInJsonSchema) {
-
-//                                              message
-                                            } else if (getErr instanceof OneOfTypeValidation) {
-                                                if (!(((OneOfTypeValidation) getErr).getBlockErrors()).isEmpty()) {
-
-                                                    List<ValidationError> oneOferrorlist =
-                                                            ((OneOfTypeValidation) getErr).getBlockErrors();
-
-                                                    for (ValidationError oneOfvalidation : oneOferrorlist ) {
-                                                        if (oneOferrorlist instanceof TypeMismatch) {
-
-                                                        } else if (oneOferrorlist instanceof MissingFieldInJsonSchema) {
-
-                                                        }
-
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                    generateDlogMessage(kind, dLog, resourcePathSummary, method, postErrors);
                                 }
-                            }
-                            if (method.getKey().equals("post")) {
+                            } else if (method.getKey().equals("post")) {
                                 if (openApiPath.getValue().getPost() != null) {
                                     List<ValidationError> postErrors =
                                             ResourceFunctionToOperation.validate(openApiPath.getValue().getPost(),
                                                     method.getValue());
-                                    if (!postErrors.isEmpty()) {
-                                        for (ValidationError postErr : postErrors) {
-                                            if (postErr instanceof TypeMismatch) {
-//                                              message
-                                                if (((TypeMismatch) postErr).getRecordName() != null) {
-                                                    System.out.println(ErrorMessages.typeMismatchingRecord(postErr.getFieldName(),
-                                                            ((TypeMismatch) postErr).getRecordName(),
-                                                            BTypeToJsonValidatorUtil.convertEnumTypetoString((
-                                                                    (TypeMismatch)postErr).getTypeJsonSchema()),
-                                                            BTypeToJsonValidatorUtil.convertEnumTypetoString(((
-                                                                    TypeMismatch)postErr).getTypeBallerinaType())
-                                                            , method.getKey(), resourcePathSummary.getPath()));
-//                                                    dLog.logDiagnostic(kind, method.getValue().getMethodPosition(),
-//                                                            ErrorMessages.typeMismatchingRecord(getErr.getFieldName(),
-//                                                                    ((TypeMismatch) getErr).getRecordName(),
-//                                                                    BTypeToJsonValidatorUtil.convertEnumTypetoString((
-//                                                                            (TypeMismatch)getErr).getTypeJsonSchema()),
-//                                                                    BTypeToJsonValidatorUtil.convertEnumTypetoString(((
-//                                                                            TypeMismatch)getErr).getTypeBallerinaType())
-//                                                                    , method.getKey(), resourcePathSummary.getPath()));
-
-                                                } else {
-                                                    System.out.println(ErrorMessages.typeMismatching(postErr.getFieldName(),
-                                                            BTypeToJsonValidatorUtil.convertEnumTypetoString
-                                                                    (((TypeMismatch) postErr).getTypeJsonSchema()),
-                                                            BTypeToJsonValidatorUtil.convertEnumTypetoString
-                                                                    (((TypeMismatch) postErr).getTypeBallerinaType())
-                                                            , method.getKey(), resourcePathSummary.getPath()));
-//                                                    dLog.logDiagnostic(kind, method.getValue().getMethodPosition(),
-//                                                            ErrorMessages.typeMismatching(getErr.getFieldName(),
-//                                                                    BTypeToJsonValidatorUtil.convertEnumTypetoString
-//                                                                            (((TypeMismatch) getErr).getTypeJsonSchema()),
-//                                                                    BTypeToJsonValidatorUtil.convertEnumTypetoString
-//                                                                            (((TypeMismatch) getErr).getTypeBallerinaType())
-//                                                                    , method.getKey(), resourcePathSummary.getPath()));
-                                                }
-
-                                            } else if (postErr instanceof MissingFieldInJsonSchema) {
-
-//                                              message
-                                            } else if (postErr instanceof OneOfTypeValidation) {
-                                                if (!(((OneOfTypeValidation) postErr).getBlockErrors()).isEmpty()) {
-
-                                                    List<ValidationError> oneOferrorlist =
-                                                            ((OneOfTypeValidation) postErr).getBlockErrors();
-
-                                                    for (ValidationError oneOfvalidation : oneOferrorlist ) {
-                                                        if (oneOferrorlist instanceof TypeMismatch) {
-
-                                                        } else if (oneOferrorlist instanceof MissingFieldInJsonSchema) {
-
-                                                        }
-
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                    generateDlogMessage(kind, dLog, resourcePathSummary, method, postErrors);
+                                }
+                            } else if (method.getKey().equals("put")) {
+                                if (openApiPath.getValue().getPut() != null) {
+                                    List<ValidationError> postErrors =
+                                            ResourceFunctionToOperation.validate(openApiPath.getValue().getPut(),
+                                                    method.getValue());
+                                    generateDlogMessage(kind, dLog, resourcePathSummary, method, postErrors);
+                                }
+                            } else if (method.getKey().equals("delete")) {
+                                if (openApiPath.getValue().getDelete() != null) {
+                                    List<ValidationError> postErrors =
+                                            ResourceFunctionToOperation.validate(openApiPath.getValue().getDelete(),
+                                                    method.getValue());
+                                    generateDlogMessage(kind, dLog, resourcePathSummary, method, postErrors);
+                                }
+                            } else if (method.getKey().equals("patch")) {
+                                if (openApiPath.getValue().getPatch() != null) {
+                                    List<ValidationError> postErrors =
+                                            ResourceFunctionToOperation.validate(openApiPath.getValue().getPatch(),
+                                                    method.getValue());
+                                    generateDlogMessage(kind, dLog, resourcePathSummary, method, postErrors);
+                                }
+                            } else if (method.getKey().equals("head")) {
+                                if (openApiPath.getValue().getHead() != null) {
+                                    List<ValidationError> postErrors =
+                                            ResourceFunctionToOperation.validate(openApiPath.getValue().getHead(),
+                                                    method.getValue());
+                                    generateDlogMessage(kind, dLog, resourcePathSummary, method, postErrors);
+                                }
+                            } else if (method.getKey().equals("options")) {
+                                if (openApiPath.getValue().getOptions() != null) {
+                                    List<ValidationError> postErrors =
+                                            ResourceFunctionToOperation.validate(openApiPath.getValue().getOptions(),
+                                                    method.getValue());
+                                    generateDlogMessage(kind, dLog, resourcePathSummary, method, postErrors);
                                 }
                             }
-
-//                            type miss match
-//                            ballerina filed miss
-//                            parameter miss
-//                            oneOf type handle
-
                         }
                     }
                 }
             }
         }
-//        for ()
-//        List<ValidationError> validationErrors = ResourceFunctionToOperation.validate();
+    }
 
+    /**
+     *
+     * @param kind
+     * @param dLog
+     * @param resourcePathSummary
+     * @param method
+     * @param postErrors
+     */
+    private static void generateDlogMessage(Diagnostic.Kind kind, DiagnosticLog dLog,
+                                            ResourcePathSummary resourcePathSummary,
+                                            Map.Entry<String, ResourceMethod> method,
+                                            List<ValidationError> postErrors) {
+
+        if (!postErrors.isEmpty()) {
+            for (ValidationError postErr : postErrors) {
+                if (postErr instanceof TypeMismatch) {
+                    generateTypeMisMatchDlog(kind, dLog, resourcePathSummary, method, postErr);
+                } else if (postErr instanceof MissingFieldInJsonSchema) {
+                    dLog.logDiagnostic(kind, method.getValue().getMethodPosition(),
+                            ErrorMessages.undocumentedFieldInRecordParam(postErr.getFieldName(),
+                                    ((MissingFieldInJsonSchema) postErr).getRecordName(),
+                                    method.getKey(), resourcePathSummary.getPath()));
+                } else if (postErr instanceof OneOfTypeValidation) {
+                    if (!(((OneOfTypeValidation) postErr).getBlockErrors()).isEmpty()) {
+                        List<ValidationError> oneOferrorlist =
+                                ((OneOfTypeValidation) postErr).getBlockErrors();
+                        for (ValidationError oneOfvalidation : oneOferrorlist) {
+                            if (oneOfvalidation instanceof TypeMismatch) {
+                                generateTypeMisMatchDlog(kind, dLog, resourcePathSummary, method, oneOfvalidation);
+
+                            } else if (oneOfvalidation instanceof MissingFieldInJsonSchema) {
+                                dLog.logDiagnostic(kind, method.getValue().getMethodPosition(),
+                                        ErrorMessages.undocumentedFieldInRecordParam(oneOfvalidation.getFieldName(),
+                                                ((MissingFieldInJsonSchema) oneOfvalidation).getRecordName(),
+                                                method.getKey(), resourcePathSummary.getPath()));
+                            }
+                        }
+                    }
+                } else if (postErr instanceof ValidationError) {
+                    dLog.logDiagnostic(kind, method.getValue().getMethodPosition(),
+                            ErrorMessages.undocumentedResourceParameter(postErr.getFieldName(),
+                                    method.getKey(), resourcePathSummary.getPath()));
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * @param kind
+     * @param dLog
+     * @param resourcePathSummary
+     * @param method
+     * @param postErr
+     */
+    private static void generateTypeMisMatchDlog(Diagnostic.Kind kind, DiagnosticLog dLog,
+                                                 ResourcePathSummary resourcePathSummary,
+                                                 Map.Entry<String, ResourceMethod> method, ValidationError postErr) {
+
+        if (((TypeMismatch) postErr).getRecordName() != null) {
+            dLog.logDiagnostic(kind, method.getValue().getMethodPosition(),
+                    ErrorMessages.typeMismatchingRecord(postErr.getFieldName(),
+                            ((TypeMismatch) postErr).getRecordName(),
+                            BTypeToJsonValidatorUtil.convertEnumTypetoString((
+                                    (TypeMismatch) postErr).getTypeJsonSchema()),
+                            BTypeToJsonValidatorUtil.convertEnumTypetoString(((
+                                    TypeMismatch) postErr).getTypeBallerinaType())
+                            , method.getKey(), resourcePathSummary.getPath()));
+
+        } else {
+            dLog.logDiagnostic(kind, method.getValue().getMethodPosition(),
+                    ErrorMessages.typeMismatching(postErr.getFieldName(),
+                            BTypeToJsonValidatorUtil.convertEnumTypetoString
+                                    (((TypeMismatch) postErr).getTypeJsonSchema()),
+                            BTypeToJsonValidatorUtil.convertEnumTypetoString
+                                    (((TypeMismatch) postErr).getTypeBallerinaType())
+                            , method.getKey(), resourcePathSummary.getPath()));
+        }
     }
 
 }

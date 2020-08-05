@@ -21,7 +21,9 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
-import org.wso2.ballerinalang.compiler.semantics.model.types.BRecordType;
+import org.ballerinalang.openapi.validator.error.MissingFieldInJsonSchema;
+import org.ballerinalang.openapi.validator.error.OneOfTypeValidation;
+import org.ballerinalang.openapi.validator.error.TypeMismatch;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,27 +58,35 @@ public class ResourceFunctionToOperation {
                                         isParameterExit = true;
                                         break;
                                     } else {
-                                        if (resourceParameter.getParameter().type instanceof BRecordType) {
-                                            List<String> list =
-                                                    BTypeToJsonValidatorUtil.getRecordFields(
-                                                            (BRecordType) resourceParameter.getParameter().type);
-                                            List<String> errorList = new ArrayList<>();
+//                                        if (resourceParameter.getParameter().type instanceof BRecordType) {
+//                                            List<String> list =
+//                                                    BTypeToJsonValidatorUtil.getRecordFields(
+//                                                            (BRecordType) resourceParameter.getParameter().type);
+//                                            List<String> errorList = new ArrayList<>();
                                             for (ValidationError validationError: requestBValidationError) {
-                                                errorList.add(validationError.getFieldName());
+                                                if ((validationError instanceof TypeMismatch) ||
+                                                        (validationError instanceof MissingFieldInJsonSchema) ||
+                                                        (validationError instanceof OneOfTypeValidation)) {
+//                                                    errorList.add(validationError.getFieldName());
+                                                    validationErrors.add(validationError);
+                                                }
                                             }
-                                            if (list.containsAll(errorList)) {
-                                                validationErrors.addAll(requestBValidationError);
-                                                isParameterExit = true;
-                                                break;
-                                            }
-                                        }
+//                                            if (list.containsAll(errorList)) {
+//                                                validationErrors.addAll(requestBValidationError);
+//                                                isParameterExit = true;
+//                                                break;
+//                                            }
+                                            isParameterExit = true;
+                                            break;
+
+//                                        }
                                     }
                                 }
                             }
                         }
                     }
                     //                    Handle Path parameter
-                }else if (operation.getParameters() != null) {
+                } else if (operation.getParameters() != null) {
                     for (Parameter parameter : operation.getParameters()) {
                         if (resourceParameter.getName().equals(parameter.getName())) {
                             List<ValidationError> validationErrorsResource = new ArrayList<>();
@@ -91,11 +101,11 @@ public class ResourceFunctionToOperation {
                             }
                         }
                     }
-                    if (!isParameterExit) {
-                        ValidationError validationError = new ValidationError(resourceParameter.getName(),
-                                BTypeToJsonValidatorUtil.convertTypeToEnum(resourceParameter.getType()));
-                        validationErrors.add(validationError);
-                    }
+//                    if (!isParameterExit) {
+//                        ValidationError validationError = new ValidationError(resourceParameter.getName(),
+//                                BTypeToJsonValidatorUtil.convertTypeToEnum(resourceParameter.getType()));
+//                        validationErrors.add(validationError);
+//                    }
                 }
                 if (!isParameterExit) {
                     ValidationError validationError = new ValidationError(resourceParameter.getName(),

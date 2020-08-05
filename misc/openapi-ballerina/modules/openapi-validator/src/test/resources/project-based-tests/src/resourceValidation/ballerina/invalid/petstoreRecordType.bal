@@ -2,11 +2,11 @@ import ballerina/http;
 
 
 type Tag record {
-    string id;
+    int id;
     string name;
 };
 type RecordTypeArray record {
-    int id;
+    string id;
     string category;
     string name;
     string photoUrls;

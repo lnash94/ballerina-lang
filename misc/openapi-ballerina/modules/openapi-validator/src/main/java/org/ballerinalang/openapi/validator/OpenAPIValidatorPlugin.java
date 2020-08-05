@@ -189,17 +189,21 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
             if (contractURI != null) {
                 try {
                     OpenAPI openAPI = ValidatorUtil.parseOpenAPIFile(contractURI);
+                    ResourceValidation.validateResource(openAPI, serviceNode, tags, operations, excludeTags,
+                            excludeOperations,
+                            kind, dLog);
+
                     ValidatorUtil.summarizeResources(this.resourceSummaryList, serviceNode);
                     ValidatorUtil.summarizeOpenAPI(this.openAPISummaryList, openAPI, this.openAPIComponentSummary);
                     ValidatorUtil.validateOpenApiAgainstResources(serviceNode, tags, operations, kind, excludeTags,
                             excludeOperations,
                             this.resourceSummaryList, this.openAPISummaryList,
                             this.openAPIComponentSummary, dLog);
-                    ValidatorUtil.validateResourcesAgainstOpenApi(tags, operations, kind, excludeTags,
-                            excludeOperations,
-                            this.resourceSummaryList,
-                            this.openAPISummaryList, this.openAPIComponentSummary,
-                            dLog);
+//                    ValidatorUtil.validateResourcesAgainstOpenApi(tags, operations, kind, excludeTags,
+//                            excludeOperations,
+//                            this.resourceSummaryList,
+//                            this.openAPISummaryList, this.openAPIComponentSummary,
+//                            dLog);
                 } catch (OpenApiValidatorException e) {
                     dLog.logDiagnostic(Diagnostic.Kind.ERROR, annotation.getPosition(),
                             e.getMessage());

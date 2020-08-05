@@ -75,5 +75,63 @@ public class ResourceValidationTests {
         ResourceValidation.validateResource(api, extractBLangservice, tag, operation, excludeTag, excludeOperation,
                 kind, dLog);
     }
+    @Test(description = "test for undocumented record field  in contract")
+    public void testRecordFieldMiss() throws OpenApiValidatorException, UnsupportedEncodingException {
+        Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreRecordFieldMiss.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        bLangPackage = ValidatorTest.getBlangPackage("resourceValidation/ballerina/invalid/petstoreRecordFieldMiss.bal");
+        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
+        kind = Diagnostic.Kind.ERROR;
+        dLog = ValidatorTest.getDiagnostic("resourceValidation/ballerina/invalid/petstoreRecordFieldMiss.bal");
+        ResourceValidation.validateResource(api, extractBLangservice, tag, operation, excludeTag, excludeOperation,
+                kind, dLog);
+    }
 
+    @Test(description = "test for undocumented path parameter  in contract")
+    public void testPathParameter() throws OpenApiValidatorException, UnsupportedEncodingException {
+        Path contractPath = RES_DIR.resolve("swagger/invalid/petstorePathParameter.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        bLangPackage = ValidatorTest.getBlangPackage("resourceValidation/ballerina/invalid/petstorePathParameter.bal");
+        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
+        kind = Diagnostic.Kind.ERROR;
+        dLog = ValidatorTest.getDiagnostic("resourceValidation/ballerina/invalid/petstorePathParameter.bal");
+        ResourceValidation.validateResource(api, extractBLangservice, tag, operation, excludeTag, excludeOperation,
+                kind, dLog);
+    }
+
+    @Test(description = "test for undocumented field oneOf type record in contract")
+    public void testOneofscenario_01() throws OpenApiValidatorException, UnsupportedEncodingException {
+        Path contractPath = RES_DIR.resolve("swagger/invalid/oneOf.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        bLangPackage = ValidatorTest.getBlangPackage("resourceValidation/ballerina/invalid/oneOf.bal");
+        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
+        kind = Diagnostic.Kind.ERROR;
+        dLog = ValidatorTest.getDiagnostic("resourceValidation/ballerina/invalid/oneOf.bal");
+        ResourceValidation.validateResource(api, extractBLangservice, tag, operation, excludeTag, excludeOperation,
+                kind, dLog);
+    }
+
+    @Test(description = "test for undocumented field oneOf type record in contract")
+    public void testOneofscenario_02() throws OpenApiValidatorException, UnsupportedEncodingException {
+        Path contractPath = RES_DIR.resolve("swagger/invalid/oneOf-scenario02.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        bLangPackage = ValidatorTest.getBlangPackage("resourceValidation/ballerina/invalid/oneOf-scenario02.bal");
+        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
+        kind = Diagnostic.Kind.ERROR;
+        dLog = ValidatorTest.getDiagnostic("resourceValidation/ballerina/invalid/oneOf-scenario02.bal");
+        ResourceValidation.validateResource(api, extractBLangservice, tag, operation, excludeTag, excludeOperation,
+                kind, dLog);
+    }
+
+    @Test(description = "test for undocumented field oneOf type record in contract")
+    public void testOneofscenario_03() throws OpenApiValidatorException, UnsupportedEncodingException {
+        Path contractPath = RES_DIR.resolve("swagger/invalid/oneOf-scenario03.yaml");
+        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        bLangPackage = ValidatorTest.getBlangPackage("resourceValidation/ballerina/invalid/oneOf-scenario03.bal");
+        extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
+        kind = Diagnostic.Kind.ERROR;
+        dLog = ValidatorTest.getDiagnostic("resourceValidation/ballerina/invalid/oneOf-scenario03.bal");
+        ResourceValidation.validateResource(api, extractBLangservice, tag, operation, excludeTag, excludeOperation,
+                kind, dLog);
+    }
 }

@@ -21,6 +21,8 @@ import io.swagger.v3.oas.models.PathItem;
 import org.ballerinalang.model.tree.AnnotationAttachmentNode;
 import org.ballerinalang.model.tree.FunctionNode;
 import org.ballerinalang.model.tree.ServiceNode;
+import org.ballerinalang.openapi.validator.error.OpenapiServiceValidationError;
+import org.ballerinalang.openapi.validator.error.ResourceValidationError;
 import org.ballerinalang.util.diagnostic.Diagnostic;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangExpression;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangListConstructorExpr;
@@ -188,8 +190,6 @@ public class MatchResourcewithOperationId {
                             valueExpr = varNameField;
                         }
 
-
-
                         if (keyExpr instanceof BLangSimpleVarRef) {
                             BLangSimpleVarRef path = (BLangSimpleVarRef) keyExpr;
                             String contractAttr = path.getVariableName().getValue();
@@ -204,6 +204,18 @@ public class MatchResourcewithOperationId {
                                 }
 
                             } else if (contractAttr.equals(Constants.METHODS)) {
+                                if (valueExpr instanceof BLangListConstructorExpr) {
+                                    BLangListConstructorExpr methodSet = (BLangListConstructorExpr) valueExpr;
+                                    for (BLangExpression methodExpr : methodSet.exprs) {
+                                        if (methodExpr instanceof BLangLiteral) {
+                                            BLangLiteral method = (BLangLiteral) methodExpr;
+                                            methodName = ((String) method.value).toLowerCase(Locale.ENGLISH);
+                                            methodPos = path.getPosition();
+
+                                        }
+                                    }
+                                }
+                            } else if (contractAttr.equals(Constants.METHODS) || contractAttr.equals(Constants.METHOD)) {
                                 if (valueExpr instanceof BLangListConstructorExpr) {
                                     BLangListConstructorExpr methodSet = (BLangListConstructorExpr) valueExpr;
                                     for (BLangExpression methodExpr : methodSet.exprs) {

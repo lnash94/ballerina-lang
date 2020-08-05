@@ -13,18 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ballerinalang.openapi.validator;
+package org.ballerinalang.openapi.validator.error;
 
 import org.ballerinalang.util.diagnostic.Diagnostic;
 
 public class ResourceValidationError {
-//    Diagnostic.Kind kind;
-    Diagnostic.DiagnosticPosition position;
-    String resourceMethod;
-    String resourcePath;
+    public Diagnostic.DiagnosticPosition position;
+    public String resourceMethod;
+    public String resourcePath;
 
     public ResourceValidationError() {
-//        this.kind = null;
         this.position = null;
         this.resourceMethod = null;
         this.resourcePath = null;
@@ -32,16 +30,10 @@ public class ResourceValidationError {
 
     public ResourceValidationError(Diagnostic.DiagnosticPosition position, String resourceMethod,
                                    String resourcePath) {
-//        this.kind = kind;
         this.position = position;
         this.resourceMethod = resourceMethod;
         this.resourcePath = resourcePath;
     }
-
-//    public Diagnostic.Kind getKind() {
-//
-//        return kind;
-//    }
 
     public Diagnostic.DiagnosticPosition getPosition() {
 

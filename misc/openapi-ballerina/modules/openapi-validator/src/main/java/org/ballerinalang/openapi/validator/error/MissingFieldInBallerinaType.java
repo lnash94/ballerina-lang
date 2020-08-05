@@ -16,21 +16,29 @@
  *  under the License.
  */
 
+package org.ballerinalang.openapi.validator.error;
 
-package org.ballerinalang.openapi.validator;
+import org.ballerinalang.openapi.validator.Constants;
+import org.ballerinalang.openapi.validator.ValidationError;
 
 /**
- * This for identify the missing field in json schema against to given bVarSymbol.
+ * This for identify the missing fields in bVarsymbol against the given json schema.
  */
-public class MissingFieldInJsonSchema extends ValidationError {
+public class MissingFieldInBallerinaType extends ValidationError {
     String fieldName;
     Constants.Type type;
+    String recordName;
 
-    public MissingFieldInJsonSchema(String fieldName, Constants.Type type) {
+    public MissingFieldInBallerinaType(String fieldName, Constants.Type type) {
         this.fieldName = fieldName;
         this.type = type;
+        this.recordName = null;
     }
-
+    public MissingFieldInBallerinaType(String fieldName, Constants.Type type, String recordName) {
+        this.fieldName = fieldName;
+        this.type = type;
+        this.recordName = recordName;
+    }
     public void setFieldName(String fieldName) {
         this.fieldName = fieldName;
     }
@@ -38,9 +46,10 @@ public class MissingFieldInJsonSchema extends ValidationError {
         this.type = type;
     }
     public String getFieldName() {
-        return fieldName;
+        return this.fieldName;
     }
     public  Constants.Type getType() {
-        return type;
+        return this.type;
     }
+    public String getRecordName() { return  this.recordName; }
 }

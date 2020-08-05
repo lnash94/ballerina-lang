@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.ballerinalang.openapi.validator;
+package org.ballerinalang.openapi.validator.error;
 
 import org.ballerinalang.util.diagnostic.Diagnostic;
 

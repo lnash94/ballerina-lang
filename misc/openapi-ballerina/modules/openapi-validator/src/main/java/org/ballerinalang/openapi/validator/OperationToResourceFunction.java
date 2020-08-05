@@ -19,6 +19,8 @@ package org.ballerinalang.openapi.validator;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import org.ballerinalang.openapi.validator.error.MissingFieldInBallerinaType;
+import org.ballerinalang.openapi.validator.error.OneOfTypeValidation;
 
 import java.util.ArrayList;
 import java.util.List;
