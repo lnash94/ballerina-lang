@@ -799,7 +799,7 @@ public class ValidatorUtil {
                     }
                     if (validationError instanceof TypeMismatch) {
                         dLog.logDiagnostic(kind, resourceParameter.getParameter().getPosition(),
-                                ErrorMessages.typeMismatching(validationError.getFieldName(),
+                                ErrorMessages.typeMismatchingRecord(validationError.getFieldName(),
                                         resourceParameter.getName(), convertEnumTypetoString(((TypeMismatch)
                                                 validationError).getTypeJsonSchema()),
                                         convertEnumTypetoString(((TypeMismatch) validationError).

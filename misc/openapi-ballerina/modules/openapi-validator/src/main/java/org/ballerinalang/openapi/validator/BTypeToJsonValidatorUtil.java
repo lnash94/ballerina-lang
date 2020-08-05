@@ -379,7 +379,8 @@ public  class BTypeToJsonValidatorUtil {
                             TypeMismatch validationError = new TypeMismatch(
                                     field.name.getValue(),
                                     convertTypeToEnum(entry.getValue().getType()),
-                                    convertTypeToEnum(field.getType().getKind().typeName()));
+                                    convertTypeToEnum(field.getType().getKind().typeName()),
+                                    getRecordName(recordType.name.toString()));
 
                             validationErrors.add(validationError);
 
@@ -395,7 +396,8 @@ public  class BTypeToJsonValidatorUtil {
                                 TypeMismatch validationError = new TypeMismatch(
                                         field.name.getValue(),
                                         convertTypeToEnum("object"),
-                                        convertTypeToEnum(field.getType().getKind().typeName()));
+                                        convertTypeToEnum(field.getType().getKind().typeName()),
+                                        getRecordName(recordType.name.toString()));
                                 validationErrors.add(validationError);
                             }
                         } else {
@@ -455,7 +457,8 @@ public  class BTypeToJsonValidatorUtil {
                                         TypeMismatch validationError = new TypeMismatch(
                                                 field.name.getValue(),
                                                 convertTypeToEnum(traversSchemaNestedArray.getItems().getType()),
-                                                convertTypeToEnum(traversNestedArray.eType.tsymbol.toString()));
+                                                convertTypeToEnum(traversNestedArray.eType.tsymbol.toString()),
+                                                getRecordName(recordType.name.toString()));
                                         validationErrors.add(validationError);
                                     }
                                 }
@@ -555,6 +558,45 @@ public  class BTypeToJsonValidatorUtil {
                 convertedType = "record";
                 break;
             case "number":
+                convertedType = "decimal";
+                break;
+            default:
+                convertedType = "";
+        }
+
+        return convertedType;
+    }
+
+    /**
+     * Convert enum type to string type
+     * @param type
+     * @return
+     */
+    public static String convertEnumTypetoString(Constants.Type type) {
+        String convertedType;
+        switch (type) {
+            case INT:
+                convertedType = "int";
+                break;
+            case INTEGER:
+                convertedType = "integer";
+                break;
+            case STRING:
+                convertedType = "string";
+                break;
+            case BOOLEAN:
+                convertedType = "boolean";
+                break;
+            case ARRAY:
+                convertedType = "array";
+                break;
+            case OBJECT:
+                convertedType = "object";
+                break;
+            case RECORD:
+                convertedType = "record";
+                break;
+            case DECIMAL:
                 convertedType = "decimal";
                 break;
             default:

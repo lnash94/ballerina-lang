@@ -21,10 +21,13 @@ import org.ballerinalang.openapi.validator.MatchResourcewithOperationId;
 import org.ballerinalang.openapi.validator.OpenApiValidatorUtil;
 import org.ballerinalang.openapi.validator.ResourceMethod;
 import org.ballerinalang.openapi.validator.ResourcePathSummary;
+import org.ballerinalang.util.diagnostic.DiagnosticLog;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BVarSymbol;
 import org.wso2.ballerinalang.compiler.tree.BLangFunction;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import org.wso2.ballerinalang.compiler.tree.BLangService;
+import org.wso2.ballerinalang.compiler.util.CompilerContext;
+import org.wso2.ballerinalang.compiler.util.diagnotic.BLangDiagnosticLogHelper;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
@@ -74,5 +77,15 @@ public class ValidatorTest {
                 MatchResourcewithOperationId.summarizeResources(bLangService);
         ResourceMethod resourceMethod = resourcePathSummaryList.get(0).getMethods().get(method);
         return resourceMethod;
+    }
+
+//    Get diagnostic log
+    public static DiagnosticLog getDiagnostic(String fileName) {
+        Path sourceRoot = RES_DIR.resolve("project-based-tests/src");
+        String balfile = sourceRoot.resolve(fileName).toString();
+        Path balFpath = Paths.get(balfile);
+        Path programDir = balFpath.toAbsolutePath().getParent();
+        CompilerContext context =  OpenApiValidatorUtil.getCompilerContext(programDir);
+        return BLangDiagnosticLogHelper.getInstance(context);
     }
 }

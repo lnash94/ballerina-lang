@@ -157,7 +157,7 @@ public class OpenApiValidatorUtil {
      * @param sourceRootPath ballerina compilable source root path
      * @return {@link CompilerContext} compiler context
      */
-    private static CompilerContext getCompilerContext(Path sourceRootPath) {
+    public static CompilerContext getCompilerContext(Path sourceRootPath) {
         CompilerPhase compilerPhase = CompilerPhase.DEFINE;
         CompilerContext context = new CompilerContext();
         CompilerOptions options = CompilerOptions.getInstance(context);

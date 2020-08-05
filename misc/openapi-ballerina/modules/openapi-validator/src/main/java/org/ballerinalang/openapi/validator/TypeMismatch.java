@@ -23,6 +23,7 @@ package org.ballerinalang.openapi.validator;
  * This for identify the fields that are same names with different data type in given json schema and bVarsymbol.
  */
 public class TypeMismatch extends ValidationError {
+    String recordName;
     String fieldName;
     Constants.Type typeJsonSchema;
     Constants.Type typeBallerinaType;
@@ -31,8 +32,15 @@ public class TypeMismatch extends ValidationError {
         this.fieldName = fieldName;
         this.typeJsonSchema = typeJsonSchema;
         this.typeBallerinaType = typeBallerinaType;
+        this.recordName = null;
     }
-
+    public TypeMismatch(String fieldName, Constants.Type typeJsonSchema, Constants.Type typeBallerinaType,
+                        String recordName) {
+        this.fieldName = fieldName;
+        this.typeJsonSchema = typeJsonSchema;
+        this.typeBallerinaType = typeBallerinaType;
+        this.recordName = recordName;
+    }
     public void setFieldName(String fieldName) {
         this.fieldName = fieldName;
     }
@@ -51,4 +59,5 @@ public class TypeMismatch extends ValidationError {
     public  Constants.Type getTypeBallerinaType() {
         return typeBallerinaType;
     }
+    public String getRecordName() { return recordName; }
 }

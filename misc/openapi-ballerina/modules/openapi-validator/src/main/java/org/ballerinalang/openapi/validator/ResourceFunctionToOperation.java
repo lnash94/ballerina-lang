@@ -38,7 +38,7 @@ public class ResourceFunctionToOperation {
             for (ResourceParameter resourceParameter: resourceMethod.getParamNames()) {
                 Boolean isParameterExit = false;
                 //            Request body handling
-                if ((resourceMethod.getBody().equals(resourceParameter.getName()))
+                if ((resourceMethod.getBody() != null) && (resourceMethod.getBody().equals(resourceParameter.getName()))
                         && (operation.getRequestBody() != null)) {
                     if (operation.getRequestBody() != null) {
                         RequestBody requestBody = operation.getRequestBody();
@@ -86,13 +86,6 @@ public class ResourceFunctionToOperation {
                                         resourceParameter.getParameter().symbol);
                                 if (!validationErrorsResource.isEmpty()) {
                                     validationErrors.addAll(validationErrorsResource);
-//                                    dlog error
-//                                    for (ValidationError validationError: validationErrorsResource) {
-//                                        if (validationError instanceof TypeMismatch) {
-//                                        } else if (validationError instanceof MissingFieldInJsonSchema) {
-//
-//                                        }
-//                                    }
                                 }
                                 break;
                             }
