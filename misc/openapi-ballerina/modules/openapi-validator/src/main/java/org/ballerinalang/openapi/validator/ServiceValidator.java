@@ -20,8 +20,6 @@ package org.ballerinalang.openapi.validator;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.Paths;
 import org.ballerinalang.model.tree.ServiceNode;
 import org.ballerinalang.openapi.validator.error.MissingFieldInBallerinaType;
 import org.ballerinalang.openapi.validator.error.MissingFieldInJsonSchema;
@@ -32,8 +30,6 @@ import org.ballerinalang.openapi.validator.error.ValidationError;
 import org.ballerinalang.util.diagnostic.Diagnostic;
 import org.ballerinalang.util.diagnostic.DiagnosticLog;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -166,7 +162,7 @@ public class ServiceValidator {
                                 for (Map.Entry<String, ResourceMethod> method: methods.entrySet()) {
                                     if (operation.getKey().equals(method.getKey())) {
                                         List<ValidationError> errorList =
-                                                ResourceValidator.validateWhatMissService(operation.getValue(),
+                                                ResourceValidator.validateWhatMissingService(operation.getValue(),
                                                         method.getValue());
                                         if (!errorList.isEmpty()) {
                                             for (ValidationError error: errorList) {
@@ -195,11 +191,13 @@ public class ServiceValidator {
                                                         }
                                                     }
 
-                                                } else if (error instanceof ValidationError) {
-                                                    dLog.logDiagnostic(kind, serviceNode.getPosition(),
-                                                            ErrorMessages.unimplementedParameterForOperation(
-                                                                    error.getFieldName(),
-                                                                    operation.getKey(), openAPIPathSummary.getPath()));
+                                                } else if (!(error instanceof TypeMismatch)) {
+                                                    if ((error instanceof ValidationError)) {
+                                                        dLog.logDiagnostic(kind, serviceNode.getPosition(),
+                                                                ErrorMessages.unimplementedParameterForOperation(
+                                                                        error.getFieldName(),
+                                                                        operation.getKey(), openAPIPathSummary.getPath()));
+                                                    }
                                                 }
                                             }
                                         }
@@ -225,6 +223,8 @@ public class ServiceValidator {
                                             ResourcePathSummary resourcePathSummary,
                                             Map.Entry<String, ResourceMethod> method,
                                             List<ValidationError> postErrors) {
+
+//        List<ValidationError> postErrors = removeDuplicate(listErr);
 
         if (!postErrors.isEmpty()) {
             for (ValidationError postErr : postErrors) {
@@ -292,4 +292,23 @@ public class ServiceValidator {
                             , method.getKey(), resourcePathSummary.getPath()));
         }
     }
+
+//    private static List<ValidationError> removeDuplicate(List<ValidationError> errorList) {
+//        Iterator<ValidationError> errorIterator = errorList.iterator();
+//        while (errorIterator.hasNext()) {
+//            ValidationError error = errorIterator.next();
+//            for (ValidationError error1: errorList) {
+//                if ((error instanceof TypeMismatch) && (error1 instanceof TypeMismatch)) {
+//                    if (error.getFieldName().equals(error1.getFieldName())) {
+//                        if (((TypeMismatch) error).getTypeBallerinaType().equals(((TypeMismatch) error1).getTypeBallerinaType())) {
+//                            if (((TypeMismatch) error).getTypeJsonSchema().equals(((TypeMismatch) error1).getTypeJsonSchema())) {
+//                                errorIterator.remove();
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return errorList;
+//    }
 }

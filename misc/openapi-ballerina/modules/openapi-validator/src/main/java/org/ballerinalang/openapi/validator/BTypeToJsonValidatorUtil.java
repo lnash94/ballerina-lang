@@ -213,6 +213,8 @@ public  class BTypeToJsonValidatorUtil {
                                                     new OneOfTypeValidation(getRecordName(member.toString()),
                                                             Constants.Type.RECORD, validationErrorListForRecords);
                                             validationErrors.add(oneOfTypeValidation);
+                                            memberIterator.remove();
+                                            iterator.remove();
                                         } else if (validationErrorListForRecords.stream().
                                                 allMatch(item -> item instanceof MissingFieldInBallerinaType)) {
                                             misFieldBallerina.addAll(validationErrorListForRecords);

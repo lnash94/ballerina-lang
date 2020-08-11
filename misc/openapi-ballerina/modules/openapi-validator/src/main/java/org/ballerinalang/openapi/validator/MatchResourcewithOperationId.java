@@ -82,7 +82,9 @@ public class MatchResourcewithOperationId {
                             openAPIPathSummary.getOperations().entrySet().iterator();
                     while (operations.hasNext()) {
                         Map.Entry<String, Operation> operationMap = operations.next();
-                        if (filters.getOperation().contains(operationMap.getValue().getOperationId())) {
+//                        check operationId is null scenario.
+                        if ((filters.getOperation().contains(operationMap.getValue().getOperationId())) ||
+                                operationMap.getValue().getOperationId() == null) {
 //                                    check tag is available if it is null then remove other wise else-if not include
 //                                    tag then remove operations.
                             if (operationMap.getValue().getTags() == null) {

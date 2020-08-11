@@ -21,6 +21,8 @@ import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.PathParameter;
+import io.swagger.v3.oas.models.parameters.QueryParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import org.ballerinalang.openapi.validator.error.MissingFieldInBallerinaType;
 import org.ballerinalang.openapi.validator.error.MissingFieldInJsonSchema;
@@ -136,7 +138,7 @@ public class ResourceValidator {
      * @throws OpenApiValidatorException
      */
 
-    public static List<ValidationError> validateWhatMissService(Operation operation, ResourceMethod resourceMethod)
+    public static List<ValidationError> validateWhatMissingService(Operation operation, ResourceMethod resourceMethod)
             throws OpenApiValidatorException {
         List<ValidationError> validationErrorList = new ArrayList<>();
         Boolean isOParamExit = false;
@@ -145,17 +147,25 @@ public class ResourceValidator {
             List<Parameter> operationParam = operation.getParameters();
             for (Parameter param : operationParam) {
                 isOParamExit = false;
+//                temporary solution for skipping the query parameter, when openApi tool available with query
+//                parameter can remove this if condition
+                if (param instanceof QueryParameter) {
+                    isOParamExit = true;
+                }
                 if (!resourceMethod.getParamNames().isEmpty()) {
                     for (ResourceParameter resourceParam: resourceMethod.getParamNames()) {
-                        if (param.getName().equals(resourceParam.getName())) {
-                            isOParamExit = true;
-                            List<ValidationError> validationErrors =
-                                    BTypeToJsonValidatorUtil.validate(param.getSchema(),
-                                            resourceParam.getParameter().symbol);
-                            if (!validationErrors.isEmpty()) {
-                                validationErrorList.addAll(validationErrors);
+//                        check whether it is path parameter , in future can add query parameter
+                        if (param instanceof PathParameter) {
+                            if (param.getName().equals(resourceParam.getName())) {
+                                isOParamExit = true;
+                                List<ValidationError> validationErrors =
+                                        BTypeToJsonValidatorUtil.validate(param.getSchema(),
+                                                resourceParam.getParameter().symbol);
+                                if (!validationErrors.isEmpty()) {
+                                    validationErrorList.addAll(validationErrors);
+                                }
+                                break;
                             }
-                            break;
                         }
                     }
                 }

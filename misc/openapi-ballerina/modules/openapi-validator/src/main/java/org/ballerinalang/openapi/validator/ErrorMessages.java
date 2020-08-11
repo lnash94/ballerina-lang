@@ -100,7 +100,7 @@ class ErrorMessages {
                                         String method, String path) {
         return String.format("Type mismatching '%s' field in the record type of the parameter '%s' for the method" +
                         " '%s' of the path '%s'.In OpenAPI contract its type is '%s' and resources type is '%s'. ",
-                fieldName, paramName, method,  path, ballerinType, openapiType);
+                fieldName, paramName, method,  path, openapiType , ballerinType);
     }
 
     static String typeMismatchOneOfObject(String fieldName, String paramName, String openapiType, String ballerinType,
