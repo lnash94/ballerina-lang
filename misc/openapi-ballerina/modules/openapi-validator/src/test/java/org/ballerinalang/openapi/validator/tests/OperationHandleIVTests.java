@@ -2,12 +2,12 @@ package org.ballerinalang.openapi.validator.tests;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
+import org.ballerinalang.openapi.validator.ResourceValidator;
 import org.ballerinalang.openapi.validator.error.OneOfTypeValidation;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
-import org.ballerinalang.openapi.validator.OperationToResourceFunction;
 import org.ballerinalang.openapi.validator.ResourceMethod;
 import org.ballerinalang.openapi.validator.error.TypeMismatch;
-import org.ballerinalang.openapi.validator.ValidationError;
+import org.ballerinalang.openapi.validator.error.ValidationError;
 import org.ballerinalang.openapi.validator.ValidatorUtil;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -39,7 +39,7 @@ public class OperationHandleIVTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
         operation = api.getPaths().get("/pets/{petId}").getPost();
-        validationErrors = OperationToResourceFunction.validate(operation, resourceMethod);
+        validationErrors = ResourceValidator.validateWhatMissService(operation, resourceMethod);
         Assert.assertTrue(validationErrors.get(0) instanceof TypeMismatch);
 
     }
@@ -53,9 +53,10 @@ public class OperationHandleIVTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
         operation = api.getPaths().get("/pets/{petId}").getPost();
-        validationErrors = OperationToResourceFunction.validate(operation, resourceMethod);
+        validationErrors = ResourceValidator.validateWhatMissService(operation, resourceMethod);
 //        Assert.assertTrue(validationErrors.get(0) instanceof TypeMismatch);
-        Assert.assertEquals(validationErrors.get(0).getFieldName(), "appilcation/xml");
+//        Assert.assertEquals(validationErrors.get(0).getFieldName(), "appilcation/xml");
+        Assert.assertEquals(validationErrors.get(0).getFieldName(), "bark");
     }
 
     @Test(description = "Operation model has OneOf parameters with request body ")
@@ -67,7 +68,7 @@ public class OperationHandleIVTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
         operation = api.getPaths().get("/pets/{petId}").getPost();
-        validationErrors = OperationToResourceFunction.validate(operation, resourceMethod);
+        validationErrors = ResourceValidator.validateWhatMissService(operation, resourceMethod);
         Assert.assertTrue(validationErrors.get(0) instanceof OneOfTypeValidation);
         Assert.assertEquals(((OneOfTypeValidation) validationErrors.get(0)).getBlockErrors().get(0).getFieldName(), "bark");
     }

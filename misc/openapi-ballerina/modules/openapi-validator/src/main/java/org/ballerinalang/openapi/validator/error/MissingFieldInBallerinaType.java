@@ -19,7 +19,6 @@
 package org.ballerinalang.openapi.validator.error;
 
 import org.ballerinalang.openapi.validator.Constants;
-import org.ballerinalang.openapi.validator.ValidationError;
 
 /**
  * This for identify the missing fields in bVarsymbol against the given json schema.

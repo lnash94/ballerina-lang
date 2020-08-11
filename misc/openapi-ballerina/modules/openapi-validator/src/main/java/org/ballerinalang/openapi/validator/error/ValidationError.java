@@ -1,4 +1,6 @@
-package org.ballerinalang.openapi.validator;
+package org.ballerinalang.openapi.validator.error;
+
+import org.ballerinalang.openapi.validator.Constants;
 
 /**
  * This model for identify the validation errors.

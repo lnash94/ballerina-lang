@@ -26,8 +26,8 @@ import org.ballerinalang.openapi.validator.error.OpenapiServiceValidationError;
 import org.ballerinalang.openapi.validator.ResourceMethod;
 import org.ballerinalang.openapi.validator.error.ResourceValidationError;
 import org.ballerinalang.openapi.validator.error.TypeMismatch;
-import org.ballerinalang.openapi.validator.ValidationError;
-import org.ballerinalang.openapi.validator.ResourceFunctionToOperation;
+import org.ballerinalang.openapi.validator.error.ValidationError;
+import org.ballerinalang.openapi.validator.ResourceValidator;
 import org.ballerinalang.openapi.validator.ValidatorUtil;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -99,7 +99,7 @@ public class ResourceHandleIVTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         resourceMethod = ValidatorTest.getFunction(extractBLangservice, "get");
         operation = api.getPaths().get("/pets/{petId}").getGet();
-        resourceValidationErrors = ResourceFunctionToOperation.validate(operation, resourceMethod);
+        resourceValidationErrors = ResourceValidator.validateWhatMissingResource(operation, resourceMethod);
 //        Assert.assertTrue(resourceValidationErrors.isEmpty());
         Assert.assertEquals(resourceValidationErrors.get(0).getFieldName(), "petId");
 
@@ -113,7 +113,7 @@ public class ResourceHandleIVTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
         operation = api.getPaths().get("/pets/{petId}").getPost();
-        resourceValidationErrors = ResourceFunctionToOperation.validate(operation, resourceMethod);
+        resourceValidationErrors = ResourceValidator.validateWhatMissingResource(operation, resourceMethod);
         Assert.assertTrue(resourceValidationErrors.get(0) instanceof TypeMismatch);
         Assert.assertEquals(resourceValidationErrors.get(0).getFieldName(), "name");
 
@@ -127,7 +127,7 @@ public class ResourceHandleIVTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
         operation = api.getPaths().get("/pets/{petId}").getPost();
-        resourceValidationErrors = ResourceFunctionToOperation.validate(operation, resourceMethod);
+        resourceValidationErrors = ResourceValidator.validateWhatMissingResource(operation, resourceMethod);
         Assert.assertTrue(resourceValidationErrors.get(0) instanceof MissingFieldInJsonSchema);
         Assert.assertEquals(resourceValidationErrors.get(0).getFieldName(), "place");
 
@@ -141,7 +141,7 @@ public class ResourceHandleIVTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
         operation = api.getPaths().get("/pets/{petId}").getPost();
-        resourceValidationErrors = ResourceFunctionToOperation.validate(operation, resourceMethod);
+        resourceValidationErrors = ResourceValidator.validateWhatMissingResource(operation, resourceMethod);
         Assert.assertTrue(resourceValidationErrors.get(0) instanceof TypeMismatch);
         Assert.assertEquals(resourceValidationErrors.get(0).getFieldName(), "name");
 
@@ -156,7 +156,7 @@ public class ResourceHandleIVTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
         operation = api.getPaths().get("/pets/{petId}").getPost();
-        resourceValidationErrors = ResourceFunctionToOperation.validate(operation, resourceMethod);
+        resourceValidationErrors = ResourceValidator.validateWhatMissingResource(operation, resourceMethod);
         Assert.assertTrue(resourceValidationErrors.get(0) instanceof TypeMismatch);
         Assert.assertEquals(resourceValidationErrors.get(0).getFieldName(), "body");
 
@@ -170,7 +170,7 @@ public class ResourceHandleIVTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
         operation = api.getPaths().get("/pets/{petId}").getPost();
-        resourceValidationErrors = ResourceFunctionToOperation.validate(operation, resourceMethod);
+        resourceValidationErrors = ResourceValidator.validateWhatMissingResource(operation, resourceMethod);
         Assert.assertTrue(resourceValidationErrors.get(0) instanceof OneOfTypeValidation);
         Assert.assertEquals(resourceValidationErrors.get(0).getFieldName(), "Dog");
         Assert.assertEquals(((OneOfTypeValidation) resourceValidationErrors.get(0))
@@ -187,7 +187,7 @@ public class ResourceHandleIVTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
         operation = api.getPaths().get("/pets").getPost();
-        resourceValidationErrors = ResourceFunctionToOperation.validate(operation, resourceMethod);
+        resourceValidationErrors = ResourceValidator.validateWhatMissingResource(operation, resourceMethod);
         Assert.assertTrue(resourceValidationErrors.get(0) instanceof OneOfTypeValidation);
         Assert.assertEquals(resourceValidationErrors.get(0).getFieldName(), "Dog");
         Assert.assertEquals(((OneOfTypeValidation) resourceValidationErrors.get(0))
@@ -204,7 +204,7 @@ public class ResourceHandleIVTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
         operation = api.getPaths().get("/pets/{petId}").getPost();
-        resourceValidationErrors = ResourceFunctionToOperation.validate(operation, resourceMethod);
+        resourceValidationErrors = ResourceValidator.validateWhatMissingResource(operation, resourceMethod);
         Assert.assertTrue(resourceValidationErrors.get(0) instanceof TypeMismatch);
         Assert.assertEquals(resourceValidationErrors.get(0).getFieldName(), "name");
     }

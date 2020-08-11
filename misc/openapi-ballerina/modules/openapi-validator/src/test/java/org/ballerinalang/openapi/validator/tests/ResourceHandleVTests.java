@@ -19,11 +19,11 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import org.ballerinalang.openapi.validator.MatchResourcewithOperationId;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
+import org.ballerinalang.openapi.validator.ResourceValidator;
 import org.ballerinalang.openapi.validator.error.OpenapiServiceValidationError;
 import org.ballerinalang.openapi.validator.ResourceMethod;
 import org.ballerinalang.openapi.validator.error.ResourceValidationError;
-import org.ballerinalang.openapi.validator.ValidationError;
-import org.ballerinalang.openapi.validator.ResourceFunctionToOperation;
+import org.ballerinalang.openapi.validator.error.ValidationError;
 import org.ballerinalang.openapi.validator.ValidatorUtil;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -87,7 +87,7 @@ public class ResourceHandleVTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         resourceMethod = ValidatorTest.getFunction(extractBLangservice, "get");
         operation = api.getPaths().get("/pets/{petId}").getGet();
-        resourceValidationErrors = ResourceFunctionToOperation.validate(operation, resourceMethod);
+        resourceValidationErrors = ResourceValidator.validateWhatMissingResource(operation, resourceMethod);
         Assert.assertTrue(resourceValidationErrors.isEmpty());
 
     }
@@ -100,7 +100,7 @@ public class ResourceHandleVTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
         operation = api.getPaths().get("/user").getPost();
-        resourceValidationErrors = ResourceFunctionToOperation.validate(operation, resourceMethod);
+        resourceValidationErrors = ResourceValidator.validateWhatMissingResource(operation, resourceMethod);
         Assert.assertTrue(resourceValidationErrors.isEmpty());
 
     }

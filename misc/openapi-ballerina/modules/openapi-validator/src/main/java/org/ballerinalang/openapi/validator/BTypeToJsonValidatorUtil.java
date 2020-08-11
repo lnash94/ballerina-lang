@@ -26,6 +26,7 @@ import org.ballerinalang.openapi.validator.error.MissingFieldInBallerinaType;
 import org.ballerinalang.openapi.validator.error.MissingFieldInJsonSchema;
 import org.ballerinalang.openapi.validator.error.OneOfTypeValidation;
 import org.ballerinalang.openapi.validator.error.TypeMismatch;
+import org.ballerinalang.openapi.validator.error.ValidationError;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BVarSymbol;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BAnyType;
 import org.wso2.ballerinalang.compiler.semantics.model.types.BArrayType;
@@ -165,13 +166,8 @@ public  class BTypeToJsonValidatorUtil {
                     && schema.getType().equals("boolean")) {
                 isExitType = true;
 
-            } else if (resourceType.getKind().typeName().equals("boolean")
-                    && schema.getType().equals("boolean")) {
-                isExitType = true;
-
-            } else if (resourceType.getKind().typeName().equals("boolean")
-                    && schema.getType().equals("boolean")) {
-
+            } else if (resourceType.getKind().typeName().equals("decimal")
+                    && schema.getType().equals("number")) {
                 isExitType = true;
 
             } else if (resourceType instanceof BUnionType) {
@@ -333,6 +329,7 @@ public  class BTypeToJsonValidatorUtil {
                                     isExitType = true;
                                 }
                             }
+//                            missing fields in ballerina
                             if (!(validationErrorsBa.isEmpty())) {
                                 OneOfTypeValidation oneOfTypeValidation =
                                         new OneOfTypeValidation("Ballerina records",

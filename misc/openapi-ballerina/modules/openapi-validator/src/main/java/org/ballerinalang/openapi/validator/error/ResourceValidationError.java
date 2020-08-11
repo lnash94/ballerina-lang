@@ -17,7 +17,7 @@ package org.ballerinalang.openapi.validator.error;
 
 import org.ballerinalang.util.diagnostic.Diagnostic;
 
-public class ResourceValidationError {
+public class ResourceValidationError  extends ValidationError {
     public Diagnostic.DiagnosticPosition position;
     public String resourceMethod;
     public String resourcePath;

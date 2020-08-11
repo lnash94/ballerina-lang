@@ -19,49 +19,43 @@
 package org.ballerinalang.openapi.validator;
 
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import org.ballerinalang.model.tree.ServiceNode;
+import org.ballerinalang.openapi.validator.error.MissingFieldInBallerinaType;
 import org.ballerinalang.openapi.validator.error.MissingFieldInJsonSchema;
 import org.ballerinalang.openapi.validator.error.OneOfTypeValidation;
 import org.ballerinalang.openapi.validator.error.ResourceValidationError;
 import org.ballerinalang.openapi.validator.error.TypeMismatch;
+import org.ballerinalang.openapi.validator.error.ValidationError;
 import org.ballerinalang.util.diagnostic.Diagnostic;
 import org.ballerinalang.util.diagnostic.DiagnosticLog;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class ResourceValidation {
+public class ServiceValidator {
 
     /**
      *
      * @param openApi
      * @param serviceNode
-     * @param tags
-     * @param operations
-     * @param excludeTags
-     * @param excludeOperations
      * @param kind
      * @param dLog
      * @throws OpenApiValidatorException
      */
     public static void validateResource(OpenAPI openApi,
                                         ServiceNode serviceNode,
-                                        List<String> tags,
-                                        List<String> operations,
-                                        List<String> excludeTags,
-                                        List<String> excludeOperations,
+                                        Filters filters,
                                         Diagnostic.Kind kind,
                                         DiagnosticLog dLog) throws OpenApiValidatorException {
-
-        boolean tagFilteringEnabled = tags.size() > 0;
-        boolean operationFilteringEnabled = operations.size() > 0;
-        boolean excludeTagsFilteringEnabled = excludeTags.size() > 0;
-        boolean excludeOperationFilterEnable = excludeOperations.size() > 0;
-
-
+//        filter openApi operation according to given filters
+        List<OpenAPIPathSummary> openAPIPathSummaries = MatchResourcewithOperationId.filterOpenapi(openApi, filters);
+//        Check all the filtered operations a available at service file
         List<ResourceValidationError> resourceMissingPathMethod =
                 MatchResourcewithOperationId.checkResourceIsAvailable(openApi, serviceNode);
 
@@ -103,62 +97,113 @@ public class ResourceValidation {
                 }
             }
         }
+        if (!openAPIPathSummaries.isEmpty()) {
+            Iterator<ResourcePathSummary> resourcePathSummaryIterator = resourcePathSummaryList.iterator();
+            while (resourcePathSummaryIterator.hasNext()) {
+                Boolean isExit = false;
+                ResourcePathSummary resourcePathSummary = resourcePathSummaryIterator.next();
+                for (OpenAPIPathSummary apiPathSummary: openAPIPathSummaries) {
+                    if (resourcePathSummary.getPath().equals(apiPathSummary.getPath())) {
+                        isExit = true;
+                        if (!(resourcePathSummary.getMethods().isEmpty()) && !(apiPathSummary.getOperations().isEmpty())) {
+                            Iterator<Map.Entry<String, ResourceMethod>> methods =
+                                    resourcePathSummary.getMethods().entrySet().iterator();
+                            while (methods.hasNext()) {
+                                Boolean isMethodExit = false;
+                                Map.Entry<String, ResourceMethod> re_methods = methods.next();
+                                Map<String, Operation> operations = apiPathSummary.getOperations();
+                                for (Map.Entry<String, Operation> operation: operations.entrySet()) {
+                                    if (re_methods.getKey().equals(operation.getKey())) {
+                                        isMethodExit = true;
+                                        break;
+                                    }
+                                }
+                                if (!isMethodExit) {
+                                    methods.remove();
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+                if (!isExit) {
+                    resourcePathSummaryIterator.remove();
+                }
+            }
+
+        }
+
 //        Check with open api  contract
-        Paths openAPIPathSummary = openApi.getPaths();
+//        Paths openAPIPathSummary = openApi.getPaths();
         for (ResourcePathSummary resourcePathSummary : resourcePathSummaryList) {
-            for (Map.Entry<String, PathItem> openApiPath : openAPIPathSummary.entrySet()) {
-                if (resourcePathSummary.getPath().equals(openApiPath.getKey())) {
+            for (OpenAPIPathSummary openApiPath : openAPIPathSummaries) {
+                if (resourcePathSummary.getPath().equals(openApiPath.getPath())) {
                     if (!resourcePathSummary.getMethods().isEmpty()) {
                         Map<String, ResourceMethod> resourceMethods = resourcePathSummary.getMethods();
                         for (Map.Entry<String, ResourceMethod> method: resourceMethods.entrySet()) {
-                            if (method.getKey().equals("get")) {
-                                if (openApiPath.getValue().getGet() != null) {
+                            for (Map.Entry<String, Operation> operation: openApiPath.getOperations().entrySet()) {
+                                if (method.getKey().equals(operation.getKey())) {
                                     List<ValidationError> postErrors =
-                                            ResourceFunctionToOperation.validate(openApiPath.getValue().getGet(),
+                                            ResourceValidator.validateWhatMissingResource(operation.getValue(),
                                                     method.getValue());
                                     generateDlogMessage(kind, dLog, resourcePathSummary, method, postErrors);
                                 }
-                            } else if (method.getKey().equals("post")) {
-                                if (openApiPath.getValue().getPost() != null) {
-                                    List<ValidationError> postErrors =
-                                            ResourceFunctionToOperation.validate(openApiPath.getValue().getPost(),
-                                                    method.getValue());
-                                    generateDlogMessage(kind, dLog, resourcePathSummary, method, postErrors);
-                                }
-                            } else if (method.getKey().equals("put")) {
-                                if (openApiPath.getValue().getPut() != null) {
-                                    List<ValidationError> postErrors =
-                                            ResourceFunctionToOperation.validate(openApiPath.getValue().getPut(),
-                                                    method.getValue());
-                                    generateDlogMessage(kind, dLog, resourcePathSummary, method, postErrors);
-                                }
-                            } else if (method.getKey().equals("delete")) {
-                                if (openApiPath.getValue().getDelete() != null) {
-                                    List<ValidationError> postErrors =
-                                            ResourceFunctionToOperation.validate(openApiPath.getValue().getDelete(),
-                                                    method.getValue());
-                                    generateDlogMessage(kind, dLog, resourcePathSummary, method, postErrors);
-                                }
-                            } else if (method.getKey().equals("patch")) {
-                                if (openApiPath.getValue().getPatch() != null) {
-                                    List<ValidationError> postErrors =
-                                            ResourceFunctionToOperation.validate(openApiPath.getValue().getPatch(),
-                                                    method.getValue());
-                                    generateDlogMessage(kind, dLog, resourcePathSummary, method, postErrors);
-                                }
-                            } else if (method.getKey().equals("head")) {
-                                if (openApiPath.getValue().getHead() != null) {
-                                    List<ValidationError> postErrors =
-                                            ResourceFunctionToOperation.validate(openApiPath.getValue().getHead(),
-                                                    method.getValue());
-                                    generateDlogMessage(kind, dLog, resourcePathSummary, method, postErrors);
-                                }
-                            } else if (method.getKey().equals("options")) {
-                                if (openApiPath.getValue().getOptions() != null) {
-                                    List<ValidationError> postErrors =
-                                            ResourceFunctionToOperation.validate(openApiPath.getValue().getOptions(),
-                                                    method.getValue());
-                                    generateDlogMessage(kind, dLog, resourcePathSummary, method, postErrors);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+//        wise versa open api against to service
+        for (OpenAPIPathSummary openAPIPathSummary: openAPIPathSummaries) {
+            for (ResourcePathSummary resourcePathSummary: resourcePathSummaryList) {
+                if (openAPIPathSummary.getPath().equals(resourcePathSummary.getPath())) {
+                    if (!openAPIPathSummary.getOperations().isEmpty()) {
+                        if (!resourcePathSummary.getMethods().isEmpty()) {
+                            Map<String, Operation> operations = openAPIPathSummary.getOperations();
+                            for (Map.Entry<String, Operation> operation : operations.entrySet()) {
+                                Map<String, ResourceMethod> methods = resourcePathSummary.getMethods();
+                                for (Map.Entry<String, ResourceMethod> method: methods.entrySet()) {
+                                    if (operation.getKey().equals(method.getKey())) {
+                                        List<ValidationError> errorList =
+                                                ResourceValidator.validateWhatMissService(operation.getValue(),
+                                                        method.getValue());
+                                        if (!errorList.isEmpty()) {
+                                            for (ValidationError error: errorList) {
+                                                if (error instanceof MissingFieldInBallerinaType) {
+                                                    dLog.logDiagnostic(kind, serviceNode.getPosition(),
+                                                            ErrorMessages.unimplementedFieldInOperation(
+                                                                    error.getFieldName(),
+                                                                    ((MissingFieldInBallerinaType) error)
+                                                                            .getRecordName(), operation.getKey(),
+                                                                    openAPIPathSummary.getPath()));
+
+                                                } else if (error instanceof OneOfTypeValidation) {
+                                                    if (!((OneOfTypeValidation) error).getBlockErrors().isEmpty()) {
+                                                        List<ValidationError> oneOfErrors =
+                                                                ((OneOfTypeValidation) error).getBlockErrors();
+                                                        for (ValidationError oneOf : oneOfErrors) {
+                                                            if (oneOf instanceof MissingFieldInBallerinaType) {
+                                                                dLog.logDiagnostic(kind, serviceNode.getPosition(),
+                                                                        ErrorMessages.unimplementedFieldInOperation(
+                                                                                oneOf.getFieldName(),
+                                                                                ((MissingFieldInBallerinaType) oneOf)
+                                                                                        .getRecordName(), operation.
+                                                                                        getKey(), openAPIPathSummary.
+                                                                                        getPath()));
+                                                            }
+                                                        }
+                                                    }
+
+                                                } else if (error instanceof ValidationError) {
+                                                    dLog.logDiagnostic(kind, serviceNode.getPosition(),
+                                                            ErrorMessages.unimplementedParameterForOperation(
+                                                                    error.getFieldName(),
+                                                                    operation.getKey(), openAPIPathSummary.getPath()));
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -247,5 +292,4 @@ public class ResourceValidation {
                             , method.getKey(), resourcePathSummary.getPath()));
         }
     }
-
 }

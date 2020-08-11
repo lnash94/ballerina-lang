@@ -21,6 +21,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import org.ballerinalang.openapi.validator.error.MissingFieldInBallerinaType;
 import org.ballerinalang.openapi.validator.error.OneOfTypeValidation;
+import org.ballerinalang.openapi.validator.error.ValidationError;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +63,7 @@ public class OperationToResourceFunction {
         if (operation.getRequestBody() != null) {
 
             List<ResourceParameter> resourceParam = resourceMethod.getParamNames();
-            Map<String, Schema> requestBodySchemas = ResourceFunctionToOperation.getOperationRequestBody(operation);
+            Map<String, Schema> requestBodySchemas = ResourceValidator.getOperationRequestBody(operation);
             for (Map.Entry<String, Schema> operationRB: requestBodySchemas.entrySet()) {
                 isOParamExit = false;
                 if (!resourceParam.isEmpty()){

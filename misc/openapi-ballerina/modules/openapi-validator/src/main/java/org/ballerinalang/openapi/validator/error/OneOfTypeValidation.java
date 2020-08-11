@@ -19,7 +19,6 @@
 package org.ballerinalang.openapi.validator.error;
 
 import org.ballerinalang.openapi.validator.Constants;
-import org.ballerinalang.openapi.validator.ValidationError;
 
 import java.util.List;
 

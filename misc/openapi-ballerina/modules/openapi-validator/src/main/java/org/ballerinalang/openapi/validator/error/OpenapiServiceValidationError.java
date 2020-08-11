@@ -15,30 +15,34 @@
  */
 package org.ballerinalang.openapi.validator.error;
 
+import org.ballerinalang.openapi.validator.OpenAPIPathSummary;
 import org.ballerinalang.util.diagnostic.Diagnostic;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class OpenapiServiceValidationError {
+public class OpenapiServiceValidationError extends ValidationError {
     Diagnostic.DiagnosticPosition position;
     String serviceOperation;
     String servicePath;
     List<String> tags;
+    OpenAPIPathSummary openAPIPathSummary;
 
     public OpenapiServiceValidationError() {
         this.position = null;
         this.serviceOperation = null;
         this.servicePath = null;
         this.tags = new ArrayList<>();
+        this.openAPIPathSummary = new OpenAPIPathSummary();
     }
 
     public OpenapiServiceValidationError(Diagnostic.DiagnosticPosition position, String serviceOperation,
-                                         String servicePath, List<String> tags) {
+                                         String servicePath, List<String> tags, OpenAPIPathSummary openAPIPathSummary) {
         this.position = position;
         this.serviceOperation = serviceOperation;
         this.servicePath = servicePath;
         this.tags = tags;
+        this.openAPIPathSummary = openAPIPathSummary;
     }
 
 
@@ -63,5 +67,9 @@ public class OpenapiServiceValidationError {
 
     public List<String> getTags() {
         return tags;
+    }
+
+    public OpenAPIPathSummary getOpenAPIPathSummary() {
+        return this.openAPIPathSummary;
     }
 }
