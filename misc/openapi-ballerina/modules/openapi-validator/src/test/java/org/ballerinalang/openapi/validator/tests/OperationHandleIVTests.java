@@ -2,13 +2,13 @@ package org.ballerinalang.openapi.validator.tests;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
-import org.ballerinalang.openapi.validator.ResourceValidator;
-import org.ballerinalang.openapi.validator.error.OneOfTypeValidation;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
 import org.ballerinalang.openapi.validator.ResourceMethod;
+import org.ballerinalang.openapi.validator.ResourceValidator;
+import org.ballerinalang.openapi.validator.ValidatorUtil;
+import org.ballerinalang.openapi.validator.error.OneOfTypeValidation;
 import org.ballerinalang.openapi.validator.error.TypeMismatch;
 import org.ballerinalang.openapi.validator.error.ValidationError;
-import org.ballerinalang.openapi.validator.ValidatorUtil;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
@@ -20,6 +20,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Test for operations with services.
+ */
 public class OperationHandleIVTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/project-based-tests/src/operationHandle/")
             .toAbsolutePath();
@@ -70,6 +73,7 @@ public class OperationHandleIVTests {
         operation = api.getPaths().get("/pets/{petId}").getPost();
         validationErrors = ResourceValidator.validateWhatMissingService(operation, resourceMethod);
         Assert.assertTrue(validationErrors.get(0) instanceof OneOfTypeValidation);
-        Assert.assertEquals(((OneOfTypeValidation) validationErrors.get(0)).getBlockErrors().get(0).getFieldName(), "bark");
+        Assert.assertEquals(((OneOfTypeValidation) validationErrors.get(0)).
+                getBlockErrors().get(0).getFieldName(), "bark");
     }
 }

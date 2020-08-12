@@ -20,8 +20,8 @@ import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import org.ballerinalang.openapi.validator.BTypeToJsonValidatorUtil;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
-import org.ballerinalang.openapi.validator.error.ValidationError;
 import org.ballerinalang.openapi.validator.ValidatorUtil;
+import org.ballerinalang.openapi.validator.error.ValidationError;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BVarSymbol;
@@ -62,7 +62,8 @@ public class ValidValidatorUtilTests {
     public void testTypeMismatchArrayType() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("validTests/validTypeMisMatchArrayType.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/validTests/validTypeMisMatchArrayType.bal");
+        bLangPackage = ValidatorTest.getBlangPackage(
+                "recordValidation/ballerina/validTests/validTypeMisMatchArrayType.bal");
         extractSchema = ValidatorTest.getComponet(api, "ValidTypeMisMatchArray");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
 
@@ -73,7 +74,8 @@ public class ValidValidatorUtilTests {
     public void testTypeMisMatchNestedArray() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("validTests/validTypeMisMatchNestedArrayType.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/validTests/validTypeMisMatchNestedArrayType.bal");
+        bLangPackage = ValidatorTest.getBlangPackage(
+                "recordValidation/ballerina/validTests/validTypeMisMatchNestedArrayType.bal");
         extractSchema = ValidatorTest.getComponet(api, "ValidTypeMisMatchNestedArray");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
 

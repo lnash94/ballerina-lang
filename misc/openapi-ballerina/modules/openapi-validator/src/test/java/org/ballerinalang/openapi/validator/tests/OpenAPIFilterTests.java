@@ -1,18 +1,13 @@
 package org.ballerinalang.openapi.validator.tests;
 
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
 import org.ballerinalang.openapi.validator.Filters;
 import org.ballerinalang.openapi.validator.OpenAPIFilter;
 import org.ballerinalang.openapi.validator.OpenAPIPathSummary;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
-import org.ballerinalang.openapi.validator.ResourceMethod;
 import org.ballerinalang.openapi.validator.ValidatorUtil;
-import org.ballerinalang.openapi.validator.error.ValidationError;
 import org.ballerinalang.util.diagnostic.Diagnostic;
 import org.testng.annotations.Test;
-import org.wso2.ballerinalang.compiler.tree.BLangPackage;
-import org.wso2.ballerinalang.compiler.tree.BLangService;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,11 +39,9 @@ public class OpenAPIFilterTests {
 
         excludeTag.add("pets");
 
-        Filters filters = new Filters(tag, excludeTag, operation, excludeOperation, kind );
+        Filters filters = new Filters(tag, excludeTag, operation, excludeOperation, kind);
         List<OpenAPIPathSummary> results = OpenAPIFilter.filterOpenapi(api, filters);
         System.out.println(results);
 
     }
-
-
 }

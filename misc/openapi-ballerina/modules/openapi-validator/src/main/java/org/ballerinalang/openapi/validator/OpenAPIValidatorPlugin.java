@@ -189,7 +189,8 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
             if (contractURI != null) {
                 try {
                     Filters filters = new Filters(tags, excludeTags, operations, excludeOperations, kind);
-                    OpenAPI openAPI = ValidatorUtil.parseOpenAPIFile(contractURI);
+//                    OpenAPI openAPI = ValidatorUtil.parseOpenAPIFile(contractURI);
+                    OpenAPI openAPI = ServiceValidator.parseOpenAPIFile(contractURI);
                     ServiceValidator.validateResource(openAPI, serviceNode, filters,
                             kind, dLog);
 

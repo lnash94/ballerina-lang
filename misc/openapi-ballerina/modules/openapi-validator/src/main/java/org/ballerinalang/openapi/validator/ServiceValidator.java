@@ -20,6 +20,8 @@ package org.ballerinalang.openapi.validator;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import org.ballerinalang.model.tree.ServiceNode;
 import org.ballerinalang.openapi.validator.error.MissingFieldInBallerinaType;
 import org.ballerinalang.openapi.validator.error.MissingFieldInJsonSchema;
@@ -31,6 +33,9 @@ import org.ballerinalang.openapi.validator.error.ValidationError;
 import org.ballerinalang.util.diagnostic.Diagnostic;
 import org.ballerinalang.util.diagnostic.DiagnosticLog;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +47,7 @@ import java.util.Map;
 public class ServiceValidator {
 
     /**
-     * Validation with given resource and openApi contract file
+     * Validation with given resource and openApi contract file.
      * @param openApi       OpenApi Object
      * @param serviceNode   serviceNode of ballerina service
      * @param kind
@@ -294,8 +299,8 @@ public class ServiceValidator {
 
     /**
      *  This for finding out the kind of TypeMisMatching.
-     * @param kind
-     * @param dLog
+     * @param kind  Dlog kind
+     * @param dLog  Dlog
      * @param resourcePathSummary
      * @param method
      * @param postErr
@@ -325,5 +330,35 @@ public class ServiceValidator {
                                 , method.getKey(), resourcePathSummary.getPath()));
             }
         }
+    }
+
+    /**
+     * Parse and get the {@link OpenAPI} for the given OpenAPI contract.
+     *
+     * @param definitionURI URI for the OpenAPI contract
+     * @return {@link OpenAPI} OpenAPI model
+     * @throws OpenApiValidatorException in case of exception
+     */
+    public static OpenAPI parseOpenAPIFile(String definitionURI) throws OpenApiValidatorException {
+        Path contractPath = Paths.get(definitionURI);
+        ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        parseOptions.setResolveFully(true);
+        parseOptions.setFlatten(true);
+
+        if (!Files.exists(contractPath)) {
+            throw new OpenApiValidatorException(ErrorMessages.invalidFilePath(definitionURI));
+        }
+
+        if (!(definitionURI.endsWith(".yaml") || definitionURI.endsWith(".json"))) {
+            throw new OpenApiValidatorException(ErrorMessages.invalidFile());
+        }
+
+        OpenAPI api = new OpenAPIV3Parser().read(definitionURI, null, parseOptions);
+        if (api == null) {
+            throw new OpenApiValidatorException(ErrorMessages.parserException(definitionURI));
+        }
+
+        return api;
     }
 }

@@ -39,7 +39,7 @@ public class ServiceValidationTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         kind = Diagnostic.Kind.ERROR;
         dLog = ValidatorTest.getDiagnostic("serviceValidator/ballerina/valid/petstore.bal");
-        filters = new Filters(tag,excludeTag,operation, excludeOperation, kind);
+        filters = new Filters(tag, excludeTag, operation, excludeOperation, kind);
         ServiceValidator.validateResource(api, extractBLangservice, filters, kind, dLog);
     }
     @Test(description = "test for undocumented Method in contract")
@@ -50,11 +50,9 @@ public class ServiceValidationTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         kind = Diagnostic.Kind.ERROR;
         dLog = ValidatorTest.getDiagnostic("serviceValidator/ballerina/valid/petstoreMethod.bal");
-        filters = new Filters(tag,excludeTag,operation, excludeOperation, kind);
+        filters = new Filters(tag, excludeTag, operation, excludeOperation, kind);
         ServiceValidator.validateResource(api, extractBLangservice, filters, kind, dLog);
 
-        //        ServiceValidator.validateResource(api, extractBLangservice, tag, operation, excludeTag, excludeOperation,
-//                kind, dLog);
     }
 
     @Test(description = "test for undocumented TypeMisMatch in contract")
@@ -65,7 +63,7 @@ public class ServiceValidationTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         kind = Diagnostic.Kind.ERROR;
         dLog = ValidatorTest.getDiagnostic("serviceValidator/ballerina/valid/petstoreParameterTM.bal");
-        filters = new Filters(tag,excludeTag,operation, excludeOperation, kind);
+        filters = new Filters(tag, excludeTag, operation, excludeOperation, kind);
         ServiceValidator.validateResource(api, extractBLangservice, filters, kind, dLog);
     }
 
@@ -77,7 +75,7 @@ public class ServiceValidationTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         kind = Diagnostic.Kind.ERROR;
         dLog = ValidatorTest.getDiagnostic("serviceValidator/ballerina/invalid/petstoreRecordType.bal");
-        filters = new Filters(tag,excludeTag,operation, excludeOperation, kind);
+        filters = new Filters(tag, excludeTag, operation, excludeOperation, kind);
         ServiceValidator.validateResource(api, extractBLangservice, filters, kind, dLog);
     }
     @Test(description = "test for undocumented record field  in contract")
@@ -88,7 +86,7 @@ public class ServiceValidationTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         kind = Diagnostic.Kind.ERROR;
         dLog = ValidatorTest.getDiagnostic("serviceValidator/ballerina/invalid/petstoreRecordFieldMiss.bal");
-        filters = new Filters(tag,excludeTag,operation, excludeOperation, kind);
+        filters = new Filters(tag, excludeTag, operation, excludeOperation, kind);
         ServiceValidator.validateResource(api, extractBLangservice, filters, kind, dLog);
     }
 
@@ -100,7 +98,7 @@ public class ServiceValidationTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         kind = Diagnostic.Kind.ERROR;
         dLog = ValidatorTest.getDiagnostic("serviceValidator/ballerina/invalid/petstorePathParameter.bal");
-        filters = new Filters(tag,excludeTag,operation, excludeOperation, kind);
+        filters = new Filters(tag, excludeTag, operation, excludeOperation, kind);
         ServiceValidator.validateResource(api, extractBLangservice, filters, kind, dLog);
     }
 
@@ -112,7 +110,7 @@ public class ServiceValidationTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         kind = Diagnostic.Kind.ERROR;
         dLog = ValidatorTest.getDiagnostic("serviceValidator/ballerina/invalid/oneOf.bal");
-        filters = new Filters(tag,excludeTag,operation, excludeOperation, kind);
+        filters = new Filters(tag, excludeTag, operation, excludeOperation, kind);
         ServiceValidator.validateResource(api, extractBLangservice, filters, kind, dLog);
     }
 
@@ -124,7 +122,7 @@ public class ServiceValidationTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         kind = Diagnostic.Kind.ERROR;
         dLog = ValidatorTest.getDiagnostic("serviceValidator/ballerina/invalid/oneOf-scenario02.bal");
-        filters = new Filters(tag,excludeTag,operation, excludeOperation, kind);
+        filters = new Filters(tag, excludeTag, operation, excludeOperation, kind);
         ServiceValidator.validateResource(api, extractBLangservice, filters, kind, dLog);
     }
 
@@ -136,7 +134,7 @@ public class ServiceValidationTests {
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         kind = Diagnostic.Kind.ERROR;
         dLog = ValidatorTest.getDiagnostic("serviceValidator/ballerina/invalid/oneOf-scenario03.bal");
-        filters = new Filters(tag,excludeTag,operation, excludeOperation, kind);
+        filters = new Filters(tag, excludeTag, operation, excludeOperation, kind);
         ServiceValidator.validateResource(api, extractBLangservice, filters, kind, dLog);
     }
 }

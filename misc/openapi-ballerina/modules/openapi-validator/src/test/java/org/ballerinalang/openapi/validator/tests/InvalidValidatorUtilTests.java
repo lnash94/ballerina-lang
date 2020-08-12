@@ -20,13 +20,13 @@ import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import org.ballerinalang.openapi.validator.BTypeToJsonValidatorUtil;
 import org.ballerinalang.openapi.validator.Constants;
+import org.ballerinalang.openapi.validator.OpenApiValidatorException;
+import org.ballerinalang.openapi.validator.ValidatorUtil;
 import org.ballerinalang.openapi.validator.error.MissingFieldInBallerinaType;
 import org.ballerinalang.openapi.validator.error.MissingFieldInJsonSchema;
 import org.ballerinalang.openapi.validator.error.OneOfTypeValidation;
-import org.ballerinalang.openapi.validator.OpenApiValidatorException;
 import org.ballerinalang.openapi.validator.error.TypeMismatch;
 import org.ballerinalang.openapi.validator.error.ValidationError;
-import org.ballerinalang.openapi.validator.ValidatorUtil;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.ballerinalang.compiler.semantics.model.symbols.BVarSymbol;
@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Unit tests for BJsonSchemaUtil Invalid tests.
+ * Unit tests for BTypeToJsonSchema Invalid tests.
  */
 public class InvalidValidatorUtilTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/project-based-tests/src/recordValidation" +
@@ -54,7 +54,8 @@ public class InvalidValidatorUtilTests {
     public void testMissingFieldInJsonSchema() throws UnsupportedEncodingException, OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("invalidTests/missingFieldInJsonSchema.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/missingFieldInJsonSchema.bal");
+        bLangPackage = ValidatorTest.getBlangPackage(
+                "recordValidation/ballerina/invalidTests/missingFieldInJsonSchema.bal");
         extractSchema = ValidatorTest.getComponet(api, "MissingFieldInJsonSchema");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
         validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
@@ -68,7 +69,8 @@ public class InvalidValidatorUtilTests {
     public void testMissingFieldInBallerinaType() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("invalidTests/missingFieldInBallerinaType.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/missingFieldInBallerinaType.bal");
+        bLangPackage = ValidatorTest.getBlangPackage(
+                "recordValidation/ballerina/invalidTests/missingFieldInBallerinaType.bal");
         extractSchema = ValidatorTest.getComponet(api, "MissingFieldInBallerinaType");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
         validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
@@ -81,7 +83,8 @@ public class InvalidValidatorUtilTests {
     public void testTypeMismatch() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("invalidTests/typeMisMatch.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/typeMisMatch.bal");
+        bLangPackage = ValidatorTest.getBlangPackage(
+                "recordValidation/ballerina/invalidTests/typeMisMatch.bal");
         extractSchema = ValidatorTest.getComponet(api, "TypeMisMatch");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
         validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
@@ -97,7 +100,8 @@ public class InvalidValidatorUtilTests {
     public void testTypeMismatchArray() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("invalidTests/typeMisMatchArray.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/typeMisMatchArray.bal");
+        bLangPackage = ValidatorTest.getBlangPackage(
+                "recordValidation/ballerina/invalidTests/typeMisMatchArray.bal");
         extractSchema = ValidatorTest.getComponet(api, "TypeMisMatchArray");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
         validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
@@ -113,7 +117,8 @@ public class InvalidValidatorUtilTests {
     public void testTypeMismatchArrayType() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("invalidTests/typeMisMatchArrayType.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/typeMisMatchArrayType.bal");
+        bLangPackage = ValidatorTest.getBlangPackage(
+                "recordValidation/ballerina/invalidTests/typeMisMatchArrayType.bal");
         extractSchema = ValidatorTest.getComponet(api, "TypeMisMatchArrayType");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
         validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
@@ -128,7 +133,8 @@ public class InvalidValidatorUtilTests {
     public void testTypeMisMatchNestedArray() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("invalidTests/typeMisMatchNestedArrayType.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/typeMisMatchNestedArrayType.bal");
+        bLangPackage = ValidatorTest.getBlangPackage(
+                "recordValidation/ballerina/invalidTests/typeMisMatchNestedArrayType.bal");
         extractSchema = ValidatorTest.getComponet(api, "TypeMisMatchNestedArray");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
         validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
@@ -142,7 +148,8 @@ public class InvalidValidatorUtilTests {
     public void testRecordArray() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("invalidTests/recordTypeArray.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/recordTypeArray.bal");
+        bLangPackage = ValidatorTest.getBlangPackage(
+                "recordValidation/ballerina/invalidTests/recordTypeArray.bal");
         extractSchema = ValidatorTest.getComponet(api, "RecordTypeArray");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
         validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
@@ -157,7 +164,8 @@ public class InvalidValidatorUtilTests {
     public void testNestedRecord() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("invalidTests/nestedRecord.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/nestedRecord.bal");
+        bLangPackage = ValidatorTest.getBlangPackage(
+                "recordValidation/ballerina/invalidTests/nestedRecord.bal");
         extractSchema = ValidatorTest.getComponet(api, "NestedRecord");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
         validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
@@ -172,7 +180,8 @@ public class InvalidValidatorUtilTests {
     public void testNested4Record() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("invalidTests/nested4Record.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/nested4Record.bal");
+        bLangPackage = ValidatorTest.getBlangPackage(
+                "recordValidation/ballerina/invalidTests/nested4Record.bal");
         extractSchema = ValidatorTest.getComponet(api, "FourNestedComponent");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
         validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
@@ -187,7 +196,8 @@ public class InvalidValidatorUtilTests {
     public void testOneOfTypewithPrimitiveData() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("invalidTests/primitive/oneOfPrimitive.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/primitive/oneOf.bal");
+        bLangPackage = ValidatorTest.getBlangPackage(
+                "recordValidation/ballerina/invalidTests/primitive/oneOf.bal");
         ComposedSchema extractSchema =
                 (ComposedSchema) api.getPaths().get("/oneOfRequestBody").getPost().getRequestBody().
                         getContent().get("application/json").getSchema();
@@ -222,7 +232,8 @@ public class InvalidValidatorUtilTests {
     public void testOneOfTypeMistMatch() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("invalidTests/oneOf/oneOfTypeMismatch.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/oneOf/oneOfTypeMismatch.bal");
+        bLangPackage = ValidatorTest.getBlangPackage(
+                "recordValidation/ballerina/invalidTests/oneOf/oneOfTypeMismatch.bal");
         ComposedSchema extractSchema =
                 (ComposedSchema) api.getPaths().get("/oneOfRequestBody").getPost().getRequestBody().getContent().
                         get("application/json").getSchema();
@@ -242,7 +253,8 @@ public class InvalidValidatorUtilTests {
     public void testOneOfMisJson() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("invalidTests/oneOf/oneOfMisFieldsJson.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/oneOf/oneOfMisFieldsJson.bal");
+        bLangPackage = ValidatorTest.getBlangPackage(
+                "recordValidation/ballerina/invalidTests/oneOf/oneOfMisFieldsJson.bal");
         ComposedSchema extractSchema =
                 (ComposedSchema) api.getPaths().get("/oneOfRequestBody").getPost().getRequestBody().getContent().
                         get("application/json").getSchema();
@@ -255,11 +267,13 @@ public class InvalidValidatorUtilTests {
                 "place");
 
     }
+
     @Test(description = "Test for missing fields in ballerina when oneOf type has")
     public void testOneOfMisBal() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("invalidTests/oneOf/oneOfBalRecord.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/oneOf/oneOfBalRecord.bal");
+        bLangPackage = ValidatorTest.getBlangPackage(
+                "recordValidation/ballerina/invalidTests/oneOf/oneOfBalRecord.bal");
         ComposedSchema extractSchema =
                 (ComposedSchema) api.getPaths().get("/oneOfRequestBody").getPost().getRequestBody().getContent().
                         get("application/json").getSchema();

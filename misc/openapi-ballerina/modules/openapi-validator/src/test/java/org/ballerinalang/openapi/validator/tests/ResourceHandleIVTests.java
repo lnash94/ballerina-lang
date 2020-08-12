@@ -19,16 +19,16 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.Schema;
 import org.ballerinalang.openapi.validator.MatchResourcewithOperationId;
+import org.ballerinalang.openapi.validator.OpenApiValidatorException;
+import org.ballerinalang.openapi.validator.ResourceMethod;
+import org.ballerinalang.openapi.validator.ResourceValidator;
+import org.ballerinalang.openapi.validator.ValidatorUtil;
 import org.ballerinalang.openapi.validator.error.MissingFieldInJsonSchema;
 import org.ballerinalang.openapi.validator.error.OneOfTypeValidation;
-import org.ballerinalang.openapi.validator.OpenApiValidatorException;
 import org.ballerinalang.openapi.validator.error.OpenapiServiceValidationError;
-import org.ballerinalang.openapi.validator.ResourceMethod;
 import org.ballerinalang.openapi.validator.error.ResourceValidationError;
 import org.ballerinalang.openapi.validator.error.TypeMismatch;
 import org.ballerinalang.openapi.validator.error.ValidationError;
-import org.ballerinalang.openapi.validator.ResourceValidator;
-import org.ballerinalang.openapi.validator.ValidatorUtil;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
@@ -40,7 +40,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * Test for resource validate with operation model in MatchResourcewithOperationId function checkOperationIsAvailable
+ * and resource Validator validateWhatMissingResource function.
+ */
 public class ResourceHandleIVTests {
     private static final Path RES_DIR = Paths.get("src/test/resources/project-based-tests/src/resourceHandle/")
             .toAbsolutePath();
