@@ -37,12 +37,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * This for finding out the all the filtered operations are documented as services in the ballerina file and all the
+ * ballerina services are documented in the contract yaml file.
+ */
 public class MatchResourcewithOperationId {
     /**
-     *
-     * @param openApi
-     * @param filters
-     * @return
+     * Filter all the operations according to the given filters.
+     * @param openApi       Openapi Object
+     * @param filters       Filter Object
+     * @return              List of OpenApiPathSummary
      */
     public static List<OpenAPIPathSummary> filterOpenapi(OpenAPI openApi,
                                                          Filters filters) {
@@ -56,15 +60,6 @@ public class MatchResourcewithOperationId {
 
 
 //        check based on the method and path filters
-//        1. filter operation
-//              1.1 filter priority
-//                  * if tag filter enable -> out put  operation with dedicated tag
-//                  * if operation filter enable -> out put operation with given name
-//                  * if exclude tag filter enable -> out put all operation negation of tags
-//                  * if exclude operation filter enable ->out put all operation expected that operation
-//                  * if tag + operation -> out put operation with tag enable and given operation
-//                  * if tag + exclude operation  -> out put operation that negation of every operation with tag and not including given operation
-//                  * if operation + exclude tag -> all operations that not in exclude tags
 
         Iterator<OpenAPIPathSummary> openAPIIter = openAPIPathSummaries.iterator();
         while (openAPIIter.hasNext()) {
@@ -106,7 +101,6 @@ public class MatchResourcewithOperationId {
 //                                    check tag is available
                             if (operationMap.getValue().getTags() != null) {
                                 if (!Collections.disjoint(filters.getExcludeTag(), operationMap.getValue().getTags())) {
-//                                        remove operation
                                     operationIter.remove();
                                 }
                             }
@@ -124,7 +118,7 @@ public class MatchResourcewithOperationId {
                         }
                     }
                 }
-            } else if (excludeOperationFilteringEnable){
+            } else if (excludeOperationFilteringEnable) {
                 // If exclude tags filtering available validate only the filtered exclude operations grouped by
                 // given exclude tags.
                 // Else If tags filtering available validate only the operations that filtered by exclude
@@ -136,10 +130,8 @@ public class MatchResourcewithOperationId {
                     while (operationIter.hasNext()) {
                         Map.Entry<String, Operation> operationMap = operationIter.next();
                         if (!filters.getExcludeOperation().contains(operationMap.getValue().getOperationId())) {
-//                                    check tag is available
                             if (operationMap.getValue().getTags() != null) {
                                 if (!Collections.disjoint(filters.getExcludeTag(), operationMap.getValue().getTags())) {
-//                                        remove operation
                                     operationIter.remove();
                                 }
                             } else {
@@ -160,7 +152,6 @@ public class MatchResourcewithOperationId {
                             if (operationMap.getValue().getTags() == null) {
                                 operations.remove();
                             } else if (Collections.disjoint(filters.getTag(), operationMap.getValue().getTags())) {
-//                                        remove operation
                                 operations.remove();
                             }
                         } else {
@@ -191,7 +182,6 @@ public class MatchResourcewithOperationId {
                         if (operationMap.getValue().getTags() == null) {
                             break;
                         } else if (!Collections.disjoint(filters.getExcludeTag(), operationMap.getValue().getTags())) {
-//                                        remove operation
                             operations.remove();
                         }
                     }
@@ -207,7 +197,6 @@ public class MatchResourcewithOperationId {
                         if (operationMap.getValue().getTags() == null) {
                             operations.remove();
                         } else if (Collections.disjoint(filters.getTag(), operationMap.getValue().getTags())) {
-//                                        remove operation
                             operations.remove();
                         }
                     }
@@ -222,26 +211,24 @@ public class MatchResourcewithOperationId {
 
 
     /**
-     * Checking the available of resource function in openApi contract
+     * Checking the available of resource function in openApi contract.
      * @param openAPI         openApi contract object
      * @param serviceNode       resource service node
      * @return                  validation Error list with ResourceValidationError type
      */
 
-    public static List<ResourceValidationError> checkResourceIsAvailable(OpenAPI openAPI, ServiceNode serviceNode) {
+    public static List<ResourceValidationError> checkOperationIsAvailable(OpenAPI openAPI, ServiceNode serviceNode) {
         List<ResourceValidationError> resourceValidationErrorList = new ArrayList<>();
         List<ResourcePathSummary> resourcePathSummaries = summarizeResources(serviceNode);
         List<OpenAPIPathSummary> openAPISummaries = summarizeOpenAPI(openAPI);
-        Boolean isExit = false;
 //      Check given path with its methods has documented in OpenApi contract
         for (ResourcePathSummary resourcePathSummary: resourcePathSummaries) {
-            isExit = false;
+            Boolean isExit = false;
             String resourcePath = resourcePathSummary.getPath();
             Map<String, ResourceMethod> resourcePathMethods = resourcePathSummary.getMethods();
-            List<String> servicePathOperations = new ArrayList<>();
             for (OpenAPIPathSummary openAPIPathSummary : openAPISummaries) {
                 String servicePath = openAPIPathSummary.getPath();
-                servicePathOperations = openAPIPathSummary.getAvailableOperations();
+                List<String> servicePathOperations = openAPIPathSummary.getAvailableOperations();
                 if (resourcePath.equals(servicePath)) {
                     isExit = true;
                     if ((!servicePathOperations.isEmpty()) && (!resourcePathMethods.isEmpty())) {
@@ -270,23 +257,22 @@ public class MatchResourcewithOperationId {
                 resourceValidationErrorList.add(resourceValidationError);
             }
         }
-    return resourceValidationErrorList;
+        return resourceValidationErrorList;
     }
 
     /**
-     * Checking the documented services are available at the resource file
-     * @param openAPI           openApi contract object
+     * Checking the documented services are available at the resource file.
+     * @param openAPISummaries           openApi contract object
      * @param serviceNode       resource file service
      * @return                  validation error list type with OpenAPIServiceValidationError
      */
-    public static List<OpenapiServiceValidationError> checkServiceAvailable(OpenAPI openAPI, ServiceNode serviceNode) {
+    public static List<OpenapiServiceValidationError> checkServiceAvailable(List<OpenAPIPathSummary> openAPISummaries,
+                                                                            ServiceNode serviceNode) {
         List<OpenapiServiceValidationError> validationErrors = new ArrayList<>();
         List<ResourcePathSummary> resourcePathSummaries = summarizeResources(serviceNode);
-        List<OpenAPIPathSummary> openAPISummaries = summarizeOpenAPI(openAPI);
-        Boolean isServiceExit = false;
 //        check the contract paths are available at the resource
         for (OpenAPIPathSummary openAPIPathSummary: openAPISummaries) {
-            isServiceExit = false;
+            Boolean isServiceExit = false;
             for (ResourcePathSummary resourcePathSummary: resourcePathSummaries) {
                 if (openAPIPathSummary.getPath().equals(resourcePathSummary.getPath())) {
                     isServiceExit = true;
@@ -323,13 +309,13 @@ public class MatchResourcewithOperationId {
                 validationErrors.add(openapiServiceValidationError);
             }
         }
-
         return validationErrors;
     }
 
     /**
      * Extract the details to be validated from the resource.
      * @param serviceNode         service node
+     * @return List of ResourcePathSummary
      */
     public static List<ResourcePathSummary>  summarizeResources(ServiceNode serviceNode) {
         // Iterate resources available in a service and extract details to be validated.
@@ -386,7 +372,9 @@ public class MatchResourcewithOperationId {
                                         pathPos = path.getPosition();
                                     }
                                 }
-                            } else if (contractAttr.equals(Constants.METHODS) || contractAttr.equals(Constants.METHOD)) {
+                            } else if (contractAttr.equals(Constants.METHODS) ||
+                                    contractAttr.equals(Constants.METHOD)) {
+
                                 if (valueExpr instanceof BLangListConstructorExpr) {
                                     BLangListConstructorExpr methodSet = (BLangListConstructorExpr) valueExpr;
                                     for (BLangExpression methodExpr : methodSet.exprs) {
@@ -410,14 +398,13 @@ public class MatchResourcewithOperationId {
                     }
                     Boolean isPathExit = false;
                     if (!resourceSummaryList.isEmpty()) {
-
-                        for (ResourcePathSummary resourcePathSummary1 : resourceSummaryList){
+                        for (ResourcePathSummary resourcePathSummary1 : resourceSummaryList) {
                             isPathExit = false;
                             if (methodPath != null) {
                                 if (methodPath.equals(resourcePathSummary1.getPath())) {
                                     setValuesResourceMethods(resource, resourceMethod, methodName, methodPos, body,
                                             resourcePathSummary1);
-                                    isPathExit =true;
+                                    isPathExit = true;
                                     break;
                                 }
                             }
@@ -465,6 +452,7 @@ public class MatchResourcewithOperationId {
     /**
      * Summarize openAPI contract paths to easily access details to validate.
      * @param contract                openAPI contract
+     * @return List of summarized OpenAPIPathSummary
      */
     public static List<OpenAPIPathSummary>   summarizeOpenAPI(OpenAPI contract) {
         List<OpenAPIPathSummary> openAPISummaries = new ArrayList<>();
@@ -518,6 +506,38 @@ public class MatchResourcewithOperationId {
     private static void addOpenapiSummary(OpenAPIPathSummary openAPISummary, String get, Operation get2) {
         openAPISummary.addAvailableOperation(get);
         openAPISummary.addOperation(get, get2);
+    }
+
+    /**
+     * remove operations based on the missing errors.
+     * @param openAPISummaries      List of OpenApiPathSummary
+     * @param missingPathInResource Error List of missing operation
+     * @return Filtered List with OpenAPiPathSummary
+     */
+    public static List<OpenAPIPathSummary> removeUndocumentedPath(List<OpenAPIPathSummary> openAPISummaries,
+                                                                  List<OpenapiServiceValidationError>
+                                                                          missingPathInResource) {
+        if (!openAPISummaries.isEmpty()) {
+            Iterator<OpenAPIPathSummary> openAPIPathIterator = openAPISummaries.iterator();
+            while (openAPIPathIterator.hasNext()) {
+                OpenAPIPathSummary openAPIPathSummary = openAPIPathIterator.next();
+                if (!missingPathInResource.isEmpty()) {
+                    for (OpenapiServiceValidationError error: missingPathInResource) {
+                        if (error.getServicePath().equals(openAPIPathSummary.getPath())) {
+                            if ((error.getServiceOperation() != null) &&
+                                    (!openAPIPathSummary.getOperations().isEmpty())) {
+                                Map<String, Operation> operationsMap = openAPIPathSummary.getOperations();
+                                operationsMap.entrySet().removeIf(operationMap -> operationMap.getKey()
+                                        .equals(error.getServiceOperation()));
+                            } else if (error.getServiceOperation() == null) {
+                                openAPIPathIterator.remove();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return openAPISummaries;
     }
 
 }

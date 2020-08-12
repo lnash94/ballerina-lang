@@ -54,7 +54,7 @@ public class ResourceHandleVTests {
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/valid/petstore.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-        validationErrors = MatchResourcewithOperationId.checkResourceIsAvailable(api, extractBLangservice);
+        validationErrors = MatchResourcewithOperationId.checkOperationIsAvailable(api, extractBLangservice);
         Assert.assertTrue(validationErrors.isEmpty());
 
     }
@@ -64,7 +64,7 @@ public class ResourceHandleVTests {
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/valid/petstore.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-        validationErrors = MatchResourcewithOperationId.checkResourceIsAvailable(api, extractBLangservice);
+        validationErrors = MatchResourcewithOperationId.checkOperationIsAvailable(api, extractBLangservice);
         Assert.assertTrue(validationErrors.isEmpty());
 
     }
@@ -74,7 +74,9 @@ public class ResourceHandleVTests {
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/valid/servicePetstore.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-        serviceValidationErrors = MatchResourcewithOperationId.checkServiceAvailable(api, extractBLangservice);
+        serviceValidationErrors =
+                MatchResourcewithOperationId.checkServiceAvailable(MatchResourcewithOperationId.summarizeOpenAPI(api),
+                        extractBLangservice);
         Assert.assertTrue(serviceValidationErrors.isEmpty());
 
     }

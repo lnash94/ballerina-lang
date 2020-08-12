@@ -50,5 +50,7 @@ public class MissingFieldInBallerinaType extends ValidationError {
     public  Constants.Type getType() {
         return this.type;
     }
-    public String getRecordName() { return  this.recordName; }
+    public String getRecordName() {
+        return  this.recordName;
+    }
 }

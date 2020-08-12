@@ -61,5 +61,8 @@ public class TypeMismatch extends ValidationError {
     public  Constants.Type getTypeBallerinaType() {
         return typeBallerinaType;
     }
-    public String getRecordName() { return recordName; }
+    public String getRecordName() {
+        return recordName;
+    }
+
 }

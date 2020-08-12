@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This model for handling the service details.
+ */
 public class ResourceMethod {
     private Diagnostic.DiagnosticPosition resourcePosition;
     private String method;
@@ -46,9 +49,7 @@ public class ResourceMethod {
                 SimpleVariableNode simpleVariableNode = parameters.get(i);
                 if (simpleVariableNode instanceof BLangSimpleVariable) {
                     BLangSimpleVariable variable = (BLangSimpleVariable) simpleVariableNode;
-//                    if (!variable.getName().getValue().equals(this.getBody())) {
                     this.parameters.put(variable.getName().getValue(), variable);
-//                    }
                 }
             }
         }

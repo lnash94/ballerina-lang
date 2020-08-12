@@ -60,7 +60,7 @@ public class ResourceHandleIVTests {
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstore.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-        validationErrors = MatchResourcewithOperationId.checkResourceIsAvailable(api, extractBLangservice);
+        validationErrors = MatchResourcewithOperationId.checkOperationIsAvailable(api, extractBLangservice);
 
         Assert.assertTrue(validationErrors.get(0) instanceof ResourceValidationError);
         Assert.assertEquals(validationErrors.get(0).getResourcePath(), "/extraPathPet");
@@ -72,7 +72,7 @@ public class ResourceHandleIVTests {
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstoreExtraMethod.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-        validationErrors = MatchResourcewithOperationId.checkResourceIsAvailable(api, extractBLangservice);
+        validationErrors = MatchResourcewithOperationId.checkOperationIsAvailable(api, extractBLangservice);
 
         Assert.assertTrue(validationErrors.get(0) instanceof ResourceValidationError);
         Assert.assertEquals(validationErrors.get(0).getresourceMethod(), "post");
@@ -85,7 +85,10 @@ public class ResourceHandleIVTests {
         bLangPackage = ValidatorTest.getBlangPackage("resourceHandle/ballerina/invalid/petstoreExtraServiceOperation" +
                 ".bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
-        serviceValidationErrors = MatchResourcewithOperationId.checkServiceAvailable(api, extractBLangservice);
+
+        serviceValidationErrors =
+                MatchResourcewithOperationId.checkServiceAvailable(MatchResourcewithOperationId.summarizeOpenAPI(api),
+                        extractBLangservice);
 
         Assert.assertTrue(serviceValidationErrors.get(0) instanceof OpenapiServiceValidationError);
         Assert.assertEquals(serviceValidationErrors.get(0).getServiceOperation(), "post");

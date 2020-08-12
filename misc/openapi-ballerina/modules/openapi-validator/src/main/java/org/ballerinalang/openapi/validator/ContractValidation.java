@@ -45,8 +45,9 @@ public class ContractValidation {
         boolean excludeTagsFilteringEnabled = excludeTags.size() > 0;
         boolean excludeOperationFilterEnabled = excludeOperations.size() > 0;
 
+        List<OpenAPIPathSummary> openAPIPathSummaryList = MatchResourcewithOperationId.summarizeOpenAPI(openApi);
         List<OpenapiServiceValidationError> missingPathInResource =
-                MatchResourcewithOperationId.checkServiceAvailable(openApi, serviceNode);
+                MatchResourcewithOperationId.checkServiceAvailable(openAPIPathSummaryList, serviceNode);
 
         if (!missingPathInResource.isEmpty()) {
             for (OpenapiServiceValidationError contractError : missingPathInResource) {
@@ -64,10 +65,12 @@ public class ContractValidation {
                     }
 
                     if (tagFilteringEnabled) {
-                        tagsFilter(serviceNode, contractError.getOpenAPIPathSummary(), tags, kind, Diagnostic.Kind.ERROR,
+                        tagsFilter(serviceNode, contractError.getOpenAPIPathSummary(), tags, kind,
+                                Diagnostic.Kind.ERROR,
                                 Diagnostic.Kind.WARNING, dLog, contractError.getServiceOperation());
                     } else if (excludeTagsFilteringEnabled) {
-                        tagsFilter(serviceNode, contractError.getOpenAPIPathSummary(), excludeTags, kind, Diagnostic.Kind.WARNING,
+                        tagsFilter(serviceNode, contractError.getOpenAPIPathSummary(), excludeTags, kind,
+                                Diagnostic.Kind.WARNING,
                                 Diagnostic.Kind.ERROR, dLog, contractError.getServiceOperation());;
                     }
 
@@ -78,7 +81,7 @@ public class ContractValidation {
                                 ErrorMessages.unimplementedOpenAPIPath(contractError.getServicePath()));
                     } else {
 //                        Handle missing operation
-                        dLog.logDiagnostic(kind,getServiceNamePosition(serviceNode),
+                        dLog.logDiagnostic(kind, getServiceNamePosition(serviceNode),
                                 ErrorMessages.unimplementedOpenAPIOperationsForPath(contractError.getServiceOperation(),
                                         contractError.getServicePath()));
                     }
@@ -98,11 +101,12 @@ public class ContractValidation {
                 if (!missingPathInResource.isEmpty()) {
                     for (OpenapiServiceValidationError error: missingPathInResource) {
                         if (error.getServicePath().equals(openAPIPathSummary.getPath())) {
-                            if ((error.getServiceOperation() != null) && (!openAPIPathSummary.getOperations().isEmpty()) ) {
+                            if ((error.getServiceOperation() != null) &&
+                                    (!openAPIPathSummary.getOperations().isEmpty())) {
                                 Map<String, Operation> operationsMap = openAPIPathSummary.getOperations();
                                 operationsMap.entrySet().removeIf(operationMap -> operationMap.getKey()
                                         .equals(error.getServiceOperation()));
-                            } else if (error.getServiceOperation() == null){
+                            } else if (error.getServiceOperation() == null) {
                                 openAPIPathIterator.remove();
                             }
                         }
@@ -153,7 +157,7 @@ public class ContractValidation {
             }
         }
         if (operation != null) {
-            dLog.logDiagnostic(kind,getServiceNamePosition(serviceNode),
+            dLog.logDiagnostic(kind, getServiceNamePosition(serviceNode),
                     ErrorMessages.unimplementedOpenAPIOperationsForPath(operation, openApiSummary.getPath()));
         } else {
             dLog.logDiagnostic(kind, getServiceNamePosition(serviceNode),
@@ -179,7 +183,7 @@ public class ContractValidation {
             }
         }
         if (operation != null) {
-            dLog.logDiagnostic(kind,getServiceNamePosition(serviceNode),
+            dLog.logDiagnostic(kind, getServiceNamePosition(serviceNode),
                     ErrorMessages.unimplementedOpenAPIOperationsForPath(operation, openApiSummary.getPath()));
         } else {
             dLog.logDiagnostic(kind, getServiceNamePosition(serviceNode),

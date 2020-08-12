@@ -47,17 +47,17 @@ import java.util.List;
 @SupportedAnnotationPackages(value = {"ballerina/openapi"})
 public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
     private DiagnosticLog dLog = null;
-    private List<ResourceSummary> resourceSummaryList;
-    private List<OpenAPIPathSummary> openAPISummaryList;
-    private OpenAPIComponentSummary openAPIComponentSummary;
+//    private List<ResourceSummary> resourceSummaryList;
+//    private List<OpenAPIPathSummary> openAPISummaryList;
+//    private OpenAPIComponentSummary openAPIComponentSummary;
     private CompilerContext compilerContext;
 
     @Override
     public void init(DiagnosticLog diagnosticLog) {
         this.dLog = diagnosticLog;
-        this.resourceSummaryList = new ArrayList<>();
-        this.openAPISummaryList = new ArrayList<>();
-        this.openAPIComponentSummary = new OpenAPIComponentSummary();
+//        this.resourceSummaryList = new ArrayList<>();
+//        this.openAPISummaryList = new ArrayList<>();
+//        this.openAPIComponentSummary = new OpenAPIComponentSummary();
     }
 
     @Override
@@ -72,7 +72,7 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
         List<String> operations = new ArrayList<>();
         List<String> excludeTags = new ArrayList<>();
         List<String> excludeOperations = new ArrayList<>();
-        this.openAPIComponentSummary = new OpenAPIComponentSummary();
+//        this.openAPIComponentSummary = new OpenAPIComponentSummary();
         String contractURI = null;
         Boolean failOnErrors = true;
         Diagnostic.Kind kind;

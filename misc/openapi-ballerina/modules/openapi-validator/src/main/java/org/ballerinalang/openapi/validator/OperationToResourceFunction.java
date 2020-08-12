@@ -66,7 +66,7 @@ public class OperationToResourceFunction {
             Map<String, Schema> requestBodySchemas = ResourceValidator.getOperationRequestBody(operation);
             for (Map.Entry<String, Schema> operationRB: requestBodySchemas.entrySet()) {
                 isOParamExit = false;
-                if (!resourceParam.isEmpty()){
+                if (!resourceParam.isEmpty()) {
                     for (ResourceParameter resourceParameter : resourceParam) {
                         if (resourceMethod.getBody().equals(resourceParameter.getName())) {
                             List<ValidationError> validationErrors =

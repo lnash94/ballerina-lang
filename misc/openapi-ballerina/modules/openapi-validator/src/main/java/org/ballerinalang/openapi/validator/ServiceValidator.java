@@ -24,6 +24,7 @@ import org.ballerinalang.model.tree.ServiceNode;
 import org.ballerinalang.openapi.validator.error.MissingFieldInBallerinaType;
 import org.ballerinalang.openapi.validator.error.MissingFieldInJsonSchema;
 import org.ballerinalang.openapi.validator.error.OneOfTypeValidation;
+import org.ballerinalang.openapi.validator.error.OpenapiServiceValidationError;
 import org.ballerinalang.openapi.validator.error.ResourceValidationError;
 import org.ballerinalang.openapi.validator.error.TypeMismatch;
 import org.ballerinalang.openapi.validator.error.ValidationError;
@@ -34,12 +35,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This model used to filter and validate all the operations according to the given filter and filter the service
+ * resource in the resource file.
+ */
 public class ServiceValidator {
 
     /**
-     *
-     * @param openApi
-     * @param serviceNode
+     * Validation with given resource and openApi contract file
+     * @param openApi       OpenApi Object
+     * @param serviceNode   serviceNode of ballerina service
      * @param kind
      * @param dLog
      * @throws OpenApiValidatorException
@@ -49,27 +54,55 @@ public class ServiceValidator {
                                         Filters filters,
                                         Diagnostic.Kind kind,
                                         DiagnosticLog dLog) throws OpenApiValidatorException {
-//        filter openApi operation according to given filters
+
+//        Filter openApi operation according to given filters
         List<OpenAPIPathSummary> openAPIPathSummaries = MatchResourcewithOperationId.filterOpenapi(openApi, filters);
-//        Check all the filtered operations a available at service file
+
+//        Check all the filtered operations are available at the service file
+        List<OpenapiServiceValidationError> openApiMissingServiceMethod =
+                MatchResourcewithOperationId.checkServiceAvailable(openAPIPathSummaries, serviceNode);
+
+//        Generate errors for missing resource in service file
+        if (!openApiMissingServiceMethod.isEmpty()) {
+            for (OpenapiServiceValidationError openApiMissingError: openApiMissingServiceMethod) {
+//              Handle missing Path
+                if (openApiMissingError.getServiceOperation() == null) {
+                    dLog.logDiagnostic(kind, serviceNode.getPosition(),
+                            ErrorMessages.unimplementedOpenAPIPath(openApiMissingError.getServicePath()));
+                } else {
+//              Handle missing operation
+                    dLog.logDiagnostic(kind, serviceNode.getPosition(),
+                            ErrorMessages.unimplementedOpenAPIOperationsForPath(openApiMissingError.
+                                            getServiceOperation(),
+                                    openApiMissingError.getServicePath()));
+                }
+            }
+//          Remove undocumentedPath and get clean operation list
+            MatchResourcewithOperationId.removeUndocumentedPath(openAPIPathSummaries,
+                    openApiMissingServiceMethod);
+
+        }
+
+//      Check all the services are available at operations
         List<ResourceValidationError> resourceMissingPathMethod =
-                MatchResourcewithOperationId.checkResourceIsAvailable(openApi, serviceNode);
+                MatchResourcewithOperationId.checkOperationIsAvailable(openApi, serviceNode);
 
         if (!resourceMissingPathMethod.isEmpty()) {
             for (ResourceValidationError resourceValidationError: resourceMissingPathMethod) {
-//                     Handling the Missing path in openApi contract
+//              Handling the Missing path in openApi contract
                 if (resourceValidationError.getresourceMethod() == null) {
                     dLog.logDiagnostic(kind, resourceValidationError.getPosition(),
                             ErrorMessages.undocumentedResourcePath(resourceValidationError.getResourcePath()));
                 } else {
-//                    Handle undocumented method in contract
+//              Handle undocumented method in contract
                     dLog.logDiagnostic(kind, resourceValidationError.getPosition(),
                             ErrorMessages.undocumentedResourceMethods(resourceValidationError.getresourceMethod(),
                                     resourceValidationError.getResourcePath()));
                 }
             }
         }
-//        Store the Resource Path that need to validate
+
+//      Modified the Resource Path that need to validate
         List<ResourcePathSummary> resourcePathSummaryList =
                 MatchResourcewithOperationId.summarizeResources(serviceNode);
 
@@ -93,6 +126,7 @@ public class ServiceValidator {
                 }
             }
         }
+//      Modified the OpenAPIPathSummary list removing undocumented paths and operations.
         if (!openAPIPathSummaries.isEmpty()) {
             Iterator<ResourcePathSummary> resourcePathSummaryIterator = resourcePathSummaryList.iterator();
             while (resourcePathSummaryIterator.hasNext()) {
@@ -101,15 +135,16 @@ public class ServiceValidator {
                 for (OpenAPIPathSummary apiPathSummary: openAPIPathSummaries) {
                     if (resourcePathSummary.getPath().equals(apiPathSummary.getPath())) {
                         isExit = true;
-                        if (!(resourcePathSummary.getMethods().isEmpty()) && !(apiPathSummary.getOperations().isEmpty())) {
+                        if (!(resourcePathSummary.getMethods().isEmpty()) &&
+                                !(apiPathSummary.getOperations().isEmpty())) {
                             Iterator<Map.Entry<String, ResourceMethod>> methods =
                                     resourcePathSummary.getMethods().entrySet().iterator();
                             while (methods.hasNext()) {
                                 Boolean isMethodExit = false;
-                                Map.Entry<String, ResourceMethod> re_methods = methods.next();
+                                Map.Entry<String, ResourceMethod> reMethods = methods.next();
                                 Map<String, Operation> operations = apiPathSummary.getOperations();
                                 for (Map.Entry<String, Operation> operation: operations.entrySet()) {
-                                    if (re_methods.getKey().equals(operation.getKey())) {
+                                    if (reMethods.getKey().equals(operation.getKey())) {
                                         isMethodExit = true;
                                         break;
                                     }
@@ -126,11 +161,9 @@ public class ServiceValidator {
                     resourcePathSummaryIterator.remove();
                 }
             }
-
         }
 
-//        Check with open api  contract
-//        Paths openAPIPathSummary = openApi.getPaths();
+//        Validate service file (-->) with openApi  contract operations
         for (ResourcePathSummary resourcePathSummary : resourcePathSummaryList) {
             for (OpenAPIPathSummary openApiPath : openAPIPathSummaries) {
                 if (resourcePathSummary.getPath().equals(openApiPath.getPath())) {
@@ -150,7 +183,7 @@ public class ServiceValidator {
                 }
             }
         }
-//        wise versa open api against to service
+//      Validate openApi operations with to (-->) services in ballerina file
         for (OpenAPIPathSummary openAPIPathSummary: openAPIPathSummaries) {
             for (ResourcePathSummary resourcePathSummary: resourcePathSummaryList) {
                 if (openAPIPathSummary.getPath().equals(resourcePathSummary.getPath())) {
@@ -192,11 +225,12 @@ public class ServiceValidator {
                                                     }
 
                                                 } else if (!(error instanceof TypeMismatch)) {
-                                                    if ((error instanceof ValidationError)) {
+                                                    if (!(error instanceof MissingFieldInJsonSchema)) {
                                                         dLog.logDiagnostic(kind, serviceNode.getPosition(),
                                                                 ErrorMessages.unimplementedParameterForOperation(
                                                                         error.getFieldName(),
-                                                                        operation.getKey(), openAPIPathSummary.getPath()));
+                                                                        operation.getKey(),
+                                                                        openAPIPathSummary.getPath()));
                                                     }
                                                 }
                                             }
@@ -212,7 +246,7 @@ public class ServiceValidator {
     }
 
     /**
-     *
+     *  This for generate Dlog message with relevant type of errors.
      * @param kind
      * @param dLog
      * @param resourcePathSummary
@@ -223,8 +257,6 @@ public class ServiceValidator {
                                             ResourcePathSummary resourcePathSummary,
                                             Map.Entry<String, ResourceMethod> method,
                                             List<ValidationError> postErrors) {
-
-//        List<ValidationError> postErrors = removeDuplicate(listErr);
 
         if (!postErrors.isEmpty()) {
             for (ValidationError postErr : postErrors) {
@@ -251,7 +283,7 @@ public class ServiceValidator {
                             }
                         }
                     }
-                } else if (postErr instanceof ValidationError) {
+                } else if (!(postErr instanceof MissingFieldInBallerinaType)) {
                     dLog.logDiagnostic(kind, method.getValue().getMethodPosition(),
                             ErrorMessages.undocumentedResourceParameter(postErr.getFieldName(),
                                     method.getKey(), resourcePathSummary.getPath()));
@@ -261,7 +293,7 @@ public class ServiceValidator {
     }
 
     /**
-     *
+     *  This for finding out the kind of TypeMisMatching.
      * @param kind
      * @param dLog
      * @param resourcePathSummary
@@ -272,43 +304,26 @@ public class ServiceValidator {
                                                  ResourcePathSummary resourcePathSummary,
                                                  Map.Entry<String, ResourceMethod> method, ValidationError postErr) {
 
-        if (((TypeMismatch) postErr).getRecordName() != null) {
-            dLog.logDiagnostic(kind, method.getValue().getMethodPosition(),
-                    ErrorMessages.typeMismatchingRecord(postErr.getFieldName(),
-                            ((TypeMismatch) postErr).getRecordName(),
-                            BTypeToJsonValidatorUtil.convertEnumTypetoString((
-                                    (TypeMismatch) postErr).getTypeJsonSchema()),
-                            BTypeToJsonValidatorUtil.convertEnumTypetoString(((
-                                    TypeMismatch) postErr).getTypeBallerinaType())
-                            , method.getKey(), resourcePathSummary.getPath()));
+        if (postErr instanceof TypeMismatch) {
+            if (((TypeMismatch) postErr).getRecordName() != null) {
+                dLog.logDiagnostic(kind, method.getValue().getMethodPosition(),
+                        ErrorMessages.typeMismatchingRecord(postErr.getFieldName(),
+                                ((TypeMismatch) postErr).getRecordName(),
+                                BTypeToJsonValidatorUtil.convertEnumTypetoString((
+                                        (TypeMismatch) postErr).getTypeJsonSchema()),
+                                BTypeToJsonValidatorUtil.convertEnumTypetoString(((
+                                        TypeMismatch) postErr).getTypeBallerinaType())
+                                , method.getKey(), resourcePathSummary.getPath()));
 
-        } else {
-            dLog.logDiagnostic(kind, method.getValue().getMethodPosition(),
-                    ErrorMessages.typeMismatching(postErr.getFieldName(),
-                            BTypeToJsonValidatorUtil.convertEnumTypetoString
-                                    (((TypeMismatch) postErr).getTypeJsonSchema()),
-                            BTypeToJsonValidatorUtil.convertEnumTypetoString
-                                    (((TypeMismatch) postErr).getTypeBallerinaType())
-                            , method.getKey(), resourcePathSummary.getPath()));
+            } else {
+                dLog.logDiagnostic(kind, method.getValue().getMethodPosition(),
+                        ErrorMessages.typeMismatching(postErr.getFieldName(),
+                                BTypeToJsonValidatorUtil.convertEnumTypetoString
+                                        (((TypeMismatch) postErr).getTypeJsonSchema()),
+                                BTypeToJsonValidatorUtil.convertEnumTypetoString
+                                        (((TypeMismatch) postErr).getTypeBallerinaType())
+                                , method.getKey(), resourcePathSummary.getPath()));
+            }
         }
     }
-
-//    private static List<ValidationError> removeDuplicate(List<ValidationError> errorList) {
-//        Iterator<ValidationError> errorIterator = errorList.iterator();
-//        while (errorIterator.hasNext()) {
-//            ValidationError error = errorIterator.next();
-//            for (ValidationError error1: errorList) {
-//                if ((error instanceof TypeMismatch) && (error1 instanceof TypeMismatch)) {
-//                    if (error.getFieldName().equals(error1.getFieldName())) {
-//                        if (((TypeMismatch) error).getTypeBallerinaType().equals(((TypeMismatch) error1).getTypeBallerinaType())) {
-//                            if (((TypeMismatch) error).getTypeJsonSchema().equals(((TypeMismatch) error1).getTypeJsonSchema())) {
-//                                errorIterator.remove();
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        return errorList;
-//    }
 }

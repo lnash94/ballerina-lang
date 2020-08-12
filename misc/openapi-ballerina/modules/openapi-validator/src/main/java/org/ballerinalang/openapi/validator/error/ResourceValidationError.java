@@ -17,6 +17,9 @@ package org.ballerinalang.openapi.validator.error;
 
 import org.ballerinalang.util.diagnostic.Diagnostic;
 
+/**
+ * This model for represent the error model with the service which undocumented with contract yaml file as operation.
+ */
 public class ResourceValidationError  extends ValidationError {
     public Diagnostic.DiagnosticPosition position;
     public String resourceMethod;

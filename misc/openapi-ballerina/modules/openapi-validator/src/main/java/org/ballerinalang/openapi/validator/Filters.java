@@ -4,6 +4,9 @@ import org.ballerinalang.util.diagnostic.Diagnostic;
 
 import java.util.List;
 
+/**
+ * This for model the all tag, operations, excludeTags and excludeOperations filters.
+ */
 public class Filters {
     private List<String> tag;
     private List<String> excludeTag;

@@ -51,5 +51,8 @@ public class MissingFieldInJsonSchema extends ValidationError {
     public  Constants.Type getType() {
         return type;
     }
-    public String getRecordName() { return this.recordName; }
+    public String getRecordName() {
+        return this.recordName;
+    }
+
 }

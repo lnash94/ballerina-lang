@@ -2,9 +2,6 @@ package org.ballerinalang.openapi.validator;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
-import org.ballerinalang.model.tree.ServiceNode;
-import org.ballerinalang.util.diagnostic.Diagnostic;
-import org.ballerinalang.util.diagnostic.DiagnosticLog;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,7 +32,8 @@ public class OpenAPIFilter {
 //                  * if exclude tag filter enable -> out put all operation negation of tags
 //                  * if exclude operation filter enable ->out put all operation expected that operation
 //                  * if tag + operation -> out put operation with tag enable and given operation
-//                  * if tag + exclude operation  -> out put operation that negation of every operation with tag and not including given operation
+//                  * if tag + exclude operation  -> out put operation that negation of every operation
+//                  with tag and not including given operation
 //                  * if operation + exclude tag -> all operations that not in exclude tags
 
         Iterator<OpenAPIPathSummary> openAPIIter = openAPIPathSummaries.iterator();
@@ -94,7 +92,7 @@ public class OpenAPIFilter {
                         }
                     }
                 }
-            } else if (excludeOperationFilteringEnable){
+            } else if (excludeOperationFilteringEnable) {
                 // If exclude tags filtering available validate only the filtered exclude operations grouped by
                 // given exclude tags.
                 // Else If tags filtering available validate only the operations that filtered by exclude

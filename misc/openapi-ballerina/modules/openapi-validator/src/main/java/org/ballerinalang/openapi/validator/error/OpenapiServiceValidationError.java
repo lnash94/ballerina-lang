@@ -21,6 +21,9 @@ import org.ballerinalang.util.diagnostic.Diagnostic;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This model for the represent the error with operation which undocumented as service in ballerina file.
+ */
 public class OpenapiServiceValidationError extends ValidationError {
     Diagnostic.DiagnosticPosition position;
     String serviceOperation;

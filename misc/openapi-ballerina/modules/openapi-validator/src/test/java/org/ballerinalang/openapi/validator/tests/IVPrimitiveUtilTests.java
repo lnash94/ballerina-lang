@@ -38,7 +38,8 @@ import java.util.List;
  * Unit tests for BJsonSchemaUtil Invalid tests.
  */
 public class IVPrimitiveUtilTests {
-    private static final Path RES_DIR = Paths.get("src/test/resources/project-based-tests/src/record/resources/")
+    private static final Path RES_DIR = Paths.get("src/test/resources/project-based-tests/src/recordValidation" +
+            "/swagger/")
             .toAbsolutePath();
     private OpenAPI api;
     private BLangPackage bLangPackage;
@@ -50,7 +51,7 @@ public class IVPrimitiveUtilTests {
     public void testIntegerType() throws UnsupportedEncodingException, OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("invalidTests/primitive/integerB.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("record/invalidTests/primitive/integerB.bal");
+        bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/primitive/integerB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
         validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
@@ -64,7 +65,7 @@ public class IVPrimitiveUtilTests {
     public void testArrayType() throws UnsupportedEncodingException, OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("invalidTests/primitive/arrayB.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("record/invalidTests/primitive/arrayB.bal");
+        bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/primitive/arrayB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
         validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
@@ -80,7 +81,7 @@ public class IVPrimitiveUtilTests {
     public void testiArrayType() throws UnsupportedEncodingException, OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("invalidTests/primitive/iarrayB.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("record/invalidTests/primitive/iarrayB.bal");
+        bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/primitive/iarrayB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
         validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);
@@ -95,7 +96,7 @@ public class IVPrimitiveUtilTests {
     public void testRecordArrayType() throws UnsupportedEncodingException, OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("invalidTests/primitive/arrayRB.yaml");
         api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
-        bLangPackage = ValidatorTest.getBlangPackage("record/invalidTests/primitive/arrayRB.bal");
+        bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/primitive/arrayRB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{category}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
         validationErrors = BTypeToJsonValidatorUtil.validate(extractSchema, extractBVarSymbol);

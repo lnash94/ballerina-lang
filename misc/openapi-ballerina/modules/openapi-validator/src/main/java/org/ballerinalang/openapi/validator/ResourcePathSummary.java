@@ -17,20 +17,15 @@
  */
 package org.ballerinalang.openapi.validator;
 
-import org.ballerinalang.model.tree.SimpleVariableNode;
 import org.ballerinalang.util.diagnostic.Diagnostic;
-import org.wso2.ballerinalang.compiler.tree.BLangSimpleVariable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * Summarized details of a Ballerina resource to be validated against OpenAPI document.
  */
 public class ResourcePathSummary {
-//    private Diagnostic.DiagnosticPosition resourcePosition;
     private String path;
     private Diagnostic.DiagnosticPosition pathPosition;
     private Map<String, ResourceMethod> methods;
