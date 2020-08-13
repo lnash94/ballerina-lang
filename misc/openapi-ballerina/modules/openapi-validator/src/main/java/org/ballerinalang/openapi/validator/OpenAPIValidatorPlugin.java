@@ -47,17 +47,11 @@ import java.util.List;
 @SupportedAnnotationPackages(value = {"ballerina/openapi"})
 public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
     private DiagnosticLog dLog = null;
-//    private List<ResourceSummary> resourceSummaryList;
-//    private List<OpenAPIPathSummary> openAPISummaryList;
-//    private OpenAPIComponentSummary openAPIComponentSummary;
     private CompilerContext compilerContext;
 
     @Override
     public void init(DiagnosticLog diagnosticLog) {
         this.dLog = diagnosticLog;
-//        this.resourceSummaryList = new ArrayList<>();
-//        this.openAPISummaryList = new ArrayList<>();
-//        this.openAPIComponentSummary = new OpenAPIComponentSummary();
     }
 
     @Override
@@ -189,22 +183,9 @@ public class OpenAPIValidatorPlugin extends AbstractCompilerPlugin {
             if (contractURI != null) {
                 try {
                     Filters filters = new Filters(tags, excludeTags, operations, excludeOperations, kind);
-//                    OpenAPI openAPI = ValidatorUtil.parseOpenAPIFile(contractURI);
                     OpenAPI openAPI = ServiceValidator.parseOpenAPIFile(contractURI);
                     ServiceValidator.validateResource(openAPI, serviceNode, filters,
                             kind, dLog);
-
-//                    ValidatorUtil.summarizeResources(this.resourceSummaryList, serviceNode);
-//                    ValidatorUtil.summarizeOpenAPI(this.openAPISummaryList, openAPI, this.openAPIComponentSummary);
-//                    ValidatorUtil.validateOpenApiAgainstResources(serviceNode, tags, operations, kind, excludeTags,
-//                            excludeOperations,
-//                            this.resourceSummaryList, this.openAPISummaryList,
-//                            this.openAPIComponentSummary, dLog);
-//                    ValidatorUtil.validateResourcesAgainstOpenApi(tags, operations, kind, excludeTags,
-//                            excludeOperations,
-//                            this.resourceSummaryList,
-//                            this.openAPISummaryList, this.openAPIComponentSummary,
-//                            dLog);
                 } catch (OpenApiValidatorException e) {
                     dLog.logDiagnostic(Diagnostic.Kind.ERROR, annotation.getPosition(),
                             e.getMessage());

@@ -5,7 +5,7 @@ import io.swagger.v3.oas.models.Operation;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
 import org.ballerinalang.openapi.validator.ResourceMethod;
 import org.ballerinalang.openapi.validator.ResourceValidator;
-import org.ballerinalang.openapi.validator.ValidatorUtil;
+import org.ballerinalang.openapi.validator.ServiceValidator;
 import org.ballerinalang.openapi.validator.error.ValidationError;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -34,7 +34,7 @@ public class OperationHandleVTests {
     @Test(description = "Operation model has path parameters primitive type")
     public void testPrimitiveTypePath() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstorePathPrimitive.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("operationHandle/ballerina/valid/petstorePathPrimitive.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         resourceMethod = ValidatorTest.getFunction(extractBLangservice, "get");
@@ -46,7 +46,7 @@ public class OperationHandleVTests {
     @Test(description = "Operation model has path parameters object type")
     public void testObjectTypePath() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstorePathObject.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("operationHandle/ballerina/valid/petstorePathObject.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         resourceMethod = ValidatorTest.getFunction(extractBLangservice, "get");
@@ -59,7 +59,7 @@ public class OperationHandleVTests {
     @Test(description = "Operation model has path parameters array type")
     public void testArrayTypePath() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstorePathArray.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("operationHandle/ballerina/valid/petstorePathArray.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         resourceMethod = ValidatorTest.getFunction(extractBLangservice, "get");
@@ -72,7 +72,7 @@ public class OperationHandleVTests {
     @Test(description = "Operation model has request parameters ")
     public void testrequestBody() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstoreRBParameter.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("operationHandle/ballerina/valid/petstoreRBParameter.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");
@@ -84,7 +84,7 @@ public class OperationHandleVTests {
     @Test(description = "Operation model has nestedArray type parameters ")
     public void testNestedArrayType() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("swagger/valid/petstoreNestedArrayType.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("operationHandle/ballerina/valid/petstoreNestedArrayType.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
         resourceMethod = ValidatorTest.getFunction(extractBLangservice, "post");

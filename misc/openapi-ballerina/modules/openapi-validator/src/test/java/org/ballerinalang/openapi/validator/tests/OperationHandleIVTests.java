@@ -5,7 +5,7 @@ import io.swagger.v3.oas.models.Operation;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
 import org.ballerinalang.openapi.validator.ResourceMethod;
 import org.ballerinalang.openapi.validator.ResourceValidator;
-import org.ballerinalang.openapi.validator.ValidatorUtil;
+import org.ballerinalang.openapi.validator.ServiceValidator;
 import org.ballerinalang.openapi.validator.error.OneOfTypeValidation;
 import org.ballerinalang.openapi.validator.error.TypeMismatch;
 import org.ballerinalang.openapi.validator.error.ValidationError;
@@ -36,7 +36,7 @@ public class OperationHandleIVTests {
     @Test(description = "Operation model has path parameters with request body ")
     public void testRBwithPath() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreRBwithPathParameter.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage(
                 "operationHandle/ballerina/invalid/petstoreRBwithPathParameter.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
@@ -50,7 +50,7 @@ public class OperationHandleIVTests {
     @Test(description = "Operation model has path parameters with request body ")
     public void testExtraRB() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreExtraRBParameter.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage(
                 "operationHandle/ballerina/invalid/petstoreExtraRBParameter.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);
@@ -65,7 +65,7 @@ public class OperationHandleIVTests {
     @Test(description = "Operation model has OneOf parameters with request body ")
     public void testOneOfRB() throws OpenApiValidatorException, UnsupportedEncodingException {
         Path contractPath = RES_DIR.resolve("swagger/invalid/petstoreOneOfTypeMismatch.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage(
                 "operationHandle/ballerina/invalid/petstoreOneOfTypeMismatch.bal");
         extractBLangservice = ValidatorTest.getServiceNode(bLangPackage);

@@ -20,7 +20,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import org.ballerinalang.openapi.validator.BTypeToJsonValidatorUtil;
 import org.ballerinalang.openapi.validator.Constants;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
-import org.ballerinalang.openapi.validator.ValidatorUtil;
+import org.ballerinalang.openapi.validator.ServiceValidator;
 import org.ballerinalang.openapi.validator.error.TypeMismatch;
 import org.ballerinalang.openapi.validator.error.ValidationError;
 import org.testng.Assert;
@@ -50,7 +50,7 @@ public class IVPrimitiveUtilTests {
     @Test(description = "Type mismatch with integer")
     public void testIntegerType() throws UnsupportedEncodingException, OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("invalidTests/primitive/integerB.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/primitive/integerB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
@@ -64,7 +64,7 @@ public class IVPrimitiveUtilTests {
     @Test(description = "Type mismatch with array")
     public void testArrayType() throws UnsupportedEncodingException, OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("invalidTests/primitive/arrayB.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/primitive/arrayB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
@@ -80,7 +80,7 @@ public class IVPrimitiveUtilTests {
     @Test(description = "Type mismatch with array")
     public void testiArrayType() throws UnsupportedEncodingException, OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("invalidTests/primitive/iarrayB.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/primitive/iarrayB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
@@ -95,7 +95,7 @@ public class IVPrimitiveUtilTests {
     @Test(description = "Type mismatch with record array")
     public void testRecordArrayType() throws UnsupportedEncodingException, OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("invalidTests/primitive/arrayRB.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/invalidTests/primitive/arrayRB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{category}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);

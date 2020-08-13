@@ -19,7 +19,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import org.ballerinalang.openapi.validator.BTypeToJsonValidatorUtil;
 import org.ballerinalang.openapi.validator.OpenApiValidatorException;
-import org.ballerinalang.openapi.validator.ValidatorUtil;
+import org.ballerinalang.openapi.validator.ServiceValidator;
 import org.ballerinalang.openapi.validator.error.ValidationError;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -49,7 +49,7 @@ public class VPrimitiveUtilTests {
     @Test(description = "Type mismatch with integer")
     public void testIntegerType() throws UnsupportedEncodingException, OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("validTests/primitive/integerB.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/validTests/primitive/integerB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
@@ -61,7 +61,7 @@ public class VPrimitiveUtilTests {
     @Test(description = "Type mismatch with string")
     public void testStringType() throws UnsupportedEncodingException, OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("validTests/primitive/stringB.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/validTests/primitive/stringB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
@@ -73,7 +73,7 @@ public class VPrimitiveUtilTests {
     @Test(description = "Type mismatch with boolean")
     public void testBooleanType() throws UnsupportedEncodingException, OpenApiValidatorException {
         Path contractPath = RES_DIR.resolve("validTests/primitive/booleanB.yaml");
-        api = ValidatorUtil.parseOpenAPIFile(contractPath.toString());
+        api = ServiceValidator.parseOpenAPIFile(contractPath.toString());
         bLangPackage = ValidatorTest.getBlangPackage("recordValidation/ballerina/validTests/primitive/booleanB.bal");
         extractSchema = ValidatorTest.getSchema(api, "/user/{userId}");
         extractBVarSymbol = ValidatorTest.getBVarSymbol(bLangPackage);
